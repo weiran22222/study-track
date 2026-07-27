@@ -24,7 +24,13 @@ JAR 已经建立；`add`、`list`、`complete`、`show`、`summary` 及损坏 JS
 当前反馈工件：
 [docs/feedback/002-parallel-worktree-retrospective.md](docs/feedback/002-parallel-worktree-retrospective.md)。
 
-最近完成的 Harness 决策：
+当前 Harness 决策：
+[docs/decisions/005-architecture-navigation-map.md](docs/decisions/005-architecture-navigation-map.md)。
+
+当前执行计划：
+[docs/exec-plans/active/011-architecture-navigation-map.md](docs/exec-plans/active/011-architecture-navigation-map.md)。
+
+最近完成的并行 Harness 决策：
 [docs/decisions/004-parallel-worktree-experiment.md](docs/decisions/004-parallel-worktree-experiment.md)。
 
 最近完成的并行计划：

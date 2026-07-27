@@ -23,57 +23,28 @@
 
 依赖版本必须集中锁定在 `pom.xml`，构建和验证必须使用仓库中的 Maven Wrapper。
 
-## 3. 计划目录
+## 3. 包级导航与关键入口
 
 ```text
-study-track/
-├── AGENTS.md
-├── SPEC.md
-├── ARCHITECTURE.md
-├── pom.xml
-├── mvnw
-├── mvnw.cmd
-├── .mvn/
-├── src/main/java/com/example/studytrack/
-│   ├── bootstrap/
-│   │   └── StudyTrackApplication.java
-│   ├── cli/
-│   │   ├── StudyTrackCommand.java
-│   │   ├── AddCommand.java
-│   │   ├── ListCommand.java
-│   │   ├── CompleteCommand.java
-│   │   ├── ShowCommand.java
-│   │   ├── SummaryCommand.java
-│   │   └── StudyTaskServiceFactory.java
-│   ├── application/
-│   │   ├── StudyTaskService.java
-│   │   ├── CompleteTaskResult.java
-│   │   ├── TaskSummary.java
-│   │   ├── InvalidTaskTitleException.java
-│   │   ├── TaskNotFoundException.java
-│   │   ├── TaskPersistenceException.java
-│   │   └── port/
-│   │       └── TaskRepository.java
-│   ├── domain/
-│   │   └── StudyTask.java
-│   └── infrastructure/
-│       └── persistence/
-│           └── JsonTaskRepository.java
-└── src/test/java/com/example/studytrack/
-    ├── architecture/
-    │   ├── ArchitectureTest.java
-    │   ├── BuildConfigurationTest.java
-    │   └── EnvironmentBootstrapTest.java
-    ├── bootstrap/
-    │   └── StudyTrackApplicationTest.java
-    ├── application/
-    │   └── StudyTaskServiceTest.java
-    └── infrastructure/
-        └── JsonTaskRepositoryTest.java
+src/main/java/com/example/studytrack/
+├── bootstrap/       # 组合 CLI 与 Infrastructure 并启动应用
+├── cli/             # 解析命令、调用用例并映射输出和退出码
+├── application/     # 编排用例服务并定义持久化端口
+├── domain/          # 保存任务实体及领域状态
+└── infrastructure/  # 实现持久化端口并读写 JSON
 ```
 
-该目录是新智能体的定位地图，不是第二份架构规则。增加、删除或移动主要入口类时，应同步
-更新本节；依赖合法性仍以第 4、5 节和 ArchUnit 测试为准。
+关键入口：
+
+- `bootstrap/StudyTrackApplication.java`：应用启动与组件组合入口；
+- `cli/StudyTrackCommand.java`：Picocli 根命令入口；
+- `application/StudyTaskService.java`：应用用例服务入口；
+- `application/port/TaskRepository.java`：持久化端口；
+- `infrastructure/persistence/JsonTaskRepository.java`：当前 JSON 持久化实现。
+
+本节是包级导航，不是完整文件清单，也不展开测试目录。查询完整文件集合时，使用 Git、
+IDE 或在仓库根目录运行 `rg --files`。增加、删除或移动上述关键入口时，应同步更新本节；
+依赖合法性仍以第 4、5 节和 ArchUnit 测试为准。
 
 ## 4. 分层与依赖
 
