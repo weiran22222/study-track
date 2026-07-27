@@ -98,6 +98,54 @@ java -jar target/study-track.jar complete 1
 - 退出码为 `2`；
 - 不修改数据文件。
 
+### 2.4 查看单个任务
+
+```powershell
+java -jar target/study-track.jar show 1
+```
+
+任务存在时，使用与 `list` 相同的单行格式输出：
+
+```text
+[ ] 1 阅读 Harness Engineering 概念总览
+```
+
+已完成任务使用 `[x]`。命令成功时退出码为 `0`，不得修改数据文件。
+
+任务不存在时：
+
+- 向标准错误写入 `Task 99 not found.`；
+- 退出码为 `2`；
+- 不创建或修改数据文件。
+
+非整数 ID 由命令行解析器报告为参数错误并返回退出码 `2`。JSON 损坏时继续遵守
+第 3 节的失败安全规则。
+
+### 2.5 任务统计
+
+```powershell
+java -jar target/study-track.jar summary
+```
+
+固定输出三行：
+
+```text
+Total: 3
+Pending: 2
+Completed: 1
+```
+
+空任务库输出：
+
+```text
+Total: 0
+Pending: 0
+Completed: 0
+```
+
+命令成功时退出码为 `0`，不得创建或修改数据文件。JSON 损坏时继续遵守第 3 节的失败
+安全规则。
+
 ## 3. 数据格式
 
 数据以 UTF-8 JSON 保存：
@@ -150,6 +198,8 @@ java -jar target/study-track.jar complete 1
 | AC-09 | Application 层不依赖具体持久化实现。 |
 | AC-10 | Checkstyle、ArchUnit 和全部自动测试通过。 |
 | AC-11 | 构建生成可通过 `java -jar target/study-track.jar` 运行的 JAR。 |
+| AC-12 | `show` 精确返回指定任务；成功、不存在和无数据文件路径均不修改数据。 |
+| AC-13 | `summary` 正确统计总数、未完成数和已完成数；空库和成功路径均保持只读。 |
 
 统一验收入口：
 

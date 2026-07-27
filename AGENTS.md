@@ -20,12 +20,18 @@ JAR 已经建立；`add`、`list`、`complete` 及损坏 JSON 失败安全均已
 `SPEC.md` 的 AC-01～AC-11 已实现并有自动验证；第一次反馈复盘选出的环境自举改进
 也已完成。GitHub Actions 已远程运行成功，两个官方 Action 已升级到 Node.js 24 运行时，
 弃用警告已经消失。`main` 已建立强制 PR + `verify` 合并门禁，并通过真实 PR 验证。
+当前正在并行实现 AC-12 `show` 和 AC-13 `summary`。
 
 当前反馈工件：
 [docs/feedback/001-first-harness-retrospective.md](docs/feedback/001-first-harness-retrospective.md)。
 
 当前 Harness 决策：
-[docs/decisions/003-main-branch-gate.md](docs/decisions/003-main-branch-gate.md)。
+[docs/decisions/004-parallel-worktree-experiment.md](docs/decisions/004-parallel-worktree-experiment.md)。
+
+当前并行计划：
+
+- [docs/exec-plans/active/009-show-task.md](docs/exec-plans/active/009-show-task.md)
+- [docs/exec-plans/active/010-task-summary.md](docs/exec-plans/active/010-task-summary.md)
 
 最近完成的主分支门禁计划：
 [docs/exec-plans/completed/008-main-branch-gate.md](docs/exec-plans/completed/008-main-branch-gate.md)。
