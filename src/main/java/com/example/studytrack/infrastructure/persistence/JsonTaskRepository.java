@@ -76,7 +76,7 @@ public final class JsonTaskRepository implements TaskRepository {
 
     try (Reader reader = Files.newBufferedReader(dataFile, StandardCharsets.UTF_8)) {
       StoredTasks storedTasks = objectMapper.readValue(reader, StoredTasks.class);
-      if (storedTasks.nextId() < 1 || storedTasks.tasks() == null) {
+      if (storedTasks == null || storedTasks.nextId() < 1 || storedTasks.tasks() == null) {
         throw new IOException("Data file is missing required fields.");
       }
       return storedTasks;

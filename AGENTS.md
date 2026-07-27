@@ -15,12 +15,15 @@
 
 ## 当前阶段
 
-当前是 Harness v4：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
-JAR 已经建立；`add`、`list`、`complete` 三个功能切片已完成。AC-07 损坏 JSON
-的完整验收与可靠性加固尚未完成。
+当前是 Harness v5：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
+JAR 已经建立；`add`、`list`、`complete` 及损坏 JSON 失败安全均已完成。当前
+`SPEC.md` 的 AC-01～AC-11 已实现并有自动验证，下一阶段是反馈复盘与 Harness 评估。
 
 不得把启动骨架能够运行描述为产品功能已经完成；产品进度以
 [SPEC.md](SPEC.md#5-验收标准) 中的验收标准为准。
+
+最近完成的可靠性计划：
+[docs/exec-plans/completed/005-corrupt-data-safety.md](docs/exec-plans/completed/005-corrupt-data-safety.md)。
 
 最近完成的 complete 功能计划：
 [docs/exec-plans/completed/004-complete-task.md](docs/exec-plans/completed/004-complete-task.md)。

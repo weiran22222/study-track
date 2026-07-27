@@ -239,6 +239,48 @@ class StudyTrackApplicationTest {
     assertFalse(Files.exists(dataFile));
   }
 
+  @Test
+  void commandsRejectCorruptDataWithoutChangingOriginalBytes(@TempDir Path temporaryDirectory)
+      throws Exception {
+    String[] corruptData = {
+        """
+        {"nextId": 2,
+        """,
+        "null",
+        """
+        {"tasks": []}
+        """,
+        """
+        {"nextId": 2, "tasks": null}
+        """
+    };
+    String[][] commands = {{"add", "新任务"}, {"list"}, {"complete", "1"}};
+
+    for (int dataIndex = 0; dataIndex < corruptData.length; dataIndex++) {
+      for (int commandIndex = 0; commandIndex < commands.length; commandIndex++) {
+        Path dataFile =
+            temporaryDirectory.resolve("corrupt-" + dataIndex + "-" + commandIndex + ".json");
+        byte[] originalData = corruptData[dataIndex].getBytes(StandardCharsets.UTF_8);
+        Files.write(dataFile, originalData);
+        String[] arguments = new String[commands[commandIndex].length + 2];
+        arguments[0] = "--data-file";
+        arguments[1] = dataFile.toString();
+        System.arraycopy(
+            commands[commandIndex], 0, arguments, 2, commands[commandIndex].length);
+
+        CommandResult result = execute(arguments);
+        String scenario = "data case " + dataIndex + ", command " + commands[commandIndex][0];
+
+        assertEquals(1, result.exitCode(), scenario);
+        assertEquals("", result.output(), scenario);
+        assertTrue(result.error().startsWith("Data file error:"), scenario);
+        assertFalse(result.error().contains("Exception"), scenario);
+        assertFalse(result.error().contains("\tat "), scenario);
+        assertArrayEquals(originalData, Files.readAllBytes(dataFile), scenario);
+      }
+    }
+  }
+
   private static CommandResult execute(String... arguments) {
     StringWriter output = new StringWriter();
     StringWriter error = new StringWriter();
