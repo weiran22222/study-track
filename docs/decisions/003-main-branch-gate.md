@@ -1,6 +1,6 @@
 # 决策卡 003：公开仓库并建立 main 合并门禁
 
-状态：已批准，待实施
+状态：已实施并通过远程验证
 
 日期：2026-07-27
 
@@ -75,3 +75,14 @@ GitHub Actions 已能在 `push` 和 `pull_request` 上执行环境自检及完�
 - PR 的 `verify` 成功前不可合并，成功后变为可合并；
 - 尝试直接推送 `main` 被远程拒绝；
 - 证据写回仓库，并通过受保护的 PR 合并。
+
+## 验证结果
+
+- GitHub API 回读确认仓库为 Public，保护参数与本决策一致；
+- 分支提交 `b087a21` 直接推送 `main` 时被 `GH006` 拒绝；
+- [PR #1](https://github.com/weiran22222/study-track/pull/1) 的提交
+  `7f00b23` 在检查运行中返回 `mergeable_state=blocked`；
+- 同一提交的两个 `verify` 成功后返回 `mergeable_state=clean`；
+- PR #1 未使用管理员绕过，正常 squash 合并为 `a65902b`；
+- 合并后的 [`verify #12`](https://github.com/weiran22222/study-track/actions/runs/30270389410)
+  成功。
