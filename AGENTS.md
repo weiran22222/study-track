@@ -15,7 +15,11 @@
 
 ## 当前阶段
 
-当前是 Harness v0：先建立规格、架构和验证入口，再实现业务代码。尚未建立的命令或检查不得被描述为已经通过。
+当前是 Harness v1：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
+JAR 骨架已经建立。`add`、`list`、`complete` 业务命令尚未实现。
+
+不得把启动骨架能够运行描述为产品功能已经完成；产品进度以
+[SPEC.md](SPEC.md#5-验收标准) 中的验收标准为准。
 
 ## 关键边界
 
@@ -52,7 +56,8 @@ macOS/Linux：
 ./mvnw verify
 ```
 
-在 Maven Wrapper 尚未创建的 Harness v0 阶段，应明确报告“验证入口尚未实现”，不能用系统 Maven 假装统一入口已经存在。
+构建环境必须使用 JDK 21。Maven Enforcer 会在版本不符合时给出明确错误，不能绕过
+版本门禁或改用系统 Maven。
 
 ## 完成定义
 
