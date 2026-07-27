@@ -49,7 +49,7 @@
 - [x] 仓库可见性改为 Public
 - [x] `main` Branch Protection 配置并回查
 - [ ] 测试 PR 验证合并前门禁
-- [ ] 直接推送 `main` 被拒绝
+- [x] 直接推送 `main` 被拒绝
 - [ ] 最终证据通过 PR 合并
 - [ ] 计划关闭
 
@@ -64,5 +64,7 @@
   `verify` 成功后才执行设置变更。
 - 2026-07-27：GitHub API 成功将仓库改为 Public，并回读确认 `verify` 严格检查、
   PR 要求、管理员强制执行、0 审批、禁用强推和禁用删除均与决策卡一致。
+- 2026-07-27：分支提交 `b087a21` 尝试非强制直接推送 `main`，远程以 `GH006`
+  拒绝，并明确要求 PR 和 `verify`；`main` 未移动。
 - 详细行为证据记录在
   [docs/evidence/001-main-branch-gate.md](../../evidence/001-main-branch-gate.md)。

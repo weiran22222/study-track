@@ -29,7 +29,7 @@
 
 ## 待验证行为
 
-- [ ] 当前证据提交直接推送到 `main` 被拒绝；
+- [x] 当前证据提交直接推送到 `main` 被拒绝；
 - [ ] 测试分支可以推送并创建 PR；
 - [ ] `verify` 完成前 PR 不可合并；
 - [ ] `verify` 成功后 PR 可以合并；
@@ -40,3 +40,16 @@
 
 本文件记录 GitHub 返回的配置和行为结果，不把配置声明本身视为有效门禁。只有拒绝直接推送
 和真实 PR 状态转换均被观察到后，才可以关闭执行计划。
+
+## 直接推送拒绝
+
+在分支提交 `b087a21` 上执行非强制推送 `git push origin HEAD:main`，远程返回：
+
+```text
+GH006: Protected branch update failed for refs/heads/main.
+Changes must be made through a pull request.
+Required status check "verify" is expected.
+```
+
+该提交只包含本证据文件和活动计划更新，因此即使保护配置意外失效，也不会改变产品行为。
+实际结果为远程拒绝，`main` 没有移动。
