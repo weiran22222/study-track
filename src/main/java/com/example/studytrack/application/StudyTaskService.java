@@ -101,4 +101,19 @@ public final class StudyTaskService {
     repository.update(new StudyTask(task.id(), task.title(), true));
     return CompleteTaskResult.COMPLETED;
   }
+
+  /**
+   * Permanently deletes a learning task.
+   *
+   * @param taskId task identifier
+   * @throws TaskNotFoundException when no task has the requested identifier
+   */
+  public void deleteTask(long taskId) {
+    boolean taskExists = repository.findAll().stream().anyMatch(task -> task.id() == taskId);
+    if (!taskExists) {
+      throw new TaskNotFoundException(taskId);
+    }
+
+    repository.delete(taskId);
+  }
 }

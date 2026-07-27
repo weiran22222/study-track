@@ -69,6 +69,18 @@ public final class JsonTaskRepository implements TaskRepository {
     write(new StoredTasks(storedTasks.nextId(), updatedTasks));
   }
 
+  @Override
+  public void delete(long taskId) {
+    StoredTasks storedTasks = read();
+    List<StudyTask> updatedTasks = new ArrayList<>(storedTasks.tasks());
+    boolean removed = updatedTasks.removeIf(task -> task.id() == taskId);
+    if (!removed) {
+      throw persistenceFailure(
+          "delete", new IOException("Task " + taskId + " does not exist."));
+    }
+    write(new StoredTasks(storedTasks.nextId(), updatedTasks));
+  }
+
   private StoredTasks read() {
     if (Files.notExists(dataFile)) {
       return new StoredTasks(1, List.of());

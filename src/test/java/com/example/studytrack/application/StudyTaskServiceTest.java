@@ -186,14 +186,46 @@ class StudyTaskServiceTest {
     assertEquals(0, repository.updateCalls);
   }
 
+  @Test
+  void deletesExistingTaskAfterConfirmingItExists() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks =
+        List.of(
+            new StudyTask(1, "保留任务", false),
+            new StudyTask(2, "删除任务", true));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    service.deleteTask(2);
+
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(1, repository.deleteCalls);
+    assertEquals(2, repository.deletedTaskId);
+  }
+
+  @Test
+  void deletingMissingTaskFailsWithoutCallingDeletePort() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "已有任务", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    TaskNotFoundException exception =
+        assertThrows(TaskNotFoundException.class, () -> service.deleteTask(99));
+
+    assertEquals("Task 99 not found.", exception.getMessage());
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.deleteCalls);
+  }
+
   private static final class RecordingTaskRepository implements TaskRepository {
 
     private int createCalls;
     private int findAllCalls;
     private int updateCalls;
+    private int deleteCalls;
     private String lastTitle;
     private List<StudyTask> tasks = List.of();
     private StudyTask updatedTask;
+    private long deletedTaskId;
 
     @Override
     public StudyTask create(String title) {
@@ -212,6 +244,12 @@ class StudyTaskServiceTest {
     public void update(StudyTask task) {
       updateCalls++;
       updatedTask = task;
+    }
+
+    @Override
+    public void delete(long taskId) {
+      deleteCalls++;
+      deletedTaskId = taskId;
     }
   }
 }

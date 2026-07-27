@@ -1,12 +1,19 @@
 package com.example.studytrack.infrastructure.persistence;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.example.studytrack.application.TaskPersistenceException;
 import com.example.studytrack.domain.StudyTask;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -85,5 +92,100 @@ class JsonTaskRepositoryTest {
     assertEquals(
         List.of(new StudyTask(1, "学习幂等性", true)),
         new JsonTaskRepository(dataFile).findAll());
+  }
+
+  @Test
+  void deleteRemovesOnlyRequestedTaskAndKeepsNextIdForFollowingCreate(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 10,
+          "tasks": [
+            {"id": 1, "title": "第一项", "completed": false},
+            {"id": 4, "title": "删除项", "completed": true},
+            {"id": 7, "title": "第三项", "completed": false}
+          ]
+        }
+        """);
+    JsonTaskRepository repository = new JsonTaskRepository(dataFile);
+
+    repository.delete(4);
+
+    JsonNode root = objectMapper.readTree(dataFile.toFile());
+    assertEquals(10, root.get("nextId").asLong());
+    assertEquals(2, root.get("tasks").size());
+    assertEquals(1, root.get("tasks").get(0).get("id").asLong());
+    assertEquals("第一项", root.get("tasks").get(0).get("title").asText());
+    assertFalse(root.get("tasks").get(0).get("completed").asBoolean());
+    assertEquals(7, root.get("tasks").get(1).get("id").asLong());
+    assertEquals("第三项", root.get("tasks").get(1).get("title").asText());
+    assertFalse(root.get("tasks").get(1).get("completed").asBoolean());
+
+    StudyTask created = repository.create("删除后新增");
+    assertEquals(new StudyTask(10, "删除后新增", false), created);
+    assertEquals(11, objectMapper.readTree(dataFile.toFile()).get("nextId").asLong());
+  }
+
+  @Test
+  void deleteLastTaskPersistsEmptyCollectionWithoutChangingNextId(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 6,
+          "tasks": [
+            {"id": 5, "title": "最后一项", "completed": true}
+          ]
+        }
+        """);
+
+    new JsonTaskRepository(dataFile).delete(5);
+
+    JsonNode root = objectMapper.readTree(dataFile.toFile());
+    assertEquals(6, root.get("nextId").asLong());
+    assertTrue(root.get("tasks").isArray());
+    assertTrue(root.get("tasks").isEmpty());
+  }
+
+  @Test
+  void deleteWriteFailurePreservesOriginalBytesAndCleansTemporaryFile(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 3,
+          "tasks": [
+            {"id": 1, "title": "保留原始数据", "completed": false},
+            {"id": 2, "title": "删除失败", "completed": true}
+          ]
+        }
+        """);
+    byte[] originalData = Files.readAllBytes(dataFile);
+    ObjectMapper failingMapper = new ObjectMapper(new FailingWriteJsonFactory());
+    JsonTaskRepository repository = new JsonTaskRepository(dataFile, failingMapper);
+
+    TaskPersistenceException exception =
+        assertThrows(TaskPersistenceException.class, () -> repository.delete(2));
+
+    assertTrue(exception.getMessage().startsWith("Unable to write data file "));
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+    try (var paths = Files.list(temporaryDirectory)) {
+      assertEquals(List.of(dataFile), paths.toList());
+    }
+  }
+
+  private static final class FailingWriteJsonFactory extends JsonFactory {
+
+    @Override
+    public JsonGenerator createGenerator(Writer writer) throws IOException {
+      throw new IOException("Injected write failure.");
+    }
   }
 }
