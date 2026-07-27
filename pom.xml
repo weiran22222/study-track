@@ -23,6 +23,7 @@
     <maven.checkstyle.version>3.6.0</maven.checkstyle.version>
     <maven.compiler.version>3.13.0</maven.compiler.version>
     <maven.enforcer.version>3.5.0</maven.enforcer.version>
+    <maven.jar.version>3.4.1</maven.jar.version>
     <maven.shade.version>3.6.0</maven.shade.version>
     <maven.surefire.version>3.5.2</maven.surefire.version>
   </properties>
@@ -122,6 +123,15 @@
         <version>${maven.surefire.version}</version>
         <configuration>
           <useModulePath>false</useModulePath>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>${maven.jar.version}</version>
+        <configuration>
+          <forceCreation>true</forceCreation>
         </configuration>
       </plugin>
 

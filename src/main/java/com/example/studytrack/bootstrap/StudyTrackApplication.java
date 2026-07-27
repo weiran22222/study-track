@@ -1,21 +1,15 @@
 package com.example.studytrack.bootstrap;
 
-import java.util.concurrent.Callable;
+import com.example.studytrack.application.StudyTaskService;
+import com.example.studytrack.cli.StudyTrackCommand;
+import com.example.studytrack.infrastructure.persistence.JsonTaskRepository;
+import java.nio.file.Path;
 import picocli.CommandLine;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.ExitCode;
-import picocli.CommandLine.Model.CommandSpec;
-import picocli.CommandLine.Spec;
 
 /** Composition root and executable entry point for StudyTrack. */
-@Command(
-    name = "study-track",
-    mixinStandardHelpOptions = true,
-    version = "study-track 0.1.0",
-    description = "Track local learning tasks.")
-public final class StudyTrackApplication implements Callable<Integer> {
+public final class StudyTrackApplication {
 
-  @Spec private CommandSpec commandSpec;
+  private StudyTrackApplication() {}
 
   /**
    * Starts the command-line application.
@@ -23,13 +17,20 @@ public final class StudyTrackApplication implements Callable<Integer> {
    * @param args command-line arguments
    */
   public static void main(String[] args) {
-    int exitCode = new CommandLine(new StudyTrackApplication()).execute(args);
+    int exitCode = createCommandLine().execute(args);
     System.exit(exitCode);
   }
 
-  @Override
-  public Integer call() {
-    commandSpec.commandLine().usage(commandSpec.commandLine().getOut());
-    return ExitCode.OK;
+  /**
+   * Creates a fully composed StudyTrack command line.
+   *
+   * @return configured command line
+   */
+  public static CommandLine createCommandLine() {
+    StudyTrackCommand rootCommand =
+        new StudyTrackCommand(
+            dataFile ->
+                new StudyTaskService(new JsonTaskRepository(Path.of(dataFile))));
+    return new CommandLine(rootCommand);
   }
 }
