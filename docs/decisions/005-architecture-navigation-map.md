@@ -1,6 +1,6 @@
 # 决策卡 005：架构导航地图降粒度
 
-状态：已批准，待实施
+状态：已验证
 
 日期：2026-07-27
 
@@ -71,3 +71,13 @@ Harness 不仅可能缺少约束，也可能包含维护成本高于收益的错
 - 技术栈、分层、依赖、持久化和验证规则保持不变；
 - 不新增测试、脚本、依赖或 CI 配置；
 - JDK 21 下完整 `verify` 仍然通过。
+
+## 验证结果
+
+决策由无父对话子智能体实施，实际只修改 `ARCHITECTURE.md` 第 3 节和执行计划记录。
+子智能体与主智能体分别在 JDK 21 下运行完整 `verify`，43 项测试均通过。
+
+[PR #7](https://github.com/weiran22222/study-track/pull/7) 的 push 与 pull request
+两次 `verify` 均成功，合并生成 `main` 提交 `62a3847`。合并后的
+[`verify #32`](https://github.com/weiran22222/study-track/actions/runs/30277232811)
+成功。全部验收项完成，未新增全文件地图测试或其他维护负担。

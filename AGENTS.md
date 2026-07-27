@@ -15,20 +15,21 @@
 
 ## 当前阶段
 
-当前是 Harness v9：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
+当前是 Harness v10：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
 JAR 已经建立；`add`、`list`、`complete`、`show`、`summary` 及损坏 JSON 失败安全
 均已完成。当前 `SPEC.md` 的 AC-01～AC-13 已实现并有自动验证。GitHub Actions 已远程
 运行成功，两个官方 Action 已升级到 Node.js 24 运行时；`main` 已建立强制 PR、最新分支
 和 `verify` 合并门禁。首次双 worktree、双子智能体、双 PR 并行实验已经完成并有证据。
+架构目录已降为包级导航与关键入口，不再维护完整代码文件清单。
 
 当前反馈工件：
 [docs/feedback/002-parallel-worktree-retrospective.md](docs/feedback/002-parallel-worktree-retrospective.md)。
 
-当前 Harness 决策：
+最近完成的 Harness 决策：
 [docs/decisions/005-architecture-navigation-map.md](docs/decisions/005-architecture-navigation-map.md)。
 
-当前执行计划：
-[docs/exec-plans/active/011-architecture-navigation-map.md](docs/exec-plans/active/011-architecture-navigation-map.md)。
+最近完成的 Harness 计划：
+[docs/exec-plans/completed/011-architecture-navigation-map.md](docs/exec-plans/completed/011-architecture-navigation-map.md)。
 
 最近完成的并行 Harness 决策：
 [docs/decisions/004-parallel-worktree-experiment.md](docs/decisions/004-parallel-worktree-experiment.md)。
