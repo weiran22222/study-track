@@ -75,7 +75,21 @@ class EnvironmentBootstrapTest {
                 failure(
                     workflow,
                     "CI does not run the environment check before the canonical verify command.",
-                    "Place the environment check step before the mvnw verify step.")));
+                    "Place the environment check step before the mvnw verify step.")),
+        () ->
+            assertTrue(
+                workflowText.contains("uses: actions/checkout@v6"),
+                actionVersionFailure(
+                    workflow,
+                    "The checkout step does not use actions/checkout@v6.",
+                    "Set the checkout step to uses: actions/checkout@v6.")),
+        () ->
+            assertTrue(
+                workflowText.contains("uses: actions/setup-java@v5"),
+                actionVersionFailure(
+                    workflow,
+                    "The Java setup step does not use actions/setup-java@v5.",
+                    "Set the Java setup step to uses: actions/setup-java@v5.")));
   }
 
   @Test
@@ -127,6 +141,20 @@ class EnvironmentBootstrapTest {
         Recheck: .\\scripts\\check-environment.ps1 (Windows) or
         sh ./scripts/check-environment.sh (macOS/Linux), then run the canonical verify command.
         Authority: docs/environment.md and docs/exec-plans/completed/006-environment-bootstrap.md
+        """
+        .formatted(location, reason, fix);
+  }
+
+  private static String actionVersionFailure(Path location, String reason, String fix) {
+    return """
+        GitHub Actions runtime invariant violated.
+        Location: %s
+        Invariant: CI must use actions/checkout@v6 and actions/setup-java@v5 so both official
+        Actions run on the approved Node.js 24 runtime.
+        Reason: %s
+        Fix: %s
+        Recheck: .\\scripts\\check-environment.ps1, then run .\\mvnw.cmd verify.
+        Authority: docs/decisions/002-actions-node24-upgrade.md
         """
         .formatted(location, reason, fix);
   }

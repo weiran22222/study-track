@@ -18,14 +18,17 @@
 当前是 Harness v6：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
 JAR 已经建立；`add`、`list`、`complete` 及损坏 JSON 失败安全均已完成。当前
 `SPEC.md` 的 AC-01～AC-11 已实现并有自动验证；第一次反馈复盘选出的环境自举改进
-也已完成。GitHub Actions 首次远程运行成功，但发现 Actions Node.js 运行时弃用警告，
-是否升级相关 Actions 版本尚待人类决定。
+也已完成。GitHub Actions 首次远程运行成功，并已获得人类批准升级产生 Node.js 运行时
+弃用警告的两个官方 Action。
 
 当前反馈工件：
 [docs/feedback/001-first-harness-retrospective.md](docs/feedback/001-first-harness-retrospective.md)。
 
 当前 Harness 决策：
-[docs/decisions/001-environment-bootstrap.md](docs/decisions/001-environment-bootstrap.md)。
+[docs/decisions/002-actions-node24-upgrade.md](docs/decisions/002-actions-node24-upgrade.md)。
+
+当前执行计划：
+[docs/exec-plans/active/007-actions-node24-upgrade.md](docs/exec-plans/active/007-actions-node24-upgrade.md)。
 
 最近完成的 Harness 执行计划：
 [docs/exec-plans/completed/006-environment-bootstrap.md](docs/exec-plans/completed/006-environment-bootstrap.md)。
