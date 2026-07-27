@@ -1,6 +1,6 @@
 # 执行计划 009：show 单任务查询
 
-状态：待实现
+状态：主智能体审查通过，待 PR 门禁
 
 ## 目标
 
@@ -38,12 +38,21 @@
 该切片可以最小修改 `StudyTaskService`、`StudyTrackCommand` 和现有 CLI 集成测试。不要为了
 避免未来冲突而预先实现或重构 `summary`。冲突由两个 PR 都完成后统一处理。
 
+## 实现决策
+
+- `StudyTaskService.showTask(long)` 通过现有 `TaskRepository.findAll()` 只读端口精确查询，
+  不扩展持久化端口或 JSON 格式；
+- `ShowCommand` 沿用 `list` 的单行协议，并按现有 CLI 约定映射不存在与持久化异常；为减少
+  并行共享热点，没有重构 `ListCommand`；
+- Application 测试验证查询不调用写端口，CLI 集成测试以文件字节快照和文件不存在断言
+  验证成功、失败及损坏 JSON 路径均只读。
+
 ## 进度
 
-- [ ] 无父对话子智能体开始
-- [ ] Application 行为与测试完成
-- [ ] CLI 行为与测试完成
-- [ ] 只读副作用验证完成
-- [ ] 完整 `verify` 通过
-- [ ] 主智能体审查
+- [x] 无父对话子智能体开始
+- [x] Application 行为与测试完成
+- [x] CLI 行为与测试完成
+- [x] 只读副作用验证完成
+- [x] 完整 `verify` 通过
+- [x] 主智能体审查（JDK 21 下独立复跑 `verify`：39 项测试通过，Checkstyle 0 违规）
 - [ ] PR 通过并合并
