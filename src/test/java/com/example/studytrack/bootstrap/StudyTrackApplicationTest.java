@@ -240,6 +240,60 @@ class StudyTrackApplicationTest {
   }
 
   @Test
+  void summaryCommandCountsMixedStatesWithoutChangingDataFile(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 4,
+          "tasks": [
+            {"id": 1, "title": "待完成一", "completed": false},
+            {"id": 2, "title": "已完成", "completed": true},
+            {"id": 3, "title": "待完成二", "completed": false}
+          ]
+        }
+        """,
+        StandardCharsets.UTF_8);
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "summary");
+
+    assertEquals(0, result.exitCode());
+    assertEquals(
+        """
+        Total: 3
+        Pending: 2
+        Completed: 1
+        """
+            .replace("\n", System.lineSeparator()),
+        result.output());
+    assertEquals("", result.error());
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void summaryCommandReportsZeroCountsWithoutCreatingDataFile(
+      @TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "summary");
+
+    assertEquals(0, result.exitCode());
+    assertEquals(
+        """
+        Total: 0
+        Pending: 0
+        Completed: 0
+        """
+            .replace("\n", System.lineSeparator()),
+        result.output());
+    assertEquals("", result.error());
+    assertFalse(Files.exists(dataFile));
+  }
+
+  @Test
   void commandsRejectCorruptDataWithoutChangingOriginalBytes(@TempDir Path temporaryDirectory)
       throws Exception {
     String[] corruptData = {
@@ -254,7 +308,7 @@ class StudyTrackApplicationTest {
         {"nextId": 2, "tasks": null}
         """
     };
-    String[][] commands = {{"add", "新任务"}, {"list"}, {"complete", "1"}};
+    String[][] commands = {{"add", "新任务"}, {"list"}, {"complete", "1"}, {"summary"}};
 
     for (int dataIndex = 0; dataIndex < corruptData.length; dataIndex++) {
       for (int commandIndex = 0; commandIndex < commands.length; commandIndex++) {
