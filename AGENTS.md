@@ -21,7 +21,10 @@ JAR 已经建立；`add` 垂直切片已完成，`list`、`complete` 尚未实�
 不得把启动骨架能够运行描述为产品功能已经完成；产品进度以
 [SPEC.md](SPEC.md#5-验收标准) 中的验收标准为准。
 
-最近完成的执行计划：
+最近完成的 Harness 计划：
+[docs/exec-plans/completed/002-build-idempotency-guard.md](docs/exec-plans/completed/002-build-idempotency-guard.md)。
+
+最近完成的功能计划：
 [docs/exec-plans/completed/001-add-task.md](docs/exec-plans/completed/001-add-task.md)。
 
 ## 关键边界
