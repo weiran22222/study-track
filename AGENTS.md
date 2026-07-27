@@ -15,9 +15,19 @@
 
 ## 当前阶段
 
-当前是 Harness v5：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
+当前是 Harness v6：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
 JAR 已经建立；`add`、`list`、`complete` 及损坏 JSON 失败安全均已完成。当前
-`SPEC.md` 的 AC-01～AC-11 已实现并有自动验证，下一阶段是反馈复盘与 Harness 评估。
+`SPEC.md` 的 AC-01～AC-11 已实现并有自动验证；第一次反馈复盘选出的环境自举改进
+也已完成。
+
+当前反馈工件：
+[docs/feedback/001-first-harness-retrospective.md](docs/feedback/001-first-harness-retrospective.md)。
+
+当前 Harness 决策：
+[docs/decisions/001-environment-bootstrap.md](docs/decisions/001-environment-bootstrap.md)。
+
+最近完成的 Harness 执行计划：
+[docs/exec-plans/completed/006-environment-bootstrap.md](docs/exec-plans/completed/006-environment-bootstrap.md)。
 
 不得把启动骨架能够运行描述为产品功能已经完成；产品进度以
 [SPEC.md](SPEC.md#5-验收标准) 中的验收标准为准。
@@ -48,6 +58,15 @@ JAR 已经建立；`add`、`list`、`complete` 及损坏 JSON 失败安全均已
 
 完整规则及原因见 [ARCHITECTURE.md](ARCHITECTURE.md#4-分层与依赖)。
 
+## Harness 变更权限
+
+- 智能体可以自主修复违反现有规格、架构或测试的实现问题；
+- 小型 Harness 修复必须先向人类提供决策卡，说明问题、证据、拟议改动、收益、
+  成本及验证方式；在人类知情且没有改变既定目标的前提下才可实施；
+- 改变项目目标、架构、验收语义、智能体权限、工具链或持续维护成本的重大
+  Harness 变化，必须先获得人类明确批准；
+- 不得仅因为技术上可行就扩大 Harness 范围。
+
 ## 标准工作流
 
 1. 阅读与任务相关的规格和架构章节；
@@ -60,7 +79,16 @@ JAR 已经建立；`add`、`list`、`complete` 及损坏 JSON 失败安全均已
 
 ## 验证命令
 
+首次进入仓库或构建环境变化后，先阅读
+[环境说明](docs/environment.md)，并运行快速自检。
+
 Windows：
+
+```powershell
+.\scripts\check-environment.ps1
+```
+
+自检通过后：
 
 ```powershell
 .\mvnw.cmd verify
@@ -69,11 +97,17 @@ Windows：
 macOS/Linux：
 
 ```bash
+sh ./scripts/check-environment.sh
+```
+
+自检通过后：
+
+```bash
 ./mvnw verify
 ```
 
 构建环境必须使用 JDK 21。Maven Enforcer 会在版本不符合时给出明确错误，不能绕过
-版本门禁或改用系统 Maven。
+版本门禁或改用系统 Maven。环境自检只诊断，不安装 JDK、不修改环境变量或 Maven 配置。
 
 ## 完成定义
 

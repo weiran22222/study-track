@@ -18,5 +18,8 @@ jobs:
           java-version: "21"
           cache: maven
 
+      - name: Check the build environment
+        run: sh ./scripts/check-environment.sh
+
       - name: Run the canonical verification command
         run: ./mvnw --batch-mode --no-transfer-progress verify
