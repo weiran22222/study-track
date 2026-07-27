@@ -19,13 +19,16 @@
 JAR 已经建立；`add`、`list`、`complete` 及损坏 JSON 失败安全均已完成。当前
 `SPEC.md` 的 AC-01～AC-11 已实现并有自动验证；第一次反馈复盘选出的环境自举改进
 也已完成。GitHub Actions 已远程运行成功，两个官方 Action 已升级到 Node.js 24 运行时，
-弃用警告已经消失。
+弃用警告已经消失。当前正在建立 `main` 的强制 PR 合并门禁。
 
 当前反馈工件：
 [docs/feedback/001-first-harness-retrospective.md](docs/feedback/001-first-harness-retrospective.md)。
 
 当前 Harness 决策：
-[docs/decisions/002-actions-node24-upgrade.md](docs/decisions/002-actions-node24-upgrade.md)。
+[docs/decisions/003-main-branch-gate.md](docs/decisions/003-main-branch-gate.md)。
+
+当前执行计划：
+[docs/exec-plans/active/008-main-branch-gate.md](docs/exec-plans/active/008-main-branch-gate.md)。
 
 最近完成的 Actions 升级计划：
 [docs/exec-plans/completed/007-actions-node24-upgrade.md](docs/exec-plans/completed/007-actions-node24-upgrade.md)。
