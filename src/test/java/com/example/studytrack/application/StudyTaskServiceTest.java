@@ -82,12 +82,55 @@ class StudyTaskServiceTest {
     assertEquals(1, repository.findAllCalls);
   }
 
+  @Test
+  void completesPendingTaskAndPersistsTransition() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "学习幂等性", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    CompleteTaskResult result = service.completeTask(1);
+
+    assertEquals(CompleteTaskResult.COMPLETED, result);
+    assertEquals(new StudyTask(1, "学习幂等性", true), repository.updatedTask);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(1, repository.updateCalls);
+  }
+
+  @Test
+  void completingAlreadyCompletedTaskDoesNotPersist() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "学习幂等性", true));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    CompleteTaskResult result = service.completeTask(1);
+
+    assertEquals(CompleteTaskResult.ALREADY_COMPLETED, result);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
+  void completingMissingTaskFailsWithoutPersisting() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "已有任务", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    TaskNotFoundException exception =
+        assertThrows(TaskNotFoundException.class, () -> service.completeTask(99));
+
+    assertEquals("Task 99 not found.", exception.getMessage());
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
   private static final class RecordingTaskRepository implements TaskRepository {
 
     private int createCalls;
     private int findAllCalls;
+    private int updateCalls;
     private String lastTitle;
     private List<StudyTask> tasks = List.of();
+    private StudyTask updatedTask;
 
     @Override
     public StudyTask create(String title) {
@@ -100,6 +143,12 @@ class StudyTaskServiceTest {
     public List<StudyTask> findAll() {
       findAllCalls++;
       return tasks;
+    }
+
+    @Override
+    public void update(StudyTask task) {
+      updateCalls++;
+      updatedTask = task;
     }
   }
 }

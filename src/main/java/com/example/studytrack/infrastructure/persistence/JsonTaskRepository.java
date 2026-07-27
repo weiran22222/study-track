@@ -50,6 +50,25 @@ public final class JsonTaskRepository implements TaskRepository {
     return List.copyOf(read().tasks());
   }
 
+  @Override
+  public void update(StudyTask task) {
+    StoredTasks storedTasks = read();
+    List<StudyTask> updatedTasks = new ArrayList<>(storedTasks.tasks());
+    int taskIndex = -1;
+    for (int index = 0; index < updatedTasks.size(); index++) {
+      if (updatedTasks.get(index).id() == task.id()) {
+        taskIndex = index;
+        break;
+      }
+    }
+    if (taskIndex < 0) {
+      throw persistenceFailure(
+          "update", new IOException("Task " + task.id() + " does not exist."));
+    }
+    updatedTasks.set(taskIndex, task);
+    write(new StoredTasks(storedTasks.nextId(), updatedTasks));
+  }
+
   private StoredTasks read() {
     if (Files.notExists(dataFile)) {
       return new StoredTasks(1, List.of());

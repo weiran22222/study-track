@@ -68,4 +68,22 @@ class JsonTaskRepositoryTest {
     assertTrue(tasks.isEmpty());
     assertFalse(Files.exists(dataFile));
   }
+
+  @Test
+  void updatePersistsCompletedStateAndPreservesRepositoryMetadata(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    JsonTaskRepository repository = new JsonTaskRepository(dataFile);
+    StudyTask task = repository.create("学习幂等性");
+
+    repository.update(new StudyTask(task.id(), task.title(), true));
+
+    JsonNode root = objectMapper.readTree(dataFile.toFile());
+    assertEquals(2, root.get("nextId").asLong());
+    assertEquals(1, root.get("tasks").size());
+    assertTrue(root.get("tasks").get(0).get("completed").asBoolean());
+    assertEquals(
+        List.of(new StudyTask(1, "学习幂等性", true)),
+        new JsonTaskRepository(dataFile).findAll());
+  }
 }

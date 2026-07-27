@@ -1,5 +1,6 @@
 package com.example.studytrack.bootstrap;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -161,6 +162,81 @@ class StudyTrackApplicationTest {
       assertTrue(result.error().contains("Invalid value for option '--status'"));
       assertFalse(Files.exists(dataFile));
     }
+  }
+
+  @Test
+  void completeCommandPersistsPendingTaskAndReportsSuccess(@TempDir Path temporaryDirectory)
+      throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "学习幂等性");
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "complete", "1");
+
+    assertEquals(0, result.exitCode());
+    assertEquals("Completed task 1." + System.lineSeparator(), result.output());
+    assertEquals("", result.error());
+    assertTrue(Files.readString(dataFile, StandardCharsets.UTF_8).contains("\"completed\" : true"));
+
+    CommandResult completed =
+        execute("--data-file", dataFile.toString(), "list", "--status", "completed");
+    assertEquals("[x] 1 学习幂等性" + System.lineSeparator(), completed.output());
+  }
+
+  @Test
+  void completeCommandIsIdempotentWithoutChangingDataFile(@TempDir Path temporaryDirectory)
+      throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "学习幂等性");
+    execute("--data-file", dataFile.toString(), "complete", "1");
+    final byte[] completedData = Files.readAllBytes(dataFile);
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "complete", "1");
+
+    assertEquals(0, result.exitCode());
+    assertEquals("Task 1 is already completed." + System.lineSeparator(), result.output());
+    assertEquals("", result.error());
+    assertArrayEquals(completedData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void completeCommandReportsMissingTaskWithoutChangingExistingData(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "已有任务");
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "complete", "99");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), result.error());
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void completeCommandDoesNotCreateDataFileForMissingTask(@TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "complete", "99");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), result.error());
+    assertFalse(Files.exists(dataFile));
+  }
+
+  @Test
+  void nonIntegerCompleteIdentifierReturnsUsageErrorWithoutCreatingDataFile(
+      @TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+
+    CommandResult result =
+        execute("--data-file", dataFile.toString(), "complete", "not-an-integer");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertTrue(result.error().contains("Invalid value for positional parameter"));
+    assertFalse(Files.exists(dataFile));
   }
 
   private static CommandResult execute(String... arguments) {
