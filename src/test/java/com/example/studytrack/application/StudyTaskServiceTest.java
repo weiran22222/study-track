@@ -83,6 +83,38 @@ class StudyTaskServiceTest {
   }
 
   @Test
+  void showsTaskWithRequestedIdentifierWithoutPersisting() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks =
+        List.of(
+            new StudyTask(1, "First task", false),
+            new StudyTask(2, "Requested task", true));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    StudyTask task = service.showTask(2);
+
+    assertEquals(new StudyTask(2, "Requested task", true), task);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.createCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
+  void showingMissingTaskFailsWithoutPersisting() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "Existing task", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    TaskNotFoundException exception =
+        assertThrows(TaskNotFoundException.class, () -> service.showTask(99));
+
+    assertEquals("Task 99 not found.", exception.getMessage());
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.createCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
   void completesPendingTaskAndPersistsTransition() {
     RecordingTaskRepository repository = new RecordingTaskRepository();
     repository.tasks = List.of(new StudyTask(1, "学习幂等性", false));
