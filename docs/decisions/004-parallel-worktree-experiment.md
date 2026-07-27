@@ -1,6 +1,6 @@
 # 决策卡 004：并行 worktree 功能实验
 
-状态：已批准，待实施
+状态：已验证
 
 日期：2026-07-27
 
@@ -68,3 +68,15 @@
 - 第二个分支在第一个合并后同步最新 `main`，冲突处理有证据；
 - 最终 `main` 同时满足 AC-12、AC-13 和既有 AC-01～AC-11；
 - 并行耗时、共享热点、冲突和 Harness 缺口进入复盘。
+
+## 验证结果
+
+全部验收项已于 2026-07-27 完成。两个实现分支从共同基线 `1c06866` 创建，分别通过
+[PR #4](https://github.com/weiran22222/study-track/pull/4) 和
+[PR #5](https://github.com/weiran22222/study-track/pull/5) 合并。`summary` 在 `show`
+合并后同步最新 `main`，实际解决 4 个共享热点冲突；最终 `main` 提交 `cb0b930` 的
+远程 `verify` 成功。
+
+完整过程证据见
+[并行 worktree 实验证据](../evidence/002-parallel-worktree-experiment.md)，经验与缺口见
+[第二次复盘](../feedback/002-parallel-worktree-retrospective.md)。

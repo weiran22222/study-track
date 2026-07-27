@@ -41,9 +41,17 @@ study-track/
 │   │   ├── StudyTrackCommand.java
 │   │   ├── AddCommand.java
 │   │   ├── ListCommand.java
-│   │   └── CompleteCommand.java
+│   │   ├── CompleteCommand.java
+│   │   ├── ShowCommand.java
+│   │   ├── SummaryCommand.java
+│   │   └── StudyTaskServiceFactory.java
 │   ├── application/
 │   │   ├── StudyTaskService.java
+│   │   ├── CompleteTaskResult.java
+│   │   ├── TaskSummary.java
+│   │   ├── InvalidTaskTitleException.java
+│   │   ├── TaskNotFoundException.java
+│   │   ├── TaskPersistenceException.java
 │   │   └── port/
 │   │       └── TaskRepository.java
 │   ├── domain/
@@ -53,14 +61,19 @@ study-track/
 │           └── JsonTaskRepository.java
 └── src/test/java/com/example/studytrack/
     ├── architecture/
-    │   └── ArchitectureTest.java
-    ├── cli/
-    │   └── StudyTrackCommandTest.java
+    │   ├── ArchitectureTest.java
+    │   ├── BuildConfigurationTest.java
+    │   └── EnvironmentBootstrapTest.java
+    ├── bootstrap/
+    │   └── StudyTrackApplicationTest.java
     ├── application/
     │   └── StudyTaskServiceTest.java
     └── infrastructure/
         └── JsonTaskRepositoryTest.java
 ```
+
+该目录是新智能体的定位地图，不是第二份架构规则。增加、删除或移动主要入口类时，应同步
+更新本节；依赖合法性仍以第 4、5 节和 ArchUnit 测试为准。
 
 ## 4. 分层与依赖
 
