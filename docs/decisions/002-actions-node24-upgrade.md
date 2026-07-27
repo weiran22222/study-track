@@ -1,6 +1,6 @@
 # 决策卡 002：升级 GitHub Actions Node.js 24 运行时
 
-状态：已实现并通过本地验证，待远程验证
+状态：已实现并通过远程验证
 
 日期：2026-07-27
 
@@ -57,3 +57,12 @@ Node.js 24。继续保留旧主版本会让非阻塞警告累积，并可能在�
 - JDK 21 下本地完整 `verify` 通过；
 - 推送后的 GitHub Actions 成功，环境自检和 33 个测试通过；
 - 远程运行不再报告本决策针对的 Node.js 20 弃用警告。
+
+## 验证结果
+
+- JDK 21 下本地完整 `verify` 通过：33 个测试、0 个失败；
+- [远程 `verify #3`](https://github.com/weiran22222/study-track/actions/runs/30269042845)
+  对提交 `3792c08` 运行成功；
+- 远程环境自检报告 Java 21 和 Maven Wrapper 3.9.12；
+- 远程完整门禁报告 33 个测试、0 个失败；
+- 远程 Check Run 注解数为 0，Node.js 20 弃用警告消失。
