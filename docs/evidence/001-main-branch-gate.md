@@ -1,6 +1,6 @@
 # main 合并门禁验证证据
 
-状态：验证中
+状态：已完成
 
 日期：2026-07-27
 
@@ -33,8 +33,8 @@
 - [x] 测试分支可以推送并创建 PR；
 - [x] `verify` 完成前 PR 不可合并；
 - [x] `verify` 成功后 PR 可以合并；
-- [ ] 证据通过 PR 合并进入 `main`；
-- [ ] 合并后的 `main` 远程 CI 成功。
+- [x] 证据通过 PR 合并进入 `main`；
+- [x] 合并后的 `main` 远程 CI 成功。
 
 ## 证据边界
 
@@ -90,3 +90,17 @@ mergeable_state=clean
 ```
 
 由此形成同一提交上的状态转换证据：`blocked`（检查未完成）→ `clean`（检查成功）。
+
+## 合并与主分支验证
+
+PR #1 的最终头提交 `3673482` 在两个 `verify` 成功后通过普通 squash merge 合并，
+没有使用管理员绕过。GitHub 生成的 `main` 提交为：
+
+```text
+a65902b docs: verify main branch gate (#1)
+```
+
+合并触发的
+[`verify #12`](https://github.com/weiran22222/study-track/actions/runs/30270389410)
+对提交 `a65902b` 运行成功。至此，配置回查、直接推送拒绝、PR 检查前阻塞、检查后放行、
+正常合并和合并后主分支验证均有实际远程证据。

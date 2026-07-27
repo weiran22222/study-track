@@ -1,6 +1,6 @@
 # 执行计划 008：验证 main 的 PR 合并门禁
 
-状态：进行中
+状态：已完成
 
 ## 背景
 
@@ -50,8 +50,8 @@
 - [x] `main` Branch Protection 配置并回查
 - [x] 测试 PR 验证合并前门禁
 - [x] 直接推送 `main` 被拒绝
-- [ ] 最终证据通过 PR 合并
-- [ ] 计划关闭
+- [x] 最终证据通过 PR 合并
+- [x] 计划关闭
 
 ## 权限边界
 
@@ -68,5 +68,10 @@
   拒绝，并明确要求 PR 和 `verify`；`main` 未移动。
 - 2026-07-27：PR #1 在提交 `7f00b23` 的两个 `verify` 分别处于 queued 和
   in_progress 时返回 `mergeable_state=blocked`，证明检查成功前不能合并。
+- 2026-07-27：同一提交的两个 `verify` 成功后，PR #1 返回
+  `mergeable_state=clean`。
+- 2026-07-27：PR #1 未使用管理员绕过，正常 squash 合并为 `a65902b`；合并后的
+  [远程 `verify #12`](https://github.com/weiran22222/study-track/actions/runs/30270389410)
+  成功。
 - 详细行为证据记录在
   [docs/evidence/001-main-branch-gate.md](../../evidence/001-main-branch-gate.md)。

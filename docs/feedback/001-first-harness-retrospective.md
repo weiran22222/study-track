@@ -54,6 +54,7 @@
 | 重复完成或不存在任务可能产生副作用 | 执行计划预先识别 | Application + Repository | 是，字节不变测试保护 |
 | JSON 根值 `null` 让 NPE 越过持久化边界 | AC-07 损坏输入矩阵 | Infrastructure | 是，跨命令测试保护 |
 | Actions Node.js 20 运行时弃用 | 首次远程 CI 注解 | CI 工具链 | 是，版本契约和远程运行保护 |
+| CI 成功但 `main` 可直接推送 | 远程治理复盘 | GitHub Branch Protection | 是，PR + `verify` 强制门禁 |
 
 ### 2.4 无父对话交接
 
@@ -84,7 +85,8 @@
 | 规范反馈 | Checkstyle | 统一代码结构 |
 | 环境门禁 | Maven Enforcer + Wrapper | 固定 Java/Maven 边界 |
 | 环境自举 | `scripts/check-environment.*` | 在完整构建前诊断 Java 与 Wrapper |
-| 合并门禁 | GitHub Actions | 计划在 push/PR 执行统一验证 |
+| 合并门禁 | GitHub Actions | 在 push/PR 执行统一验证 |
+| 主分支保护 | GitHub Branch Protection | 合并前强制 PR、最新分支和 `verify` |
 | 记忆 | Git 提交 | 保存阶段基线和可审计历史 |
 
 ## 4. 已知限制
@@ -180,3 +182,8 @@ CI 反馈闭环，不自动安装系统软件，也不把本地缓存构建描�
 运行时弃用警告。学习者批准升级后，
 [远程 `verify #3`](https://github.com/weiran22222/study-track/actions/runs/30269042845)
 成功，环境自检和 33 个测试通过，注解数为 0，目标弃用警告已经消失。
+
+随后，学习者批准把仓库公开并保护 `main`。真实验证证明：直接推送被 `GH006` 拒绝；
+PR #1 在检查运行中为 `blocked`、成功后为 `clean`，并通过正常流程合并。合并后的
+[`verify #12`](https://github.com/weiran22222/study-track/actions/runs/30270389410)
+成功，因此 CI 已从事后报告器升级为合并前守门人。
