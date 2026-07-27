@@ -1,6 +1,7 @@
 package com.example.studytrack.application.port;
 
 import com.example.studytrack.domain.StudyTask;
+import java.util.List;
 
 /** Persistence boundary used by learning-task use cases. */
 public interface TaskRepository {
@@ -12,4 +13,11 @@ public interface TaskRepository {
    * @return the persisted task
    */
   StudyTask create(String title);
+
+  /**
+   * Reads all persisted tasks.
+   *
+   * @return persisted tasks
+   */
+  List<StudyTask> findAll();
 }

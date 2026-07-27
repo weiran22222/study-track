@@ -15,11 +15,14 @@
 
 ## 当前阶段
 
-当前是 Harness v2：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
-JAR 已经建立；`add` 垂直切片已完成，`list`、`complete` 尚未实现。
+当前是 Harness v3：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
+JAR 已经建立；`add`、`list` 垂直切片已完成，`complete` 尚未实现。
 
 不得把启动骨架能够运行描述为产品功能已经完成；产品进度以
 [SPEC.md](SPEC.md#5-验收标准) 中的验收标准为准。
+
+最近完成的 list 功能计划：
+[docs/exec-plans/completed/003-list-tasks.md](docs/exec-plans/completed/003-list-tasks.md)。
 
 最近完成的 Harness 计划：
 [docs/exec-plans/completed/002-build-idempotency-guard.md](docs/exec-plans/completed/002-build-idempotency-guard.md)。

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.example.studytrack.application.port.TaskRepository;
 import com.example.studytrack.domain.StudyTask;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class StudyTaskServiceTest {
@@ -60,16 +61,45 @@ class StudyTaskServiceTest {
     assertEquals(0, repository.createCalls);
   }
 
+  @Test
+  void listsTasksInAscendingIdentifierOrder() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks =
+        List.of(
+            new StudyTask(3, "第三项", false),
+            new StudyTask(1, "第一项", true),
+            new StudyTask(2, "第二项", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    List<StudyTask> tasks = service.listTasks();
+
+    assertEquals(
+        List.of(
+            new StudyTask(1, "第一项", true),
+            new StudyTask(2, "第二项", false),
+            new StudyTask(3, "第三项", false)),
+        tasks);
+    assertEquals(1, repository.findAllCalls);
+  }
+
   private static final class RecordingTaskRepository implements TaskRepository {
 
     private int createCalls;
+    private int findAllCalls;
     private String lastTitle;
+    private List<StudyTask> tasks = List.of();
 
     @Override
     public StudyTask create(String title) {
       createCalls++;
       lastTitle = title;
       return new StudyTask(createCalls, title, false);
+    }
+
+    @Override
+    public List<StudyTask> findAll() {
+      findAllCalls++;
+      return tasks;
     }
   }
 }

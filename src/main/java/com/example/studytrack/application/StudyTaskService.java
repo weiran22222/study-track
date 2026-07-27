@@ -2,6 +2,8 @@ package com.example.studytrack.application;
 
 import com.example.studytrack.application.port.TaskRepository;
 import com.example.studytrack.domain.StudyTask;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 /** Application service for learning-task use cases. */
@@ -39,5 +41,16 @@ public final class StudyTaskService {
     }
 
     return repository.create(title);
+  }
+
+  /**
+   * Lists learning tasks in ascending identifier order.
+   *
+   * @return persisted tasks ordered by identifier
+   */
+  public List<StudyTask> listTasks() {
+    return repository.findAll().stream()
+        .sorted(Comparator.comparingLong(StudyTask::id))
+        .toList();
   }
 }

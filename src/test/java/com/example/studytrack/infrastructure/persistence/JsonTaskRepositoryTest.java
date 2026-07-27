@@ -48,4 +48,24 @@ class JsonTaskRepositoryTest {
     assertEquals(List.of(dataFile), files);
     assertTrue(Files.exists(dataFile));
   }
+
+  @Test
+  void readsTasksSavedByEarlierRepositoryInstance(@TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    new JsonTaskRepository(dataFile).create("跨进程读取");
+
+    List<StudyTask> tasks = new JsonTaskRepository(dataFile).findAll();
+
+    assertEquals(List.of(new StudyTask(1, "跨进程读取", false)), tasks);
+  }
+
+  @Test
+  void missingDataFileIsAnEmptyRepository(@TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+
+    List<StudyTask> tasks = new JsonTaskRepository(dataFile).findAll();
+
+    assertTrue(tasks.isEmpty());
+    assertFalse(Files.exists(dataFile));
+  }
 }

@@ -45,6 +45,11 @@ public final class JsonTaskRepository implements TaskRepository {
     return task;
   }
 
+  @Override
+  public List<StudyTask> findAll() {
+    return List.copyOf(read().tasks());
+  }
+
   private StoredTasks read() {
     if (Files.notExists(dataFile)) {
       return new StoredTasks(1, List.of());
