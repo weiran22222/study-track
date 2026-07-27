@@ -165,6 +165,77 @@ class StudyTrackApplicationTest {
   }
 
   @Test
+  void showCommandDisplaysTaskStatusWithoutChangingDataFile(@TempDir Path temporaryDirectory)
+      throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 3,
+          "tasks": [
+            {"id": 1, "title": "Pending task", "completed": false},
+            {"id": 2, "title": "Completed task", "completed": true}
+          ]
+        }
+        """,
+        StandardCharsets.UTF_8);
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    final CommandResult pending = execute("--data-file", dataFile.toString(), "show", "1");
+    final CommandResult completed = execute("--data-file", dataFile.toString(), "show", "2");
+
+    assertEquals(0, pending.exitCode());
+    assertEquals("[ ] 1 Pending task" + System.lineSeparator(), pending.output());
+    assertEquals("", pending.error());
+    assertEquals(0, completed.exitCode());
+    assertEquals("[x] 2 Completed task" + System.lineSeparator(), completed.output());
+    assertEquals("", completed.error());
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void showCommandReportsMissingTaskWithoutChangingExistingData(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "Existing task");
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "show", "99");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), result.error());
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void showCommandDoesNotCreateDataFileForMissingTask(@TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "show", "99");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), result.error());
+    assertFalse(Files.exists(dataFile));
+  }
+
+  @Test
+  void nonIntegerShowIdentifierReturnsUsageErrorWithoutCreatingDataFile(
+      @TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+
+    CommandResult result =
+        execute("--data-file", dataFile.toString(), "show", "not-an-integer");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertTrue(result.error().contains("Invalid value for positional parameter"));
+    assertFalse(Files.exists(dataFile));
+  }
+
+  @Test
   void completeCommandPersistsPendingTaskAndReportsSuccess(@TempDir Path temporaryDirectory)
       throws Exception {
     Path dataFile = temporaryDirectory.resolve("tasks.json");
@@ -308,7 +379,9 @@ class StudyTrackApplicationTest {
         {"nextId": 2, "tasks": null}
         """
     };
-    String[][] commands = {{"add", "新任务"}, {"list"}, {"complete", "1"}, {"summary"}};
+    String[][] commands = {
+        {"add", "新任务"}, {"list"}, {"complete", "1"}, {"show", "1"}, {"summary"}
+    };
 
     for (int dataIndex = 0; dataIndex < corruptData.length; dataIndex++) {
       for (int commandIndex = 0; commandIndex < commands.length; commandIndex++) {

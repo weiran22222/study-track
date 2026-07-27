@@ -15,7 +15,11 @@ import picocli.CommandLine.Spec;
     version = "study-track 0.1.0",
     description = "Track local learning tasks.",
     subcommands = {
-      AddCommand.class, ListCommand.class, CompleteCommand.class, SummaryCommand.class
+      AddCommand.class,
+      ListCommand.class,
+      CompleteCommand.class,
+      ShowCommand.class,
+      SummaryCommand.class
     })
 public final class StudyTrackCommand implements Callable<Integer> {
 

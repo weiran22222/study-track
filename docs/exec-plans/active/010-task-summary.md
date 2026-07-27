@@ -53,3 +53,17 @@
 - `summarizeTasks()` 只调用一次 `TaskRepository.findAll()`，由总数减去已完成数得到未完成数，
   不调用任何持久化写入方法；
 - CLI 回归测试同时覆盖已有文件字节不变、无数据文件不创建，以及损坏 JSON 原字节保留。
+
+## 合并 main 冲突记录
+
+将包含 `show` 的 `main` 提交 `6d421307ce07a03123ea911f3248d758479045bf` 合并到本分支时，
+实际冲突及解决方式如下：
+
+- `StudyTaskService`：保留 `summarizeTasks()` 与 `showTask(long)` 两个独立只读用例；
+- `StudyTrackCommand`：根命令同时注册 `ShowCommand` 和 `SummaryCommand`；
+- `StudyTaskServiceTest`：保留双方全部 Application 行为与无写入断言；
+- `StudyTrackApplicationTest`：保留双方 CLI 集成场景，并让损坏 JSON 参数化测试同时覆盖
+  `show` 和 `summary`。
+
+冲突解决只取两个已审查切片的行为并集，没有重构共享逻辑、修改规格、架构、持久化或工具链。
+合并后在 JDK 21 下运行完整 `.\mvnw.cmd verify`，43 项测试全部通过，Checkstyle 0 违规。

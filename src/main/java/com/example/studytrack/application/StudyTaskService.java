@@ -67,6 +67,20 @@ public final class StudyTaskService {
   }
 
   /**
+   * Finds one learning task by identifier.
+   *
+   * @param taskId task identifier
+   * @return the task with the requested identifier
+   * @throws TaskNotFoundException when no task has the requested identifier
+   */
+  public StudyTask showTask(long taskId) {
+    return repository.findAll().stream()
+        .filter(candidate -> candidate.id() == taskId)
+        .findFirst()
+        .orElseThrow(() -> new TaskNotFoundException(taskId));
+  }
+
+  /**
    * Completes a learning task when it is still pending.
    *
    * @param taskId task identifier
