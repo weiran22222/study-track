@@ -48,7 +48,7 @@
 - [x] 决策与活动计划推送到未保护的 `main`
 - [x] 仓库可见性改为 Public
 - [x] `main` Branch Protection 配置并回查
-- [ ] 测试 PR 验证合并前门禁
+- [x] 测试 PR 验证合并前门禁
 - [x] 直接推送 `main` 被拒绝
 - [ ] 最终证据通过 PR 合并
 - [ ] 计划关闭
@@ -66,5 +66,7 @@
   PR 要求、管理员强制执行、0 审批、禁用强推和禁用删除均与决策卡一致。
 - 2026-07-27：分支提交 `b087a21` 尝试非强制直接推送 `main`，远程以 `GH006`
   拒绝，并明确要求 PR 和 `verify`；`main` 未移动。
+- 2026-07-27：PR #1 在提交 `7f00b23` 的两个 `verify` 分别处于 queued 和
+  in_progress 时返回 `mergeable_state=blocked`，证明检查成功前不能合并。
 - 详细行为证据记录在
   [docs/evidence/001-main-branch-gate.md](../../evidence/001-main-branch-gate.md)。

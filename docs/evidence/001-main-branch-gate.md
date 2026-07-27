@@ -31,7 +31,7 @@
 
 - [x] 当前证据提交直接推送到 `main` 被拒绝；
 - [x] 测试分支可以推送并创建 PR；
-- [ ] `verify` 完成前 PR 不可合并；
+- [x] `verify` 完成前 PR 不可合并；
 - [x] `verify` 成功后 PR 可以合并；
 - [ ] 证据通过 PR 合并进入 `main`；
 - [ ] 合并后的 `main` 远程 CI 成功。
@@ -67,3 +67,26 @@ mergeable_state=clean
 
 这证明检查成功后 PR 可以合并，但查询发生得太晚，没有捕获检查运行中的阻塞状态。为避免
 把缺失证据写成成功，本 PR 将增加本段说明性提交，并在推送后立即重新观察 pending 状态。
+
+## PR 检查运行中状态
+
+说明性提交 `7f00b23` 推送后立即回查 PR #1：
+
+```text
+mergeable=true
+mergeable_state=blocked
+verify (push)=queued
+verify (pull_request)=in_progress
+```
+
+Git 内容本身可以合并，但在必需检查尚未完成时，GitHub 将 PR 状态标记为 `blocked`。
+这证明 `verify` 已成为合并前条件，而不是合并后的通知。
+
+随后，同一提交的两个 `verify` 均返回 `completed/success`，PR 状态变为：
+
+```text
+mergeable=true
+mergeable_state=clean
+```
+
+由此形成同一提交上的状态转换证据：`blocked`（检查未完成）→ `clean`（检查成功）。
