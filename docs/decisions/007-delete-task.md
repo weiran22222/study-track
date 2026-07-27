@@ -1,6 +1,6 @@
 # 决策卡 007：永久删除单个任务
 
-状态：已批准，待实施
+状态：已验证
 
 日期：2026-07-27
 
@@ -81,3 +81,17 @@ StudyTrack 可以添加、查看和完成任务，但用户无法删除错误创
 - `nextId`、其他任务、原始文件失败安全得到验证；
 - JDK 21 下完整 `verify` 通过；
 - 功能通过受保护 PR 合并并在最终 `main` 重新验证。
+
+## 验证结果
+
+规划通过 [PR #10](https://github.com/weiran22222/study-track/pull/10) 先行合并，随后
+无父对话子智能体在隔离 worktree 中实施。主智能体审查并独立复跑 54 项测试与真实 JAR
+场景后，[PR #11](https://github.com/weiran22222/study-track/pull/11) 通过受保护门禁合并。
+
+最终 `main` 提交 `3cb8138` 的
+[`verify #44`](https://github.com/weiran22222/study-track/actions/runs/30281636291)
+成功。AC-14 的成功、无目标、无数据文件、非法参数、损坏 JSON、确定性写入失败、ID
+不复用和跨命令一致性均有自动验证。
+
+完整证据与未直接故障注入的原子替换边界见
+[删除功能证据](../evidence/003-delete-task.md)。

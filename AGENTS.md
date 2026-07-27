@@ -16,8 +16,8 @@
 ## 当前阶段
 
 当前是 Harness v11：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
-JAR 已经建立；`add`、`list`、`complete`、`show`、`summary` 及损坏 JSON 失败安全
-均已完成。当前 `SPEC.md` 的 AC-01～AC-13 已实现并有自动验证。GitHub Actions 已远程
+JAR 已经建立；`add`、`list`、`complete`、`show`、`summary`、`delete` 及损坏 JSON
+失败安全均已完成。当前 `SPEC.md` 的 AC-01～AC-14 已实现并有自动验证。GitHub Actions 已远程
 运行成功，两个官方 Action 已升级到 Node.js 24 运行时；`main` 已建立强制 PR、最新分支
 和 `verify` 合并门禁。首次双 worktree、双子智能体、双 PR 并行实验已经完成并有证据。
 架构目录已降为包级导航与关键入口，不再维护完整代码文件清单。Harness 变更现在按风险、
@@ -26,11 +26,14 @@ JAR 已经建立；`add`、`list`、`complete`、`show`、`summary` 及损坏 JS
 当前反馈工件：
 [docs/feedback/002-parallel-worktree-retrospective.md](docs/feedback/002-parallel-worktree-retrospective.md)。
 
-当前产品决策：
+最近完成的产品决策：
 [docs/decisions/007-delete-task.md](docs/decisions/007-delete-task.md)。
 
-当前执行计划：
-[docs/exec-plans/active/012-delete-task.md](docs/exec-plans/active/012-delete-task.md)。
+最近完成的产品计划：
+[docs/exec-plans/completed/012-delete-task.md](docs/exec-plans/completed/012-delete-task.md)。
+
+删除功能的实施与失败安全证据：
+[docs/evidence/003-delete-task.md](docs/evidence/003-delete-task.md)。
 
 最近完成的 Harness 决策：
 [docs/decisions/006-risk-tiered-harness-flow.md](docs/decisions/006-risk-tiered-harness-flow.md)。
