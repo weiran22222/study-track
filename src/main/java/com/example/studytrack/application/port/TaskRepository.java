@@ -27,4 +27,11 @@ public interface TaskRepository {
    * @param task changed task whose identifier already exists
    */
   void update(StudyTask task);
+
+  /**
+   * Permanently removes an existing task while preserving repository metadata.
+   *
+   * @param taskId identifier of the task to remove
+   */
+  void delete(long taskId);
 }

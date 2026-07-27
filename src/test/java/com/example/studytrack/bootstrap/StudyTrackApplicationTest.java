@@ -311,6 +311,130 @@ class StudyTrackApplicationTest {
   }
 
   @Test
+  void deleteCommandRemovesCompletedAndPendingTasksWithoutReusingIds(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 4,
+          "tasks": [
+            {"id": 1, "title": "第一项", "completed": false},
+            {"id": 2, "title": "已完成删除项", "completed": true},
+            {"id": 3, "title": "第三项", "completed": false}
+          ]
+        }
+        """,
+        StandardCharsets.UTF_8);
+
+    CommandResult completedDelete =
+        execute("--data-file", dataFile.toString(), "delete", "2");
+
+    assertEquals(0, completedDelete.exitCode());
+    assertEquals("Deleted task 2." + System.lineSeparator(), completedDelete.output());
+    assertEquals("", completedDelete.error());
+    String afterCompletedDelete = Files.readString(dataFile, StandardCharsets.UTF_8);
+    assertTrue(afterCompletedDelete.contains("\"nextId\" : 4"));
+    assertFalse(afterCompletedDelete.contains("已完成删除项"));
+
+    CommandResult list = execute("--data-file", dataFile.toString(), "list");
+    assertEquals(
+        """
+        [ ] 1 第一项
+        [ ] 3 第三项
+        """
+            .replace("\n", System.lineSeparator()),
+        list.output());
+    assertEquals(2, execute("--data-file", dataFile.toString(), "show", "2").exitCode());
+    assertEquals(
+        """
+        Total: 2
+        Pending: 2
+        Completed: 0
+        """
+            .replace("\n", System.lineSeparator()),
+        execute("--data-file", dataFile.toString(), "summary").output());
+
+    CommandResult add = execute("--data-file", dataFile.toString(), "add", "删除后新增");
+    assertEquals("Created task 4: 删除后新增" + System.lineSeparator(), add.output());
+
+    CommandResult pendingDelete =
+        execute("--data-file", dataFile.toString(), "delete", "4");
+    assertEquals(0, pendingDelete.exitCode());
+    assertEquals("Deleted task 4." + System.lineSeparator(), pendingDelete.output());
+    assertTrue(
+        Files.readString(dataFile, StandardCharsets.UTF_8).contains("\"nextId\" : 5"));
+  }
+
+  @Test
+  void deleteCommandPersistsLegalEmptyCollection(@TempDir Path temporaryDirectory)
+      throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "唯一任务");
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "delete", "1");
+
+    assertEquals(0, result.exitCode());
+    assertEquals("Deleted task 1." + System.lineSeparator(), result.output());
+    assertEquals("", result.error());
+    String json = Files.readString(dataFile, StandardCharsets.UTF_8);
+    assertTrue(json.contains("\"nextId\" : 2"));
+    assertTrue(json.contains("\"tasks\" : [ ]"));
+    assertEquals(
+        "No tasks." + System.lineSeparator(),
+        execute("--data-file", dataFile.toString(), "list").output());
+  }
+
+  @Test
+  void deleteCommandReportsMissingTaskWithoutChangingExistingData(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "已有任务");
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "delete", "99");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), result.error());
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void deleteCommandDoesNotCreateDataFileForMissingTask(@TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "delete", "99");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), result.error());
+    assertFalse(Files.exists(dataFile));
+  }
+
+  @Test
+  void invalidDeleteArgumentsReturnUsageErrorWithoutChangingData(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "保留任务");
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    final CommandResult nonInteger =
+        execute("--data-file", dataFile.toString(), "delete", "not-an-integer");
+    final CommandResult force =
+        execute("--data-file", dataFile.toString(), "delete", "--force", "1");
+
+    assertEquals(2, nonInteger.exitCode());
+    assertEquals("", nonInteger.output());
+    assertTrue(nonInteger.error().contains("Invalid value for positional parameter"));
+    assertEquals(2, force.exitCode());
+    assertEquals("", force.output());
+    assertTrue(force.error().contains("Unknown option: '--force'"));
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
   void summaryCommandCountsMixedStatesWithoutChangingDataFile(
       @TempDir Path temporaryDirectory) throws Exception {
     Path dataFile = temporaryDirectory.resolve("tasks.json");
@@ -380,7 +504,12 @@ class StudyTrackApplicationTest {
         """
     };
     String[][] commands = {
-        {"add", "新任务"}, {"list"}, {"complete", "1"}, {"show", "1"}, {"summary"}
+        {"add", "新任务"},
+        {"list"},
+        {"complete", "1"},
+        {"show", "1"},
+        {"summary"},
+        {"delete", "1"}
     };
 
     for (int dataIndex = 0; dataIndex < corruptData.length; dataIndex++) {
