@@ -1,6 +1,6 @@
 # 执行计划 010：summary 任务统计
 
-状态：待实现
+状态：主智能体审查通过，待 PR 门禁
 
 ## 目标
 
@@ -39,10 +39,31 @@
 
 ## 进度
 
-- [ ] 无父对话子智能体开始
-- [ ] Application 行为与测试完成
-- [ ] CLI 行为与测试完成
-- [ ] 只读副作用验证完成
-- [ ] 完整 `verify` 通过
-- [ ] 主智能体审查
+- [x] 无父对话子智能体开始
+- [x] Application 行为与测试完成
+- [x] CLI 行为与测试完成
+- [x] 只读副作用验证完成
+- [x] 完整 `verify` 通过
+- [x] 主智能体审查（JDK 21 下独立复跑 `verify`：37 项测试通过，Checkstyle 0 违规）
 - [ ] PR 通过并合并
+
+## 实现决策
+
+- Application 使用不可变 `TaskSummary` 记录承载三个 `long` 计数，CLI 只负责固定格式输出；
+- `summarizeTasks()` 只调用一次 `TaskRepository.findAll()`，由总数减去已完成数得到未完成数，
+  不调用任何持久化写入方法；
+- CLI 回归测试同时覆盖已有文件字节不变、无数据文件不创建，以及损坏 JSON 原字节保留。
+
+## 合并 main 冲突记录
+
+将包含 `show` 的 `main` 提交 `6d421307ce07a03123ea911f3248d758479045bf` 合并到本分支时，
+实际冲突及解决方式如下：
+
+- `StudyTaskService`：保留 `summarizeTasks()` 与 `showTask(long)` 两个独立只读用例；
+- `StudyTrackCommand`：根命令同时注册 `ShowCommand` 和 `SummaryCommand`；
+- `StudyTaskServiceTest`：保留双方全部 Application 行为与无写入断言；
+- `StudyTrackApplicationTest`：保留双方 CLI 集成场景，并让损坏 JSON 参数化测试同时覆盖
+  `show` 和 `summary`。
+
+冲突解决只取两个已审查切片的行为并集，没有重构共享逻辑、修改规格、架构、持久化或工具链。
+合并后在 JDK 21 下运行完整 `.\mvnw.cmd verify`，43 项测试全部通过，Checkstyle 0 违规。

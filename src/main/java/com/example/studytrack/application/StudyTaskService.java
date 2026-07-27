@@ -55,6 +55,18 @@ public final class StudyTaskService {
   }
 
   /**
+   * Summarizes all persisted learning tasks by completion state.
+   *
+   * @return immutable task counts
+   */
+  public TaskSummary summarizeTasks() {
+    List<StudyTask> tasks = repository.findAll();
+    long completed = tasks.stream().filter(StudyTask::completed).count();
+    long total = tasks.size();
+    return new TaskSummary(total, total - completed, completed);
+  }
+
+  /**
    * Finds one learning task by identifier.
    *
    * @param taskId task identifier

@@ -83,6 +83,37 @@ class StudyTaskServiceTest {
   }
 
   @Test
+  void summarizesMixedTaskStatesWithoutPersisting() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks =
+        List.of(
+            new StudyTask(1, "待完成一", false),
+            new StudyTask(2, "已完成", true),
+            new StudyTask(3, "待完成二", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    TaskSummary summary = service.summarizeTasks();
+
+    assertEquals(new TaskSummary(3, 2, 1), summary);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.createCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
+  void summarizesEmptyRepositoryAsZeroCounts() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    StudyTaskService service = new StudyTaskService(repository);
+
+    TaskSummary summary = service.summarizeTasks();
+
+    assertEquals(new TaskSummary(0, 0, 0), summary);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.createCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
   void showsTaskWithRequestedIdentifierWithoutPersisting() {
     RecordingTaskRepository repository = new RecordingTaskRepository();
     repository.tasks =
