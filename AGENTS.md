@@ -18,7 +18,8 @@
 当前是 Harness v6：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
 JAR 已经建立；`add`、`list`、`complete` 及损坏 JSON 失败安全均已完成。当前
 `SPEC.md` 的 AC-01～AC-11 已实现并有自动验证；第一次反馈复盘选出的环境自举改进
-也已完成。
+也已完成。GitHub Actions 首次远程运行成功，但发现 Actions Node.js 运行时弃用警告，
+是否升级相关 Actions 版本尚待人类决定。
 
 当前反馈工件：
 [docs/feedback/001-first-harness-retrospective.md](docs/feedback/001-first-harness-retrospective.md)。

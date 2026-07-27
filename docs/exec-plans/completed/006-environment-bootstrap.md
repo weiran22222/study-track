@@ -78,5 +78,13 @@ Harness 改进，不改变 StudyTrack 的产品行为。
   Wrapper 3.9.12 实际使用 Java 21；未把发现的安装路径写入仓库。
 - 2026-07-27：使用 JDK 21 运行 `.\mvnw.cmd verify`，33 个测试全部通过；构建使用
   现有本地依赖缓存，不能据此声称干净机器冷启动已经验证。
-- 2026-07-27：GitHub Actions 已在完整 `verify` 前调用 POSIX 自检，但远程工作流尚未
-  实际运行，仍不能作为远程环境成功的证据。
+- 2026-07-27：计划在本地完成时，GitHub Actions 已在完整 `verify` 前调用 POSIX
+  自检，但远程工作流尚未实际运行，因此当时不能作为远程环境成功的证据。
+- 2026-07-27：提交 `e374e69` 首次推送到
+  `https://github.com/weiran22222/study-track`；
+  [远程 `verify #1`](https://github.com/weiran22222/study-track/actions/runs/30268171485)
+  在 39 秒内成功。环境步骤实际报告 Java 21 和 Maven Wrapper 3.9.12，完整门禁实际
+  报告 33 个测试、0 个失败。
+- 2026-07-27：远程运行同时产生一个非阻塞警告：`actions/checkout@v4` 和
+  `actions/setup-java@v4` 使用的 Node.js 20 运行时已弃用，目前被 GitHub 强制运行在
+  Node.js 24。该警告已经记录，但 Actions 版本升级属于 Harness 变化，尚未获得人类决策。

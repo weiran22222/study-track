@@ -65,4 +65,9 @@ Wrapper 第一次运行可能需要下载固定版本的 Maven。代理、证书
 
 自检通过只证明当前机器上 JDK 21 与 Maven Wrapper 可以启动；完整 `verify` 通过才证明
 当前代码满足仓库门禁。若依赖来自已有本地缓存，这两项成功都不能被描述为“干净机器冷启动
-已经验证”。CI 只有在远程工作流实际成功后，才能作为远程环境的运行证据。
+已经验证”。
+
+2026-07-27，[GitHub Actions `verify #1`](https://github.com/weiran22222/study-track/actions/runs/30268171485)
+已在 GitHub 托管运行器上成功：环境自检报告 Java 21 和 Maven Wrapper 3.9.12，随后
+33 个测试全部通过。该工作流启用了 Maven 缓存，因此它证明远程反馈回路可运行，但不构成
+无缓存冷启动证明。
