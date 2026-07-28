@@ -28,6 +28,7 @@
 - [010：重命名单个任务](decisions/010-rename-task.md)
 - [011：精简第三级工件与收尾流程](decisions/011-lean-tier3-artifacts.md)
 - [012：使用 UTF-8 标题文件绕过 Windows 命令行编码边界](decisions/012-unicode-safe-title-file-input.md)
+- [013：移除导航中的易变 Harness 进度](decisions/013-remove-volatile-harness-progress.md)
 
 ## 执行计划
 
