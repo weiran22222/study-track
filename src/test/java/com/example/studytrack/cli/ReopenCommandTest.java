@@ -43,7 +43,16 @@ class ReopenCommandTest {
     assertEquals("Task 8 is already pending." + System.lineSeparator(), result.output());
     assertEquals("", result.error());
     assertEquals(1, repository.findAllCalls);
-    assertEquals(0, repository.updateCalls);
+    assertEquals(
+        0,
+        repository.updateCalls,
+        "Location: ReopenCommandTest.alreadyPendingTaskIsSuccessfulWithoutPersisting\n"
+            + "Invariant: CLI reopen on a pending task must not call repository.update.\n"
+            + "Reason: Production persisted from the CLI already-pending path.\n"
+            + "Fix: Keep the application already-pending branch free of repository updates.\n"
+            + "Recheck: .\\mvnw.cmd "
+            + "-Dtest=ReopenCommandTest#alreadyPendingTaskIsSuccessfulWithoutPersisting test\n"
+            + "Authority: SPEC.md 2.8 and AC-17.");
   }
 
   @Test

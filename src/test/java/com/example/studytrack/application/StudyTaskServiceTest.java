@@ -213,7 +213,16 @@ class StudyTaskServiceTest {
 
     assertEquals(ReopenTaskResult.ALREADY_PENDING, result);
     assertEquals(1, repository.findAllCalls);
-    assertEquals(0, repository.updateCalls);
+    assertEquals(
+        0,
+        repository.updateCalls,
+        "Location: StudyTaskServiceTest.reopeningAlreadyPendingTaskDoesNotPersist\n"
+            + "Invariant: Reopening a pending task must not call repository.update.\n"
+            + "Reason: Production called repository.update on the already-pending branch.\n"
+            + "Fix: Return ALREADY_PENDING before any repository update.\n"
+            + "Recheck: .\\mvnw.cmd "
+            + "-Dtest=StudyTaskServiceTest#reopeningAlreadyPendingTaskDoesNotPersist test\n"
+            + "Authority: SPEC.md 2.8 and AC-17.");
   }
 
   @Test

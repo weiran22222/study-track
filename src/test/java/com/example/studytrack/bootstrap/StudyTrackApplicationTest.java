@@ -373,7 +373,18 @@ class StudyTrackApplicationTest {
     assertEquals(0, result.exitCode());
     assertEquals("Task 1 is already pending." + System.lineSeparator(), result.output());
     assertEquals("", result.error());
-    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+    assertArrayEquals(
+        originalData,
+        Files.readAllBytes(dataFile),
+        "Location: StudyTrackApplicationTest.reopenCommandIsIdempotentWithoutChangingDataFile\n"
+            + "Invariant: Already-pending reopen must leave the data file "
+            + "byte-for-byte unchanged.\n"
+            + "Reason: The already-pending command rewrote persisted task state.\n"
+            + "Fix: Avoid repository updates when the target task is already pending.\n"
+            + "Recheck: .\\mvnw.cmd "
+            + "-Dtest=StudyTrackApplicationTest#reopenCommandIsIdempotentWithoutChangingDataFile "
+            + "test\n"
+            + "Authority: SPEC.md 2.8 and AC-17.");
   }
 
   @Test
