@@ -36,11 +36,13 @@
 - [018：只读审计本地 worktree](decisions/018-worktree-hygiene-audit.md)
 - [019：使用 Codex-managed Worktree/Handoff](decisions/019-codex-managed-worktree-lifecycle.md)
 - [020：develop 集成与 main 生产发布分支模型](decisions/020-develop-production-branch-model.md)
+- [021：分离实现 generator 与独立验证 evaluator](decisions/021-generator-evaluator-role-separation.md)
 
 ## 执行计划
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
+- [018：实施 generator/evaluator 职责分离](exec-plans/018-generator-evaluator-role-separation.md)（规划中）
 - [017：迁移 develop 集成与 main 生产发布分支模型](exec-plans/017-develop-production-branch-model.md)（实施中：远程迁移已到 S4）
 - [016：实施 CI PR 完整差异空白门禁](exec-plans/completed/016-ci-pr-diff-whitespace-gate.md)
 - [015：重新打开单个任务](exec-plans/completed/015-reopen-task.md)
