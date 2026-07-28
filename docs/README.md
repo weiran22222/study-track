@@ -30,6 +30,7 @@
 - [012：使用 UTF-8 标题文件绕过 Windows 命令行编码边界](decisions/012-unicode-safe-title-file-input.md)
 - [013：移除导航中的易变 Harness 进度](decisions/013-remove-volatile-harness-progress.md)
 - [014：重新打开单个任务](decisions/014-reopen-task.md)
+- [015：提交前检查完整暂存内容](decisions/015-staged-diff-check.md)
 
 ## 执行计划
 
