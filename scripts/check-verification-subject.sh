@@ -3,7 +3,7 @@
 set -u
 
 authority="docs/decisions/021-generator-evaluator-role-separation.md and
-docs/exec-plans/018-generator-evaluator-role-separation.md"
+docs/exec-plans/completed/018-generator-evaluator-role-separation.md"
 
 fail_verification_subject_check() {
   location=$1

@@ -348,7 +348,7 @@ class VerificationSubjectGuardTest {
             assertTrue(
                 script.contains("docs/decisions/021-generator-evaluator-role-separation.md")
                     && script.contains(
-                        "docs/exec-plans/018-generator-evaluator-role-separation.md"),
+                        "docs/exec-plans/completed/018-generator-evaluator-role-separation.md"),
                 failure(
                     path,
                     "The guard no longer links its decision and execution-plan authorities.",
@@ -451,7 +451,7 @@ class VerificationSubjectGuardTest {
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=VerificationSubjectGuardTest test, then .\\mvnw.cmd verify.
         Authority: docs/decisions/021-generator-evaluator-role-separation.md and
-        docs/exec-plans/018-generator-evaluator-role-separation.md
+        docs/exec-plans/completed/018-generator-evaluator-role-separation.md
         """
         .formatted(location, reason, fix);
   }

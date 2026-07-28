@@ -1,17 +1,17 @@
 # 执行计划 018：实施 generator/evaluator 职责分离
 
-状态：实施中，generator 本地实现与自检完成，待冻结与独立验证
+状态：已完成（2026-07-29）
 
 ## 目标与权限边界
 
 本计划执行
-[决策卡 021](../decisions/021-generator-evaluator-role-separation.md)。目标是把同一任务的
+[决策卡 021](../../decisions/021-generator-evaluator-role-separation.md)。目标是把同一任务的
 实现和最终本地验证强制交给不同子智能体，并把 evaluator 结论绑定到精确、不可变的提交。
 
 这是第三级 Harness 变更。学习者已于 2026-07-29 明确批准决策卡 021、规划 PR #35
 合并及按本计划实施；规划 PR 已合并，合并后的 `develop` push `verify` run
-30379095072 已成功。当前实施阶段可以更新 `AGENTS.md`、两个 guard、对应测试和本计划
-事实，但不得改变 CI 身份、产品、架构、数据格式、远程权限或决策卡 020/计划 017。
+30379095072 已成功。获批的实施阶段只更新了 `AGENTS.md`、两个 guard、对应测试和本计划
+事实，没有改变 CI 身份、产品、架构、数据格式、远程权限或决策卡 020/计划 017。
 
 规划 PR 与实施 PR 都必须实际试运行本协议；不得把尚未发生的 evaluator 结论、实施 PR、
 远端 CI、合并或最终 `develop` 验证写成已经发生。
@@ -234,8 +234,9 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 `a551365b9a9d8a7cdc8598a274dd23df48e3ca30`。独立 evaluator 对该 SHA 给出真实 `FAIL`：
 PowerShell guard 使用默认大小写不敏感的分支比较，错误接受了仅字母大小写不同的 expected
 branch，而 POSIX guard 正确拒绝。该报告已回流 generator；旧 SHA 与旧结论已经失效，
-generator 改用明确大小写敏感的精确比较并补充同场景回归。修复后的新 SHA 尚未冻结或
-独立验证。
+generator 改用明确大小写敏感的精确比较并补充同场景回归。修复后的新 SHA
+`063392c9c77f64445ea725e85fdec6c2c16dfbdd` 随后重新冻结，并由同一 evaluator 从头
+独立复验。
 
 ## 阶段 3：同一 SHA 的 PR、CI 与合并
 
@@ -247,6 +248,28 @@ generator 改用明确大小写敏感的精确比较并补充同场景回归。�
 6. required `verify` 和 evaluator `PASS` 同时覆盖同一 SHA 后，才交由人类/正常保护流程
    决定是否合并；
 7. 合并后检查最终 `develop` push `verify`。该远端结果由 GitHub 保存，不提前回写。
+
+## 完成证据
+
+- 规划 [PR #35](https://github.com/weiran22222/study-track/pull/35) 已合并；合并后的
+  `develop` push
+  [`verify` run 30379095072](https://github.com/weiran22222/study-track/actions/runs/30379095072)
+  成功。
+- 实施第一版 Subject SHA `a551365b9a9d8a7cdc8598a274dd23df48e3ca30` 的独立验证结论
+  为 `FAIL`：PowerShell guard 错误接受仅大小写不同的 expected branch。协调者把发现
+  回流同一 generator；新提交
+  `063392c9c77f64445ea725e85fdec6c2c16dfbdd` 修复精确分支比较并增加回归，旧报告立即
+  失效。
+- 同一 evaluator 对 `063392c9c77f64445ea725e85fdec6c2c16dfbdd` 完整复验并给出
+  `PASS`：相关测试 16/16、完整测试 122/122。实施
+  [PR #36](https://github.com/weiran22222/study-track/pull/36) 的 head、evaluator 报告和
+  required `verify` 均绑定该 SHA；PR 评论保留 `FAIL` 和 `PASS` 两份审计记录。
+- 学习者明确批准合并后，PR #36 合入 `develop`，合并提交为
+  `75c87f1620985c8a4af6981439345fd176eda2e2`。最终 `develop` push
+  [`verify` run 30382996038](https://github.com/weiran22222/study-track/actions/runs/30382996038)
+  成功；本地 `develop` 已同步且干净。`main` 未改变，也没有发生部署。
+- 边界：PR 评论和协调记录只能审计不同 agent/task 标识与交接过程，不能证明密码学或
+  平台级身份；Actions 记录证明对应 Git SHA 的机械检查，不证明真实部署。
 
 ## 风险、回滚与证据边界
 
@@ -292,7 +315,7 @@ generator 改用明确大小写敏感的精确比较并补充同场景回归。�
 
 ## 验收标准
 
-- [ ] 规划 PR 留有不同 generator/evaluator 对精确 SHA 的试运行报告，并在 required
+- [x] 规划 PR 留有不同 generator/evaluator 对精确 SHA 的试运行报告，并在 required
   `verify` 成功后取得人类对决策卡 021、规划 PR 合并及实施的明确批准；
 - [x] 决策卡 021 与计划 018 只在上述明确批准后经规划 PR 合入；
 - [x] `AGENTS.md` 明确四方职责、串行 handoff、状态机、SHA 失效和完成定义；
@@ -300,12 +323,12 @@ generator 改用明确大小写敏感的精确比较并补充同场景回归。�
 - [x] 两个跨平台 guard 入口实现 branch/HEAD/SHA/clean/index 前后检查，失败反馈满足
   六字段要求；
 - [x] 静态契约和本地场景覆盖 guard、角色边界及 required `verify` 不变；
-- [ ] 实施由 generator 子智能体完成，主智能体冻结 SHA，不同 evaluator 只读验证；
+- [x] 实施由 generator 子智能体完成，主智能体冻结 SHA，不同 evaluator 只读验证；
 - [x] 至少试验并记录一次可控的 `FAIL -> IMPLEMENTING -> 新 SHA -> VERIFYING` 回流，
   或在不伪造产品缺陷的前提下用 guard/测试 fixture 证明旧结论失效路径；
-- [ ] evaluator 报告使用统一格式，未写入被验证提交，由主智能体保存到 PR 评论；
-- [ ] evaluator `PASS` 与 required `verify` 对同一 PR head SHA 成功；
+- [x] evaluator 报告使用统一格式，未写入被验证提交，由主智能体保存到 PR 评论；
+- [x] evaluator `PASS` 与 required `verify` 对同一 PR head SHA 成功；
 - [x] 没有新增伪造身份的 `independent-verification` check，没有手工 worktree；
-- [ ] JDK 21 下相关测试与完整 `verify` 通过，最终 `develop` push `verify` 由 GitHub
+- [x] JDK 21 下相关测试与完整 `verify` 通过，最终 `develop` push `verify` 由 GitHub
   权威记录确认；
-- [ ] 没有修改产品、架构、数据格式、远程权限或计划 017/决策 020 的陈旧状态。
+- [x] 没有修改产品、架构、数据格式、远程权限或计划 017/决策 020 的陈旧状态。

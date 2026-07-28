@@ -4,7 +4,7 @@ param(
 )
 
 $authority = "docs/decisions/021-generator-evaluator-role-separation.md and " +
-  "docs/exec-plans/018-generator-evaluator-role-separation.md"
+  "docs/exec-plans/completed/018-generator-evaluator-role-separation.md"
 
 function Stop-VerificationSubjectCheck {
   param(
