@@ -62,3 +62,4 @@
 - [001：第一次 Harness 实战复盘](feedback/001-first-harness-retrospective.md)
 - [002：并行 worktree 实战复盘](feedback/002-parallel-worktree-retrospective.md)
 - [003：rename 三级流程复盘](feedback/003-rename-task-retrospective.md)
+- [004：Unicode 边界与状态漂移复盘](feedback/004-unicode-boundary-harness-retrospective.md)
