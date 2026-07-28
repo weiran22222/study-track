@@ -25,11 +25,13 @@
 - [007：永久删除单个任务](decisions/007-delete-task.md)
 - [008：接受原子替换失败的直接测试缺口](decisions/008-accept-atomic-replacement-test-gap.md)
 - [009：控制智能体导航中的文档熵](decisions/009-documentation-entropy-control.md)
+- [010：重命名单个任务](decisions/010-rename-task.md)
 
 ## 执行计划
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
+- [013：重命名单个任务（进行中）](exec-plans/013-rename-task.md)
 - [001：实现添加学习任务](exec-plans/completed/001-add-task.md)
 - [002：保护构建幂等性](exec-plans/completed/002-build-idempotency-guard.md)
 - [003：查看学习任务](exec-plans/completed/003-list-tasks.md)
