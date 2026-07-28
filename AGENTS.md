@@ -18,15 +18,14 @@
 ## 当前阶段
 
 当前是 Harness v12：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
-JAR 已经建立；`add`、`list`、`complete`、`show`、`summary`、`delete` 及损坏 JSON
-失败安全均已完成。当前 `SPEC.md` 的 AC-01～AC-14 已实现并有自动验证。GitHub Actions 已远程
-运行成功，两个官方 Action 已升级到 Node.js 24 运行时；`main` 已建立强制 PR、最新分支
-和 `verify` 合并门禁。首次双 worktree、双子智能体、双 PR 并行实验已经完成并有证据。
-架构目录已降为包级导航与关键入口，不再维护完整代码文件清单。Harness 变更现在按风险、
-持续时间和协作复杂度选择三级流程。历史工件由文档索引集中导航，`AGENTS.md` 不再随任务
-完成而追加历史清单。`rename <id> <new-title>` 的产品语义和 AC-15 已获人类批准，当前
-处于第三级变更的规划阶段；AC-15 尚未实现，在功能验证和受保护 PR 完成前不得把
-`rename` 描述为可用功能。
+JAR 已经建立；`add`、`list`、`complete`、`show`、`summary`、`delete`、`rename`
+及损坏 JSON 失败安全均已完成。当前 `SPEC.md` 的 AC-01～AC-15 已实现并有自动验证。
+GitHub Actions 已远程运行成功，两个官方 Action 已升级到 Node.js 24 运行时；`main`
+已建立强制 PR、最新分支和 `verify` 合并门禁。首次双 worktree、双子智能体、双 PR
+并行实验已经完成并有证据。架构目录已降为包级导航与关键入口，不再维护完整代码文件
+清单。Harness 变更现在按风险、持续时间和协作复杂度选择三级流程。历史工件由文档索引
+集中导航，`AGENTS.md` 不再随任务完成而追加历史清单。`rename <id> <new-title>` 已按
+第三级流程实现并验证；本功能复用现有 Harness 机制，没有改变 Harness v12。
 
 ## 关键边界
 

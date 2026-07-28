@@ -31,7 +31,7 @@
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
-- [013：重命名单个任务（进行中）](exec-plans/013-rename-task.md)
+- [013：重命名单个任务](exec-plans/completed/013-rename-task.md)
 - [001：实现添加学习任务](exec-plans/completed/001-add-task.md)
 - [002：保护构建幂等性](exec-plans/completed/002-build-idempotency-guard.md)
 - [003：查看学习任务](exec-plans/completed/003-list-tasks.md)
@@ -50,7 +50,7 @@
 - [001：main 合并门禁验证](evidence/001-main-branch-gate.md)
 - [002：并行 worktree 实验](evidence/002-parallel-worktree-experiment.md)
 - [003：永久删除任务实施证据](evidence/003-delete-task.md)
-- [004：重命名任务本地实施证据](evidence/004-rename-task.md)
+- [004：重命名任务实施证据](evidence/004-rename-task.md)
 
 ## 复盘反馈
 

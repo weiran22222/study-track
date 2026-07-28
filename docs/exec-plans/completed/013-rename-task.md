@@ -1,14 +1,15 @@
 # 执行计划 013：重命名单个任务
 
-状态：进行中（本地实施与子智能体验证已完成，主智能体审查及远程门禁待验证）
+状态：已完成
 
 ## 目标
 
 实现决策卡 010、`SPEC.md` 2.7 节和 AC-15，使用户可以只修改一个已有任务的标题，同时
 保持分层、现有任务状态、Repository 元数据和持久化失败安全。
 
-本计划的代码与测试实施明确交给规划合并后的后续子智能体。本阶段只固化产品协议、验收
-边界和实施顺序，不新增生产代码或测试实现，也不声称 `rename` 已经可用。
+本计划先由规划阶段固化产品协议、验收边界和实施顺序，再由规划合并后的后续子智能体
+完成代码与测试。实现经主智能体审查、独立复验、受保护功能 PR 和最终 `main` 远程门禁
+确认，`rename` 现已作为 AC-15 的可用功能完成。
 
 ## 范围
 
@@ -184,20 +185,34 @@
 - JDK 21 完整 `verify`：78 项通过，Checkstyle、JUnit、ArchUnit 和可执行 JAR 打包全部
   成功；
 - 详细输出、哈希与证据边界见
-  [`docs/evidence/004-rename-task.md`](../evidence/004-rename-task.md)；
-- 主智能体审查、功能分支 push、功能 PR、远程 CI、合并和最终 `main` 验证均待验证。
+  [`docs/evidence/004-rename-task.md`](../../evidence/004-rename-task.md)；
+- 主智能体独立审查与复验通过；
+- 规划 [PR #15](https://github.com/weiran22222/study-track/pull/15) 已合并为 `main`
+  提交 `5dda087`，合并后的
+  [`verify #56`](https://github.com/weiran22222/study-track/actions/runs/30329239077)
+  成功；
+- 功能分支 `push verify #57` 成功；功能
+  [PR #16](https://github.com/weiran22222/study-track/pull/16) 已合并，PR 的
+  [`verify #58`](https://github.com/weiran22222/study-track/actions/runs/30330065132)
+  成功；
+- 功能合并后的 `main` 提交为
+  `a3aa8fc5e04fd64ea1cc26ae5dbff943aa8d56ab`，其
+  [`verify #59`](https://github.com/weiran22222/study-track/actions/runs/30330109497)
+  成功。
 
 ## 进度
 
 - [x] 人类批准产品语义
 - [x] 决策卡 010、`SPEC.md` 2.7 节和 AC-15 已起草
 - [x] 执行计划 013 已起草
-- [ ] 规划 PR 通过并合并
+- [x] 规划 PR #15 通过并合并（`main` 提交 `5dda087`，远程 `verify #56` 成功）
 - [x] 后续子智能体开始实施
 - [x] Application 与 Repository 行为完成
 - [x] CLI 与组合入口行为完成
 - [x] 失败安全与真实 JAR 验收完成
 - [x] 子智能体完整 `verify` 通过
-- [ ] 主智能体审查与独立复验
-- [ ] 功能 PR 通过并合并
-- [ ] 最终 `main` 远程 `verify` 成功，证据和计划归档
+- [x] 主智能体审查与独立复验
+- [x] 功能分支 `push verify #57` 和功能 PR #16 的 `verify #58` 成功
+- [x] 功能 PR #16 通过并合并（`main` 提交
+  `a3aa8fc5e04fd64ea1cc26ae5dbff943aa8d56ab`）
+- [x] 最终 `main` 的远程 `verify #59` 成功，证据和计划已归档
