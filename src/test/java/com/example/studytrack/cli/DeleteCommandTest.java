@@ -19,7 +19,11 @@ class DeleteCommandTest {
   void persistenceFailureReturnsSoftwareExitCodeWithoutStackTrace() {
     TaskRepository repository = new FailingDeleteRepository();
     StudyTrackCommand rootCommand =
-        new StudyTrackCommand(dataFile -> new StudyTaskService(repository));
+        new StudyTrackCommand(
+            dataFile -> new StudyTaskService(repository),
+            location -> {
+              throw new AssertionError("Title-file reader must not be called.");
+            });
     CommandLine commandLine = new CommandLine(rootCommand);
     StringWriter output = new StringWriter();
     StringWriter error = new StringWriter();

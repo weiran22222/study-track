@@ -2,6 +2,7 @@ package com.example.studytrack.bootstrap;
 
 import com.example.studytrack.application.StudyTaskService;
 import com.example.studytrack.cli.StudyTrackCommand;
+import com.example.studytrack.infrastructure.input.Utf8TitleFileReader;
 import com.example.studytrack.infrastructure.persistence.JsonTaskRepository;
 import java.nio.file.Path;
 import picocli.CommandLine;
@@ -30,7 +31,8 @@ public final class StudyTrackApplication {
     StudyTrackCommand rootCommand =
         new StudyTrackCommand(
             dataFile ->
-                new StudyTaskService(new JsonTaskRepository(Path.of(dataFile))));
+                new StudyTaskService(new JsonTaskRepository(Path.of(dataFile))),
+            new Utf8TitleFileReader());
     return new CommandLine(rootCommand);
   }
 }

@@ -39,7 +39,9 @@ src/main/java/com/example/studytrack/
 - `bootstrap/StudyTrackApplication.java`：应用启动与组件组合入口；
 - `cli/StudyTrackCommand.java`：Picocli 根命令入口；
 - `application/StudyTaskService.java`：应用用例服务入口；
+- `application/port/TitleFileReader.java`：标题文件输入端口；
 - `application/port/TaskRepository.java`：持久化端口；
+- `infrastructure/input/Utf8TitleFileReader.java`：严格 UTF-8 标题文件读取实现；
 - `infrastructure/persistence/JsonTaskRepository.java`：当前 JSON 持久化实现。
 
 本节是包级导航，不是完整文件清单，也不展开测试目录。查询完整文件集合时，使用 Git、

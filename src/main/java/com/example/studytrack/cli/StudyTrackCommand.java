@@ -1,5 +1,6 @@
 package com.example.studytrack.cli;
 
+import com.example.studytrack.application.port.TitleFileReader;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.Command;
@@ -26,6 +27,7 @@ import picocli.CommandLine.Spec;
 public final class StudyTrackCommand implements Callable<Integer> {
 
   private final StudyTaskServiceFactory serviceFactory;
+  private final TitleFileReader titleFileReader;
 
   @Option(
       names = "--data-file",
@@ -39,9 +41,12 @@ public final class StudyTrackCommand implements Callable<Integer> {
    * Creates the root command.
    *
    * @param serviceFactory factory supplied by the bootstrap layer
+   * @param titleFileReader title-file input port supplied by the bootstrap layer
    */
-  public StudyTrackCommand(StudyTaskServiceFactory serviceFactory) {
+  public StudyTrackCommand(
+      StudyTaskServiceFactory serviceFactory, TitleFileReader titleFileReader) {
     this.serviceFactory = Objects.requireNonNull(serviceFactory);
+    this.titleFileReader = Objects.requireNonNull(titleFileReader);
   }
 
   @Override
@@ -52,6 +57,10 @@ public final class StudyTrackCommand implements Callable<Integer> {
 
   StudyTaskServiceFactory serviceFactory() {
     return serviceFactory;
+  }
+
+  TitleFileReader titleFileReader() {
+    return titleFileReader;
   }
 
   String dataFile() {
