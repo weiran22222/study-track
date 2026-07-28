@@ -10,83 +10,21 @@
 
 1. 产品行为、输入输出和完成标准：[SPEC.md](SPEC.md)
 2. 技术选择、分层与依赖规则：[ARCHITECTURE.md](ARCHITECTURE.md)
+3. 历史决策、计划、证据和复盘：[docs/README.md](docs/README.md)
 
-本文件只提供地图和工作约定，不复制两份文档的全部内容。
+本文件只提供稳定地图和工作约定，不复制其他文档的完整内容，也不逐项登记已完成任务。
+需要理解现状形成原因时，从文档索引渐进查阅相关历史工件。
 
 ## 当前阶段
 
-当前是 Harness v11：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
+当前是 Harness v12：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
 JAR 已经建立；`add`、`list`、`complete`、`show`、`summary`、`delete` 及损坏 JSON
 失败安全均已完成。当前 `SPEC.md` 的 AC-01～AC-14 已实现并有自动验证。GitHub Actions 已远程
 运行成功，两个官方 Action 已升级到 Node.js 24 运行时；`main` 已建立强制 PR、最新分支
 和 `verify` 合并门禁。首次双 worktree、双子智能体、双 PR 并行实验已经完成并有证据。
 架构目录已降为包级导航与关键入口，不再维护完整代码文件清单。Harness 变更现在按风险、
-持续时间和协作复杂度选择三级流程。
-
-当前反馈工件：
-[docs/feedback/002-parallel-worktree-retrospective.md](docs/feedback/002-parallel-worktree-retrospective.md)。
-
-当前已接受的 Harness 证据边界决策：
-[docs/decisions/008-accept-atomic-replacement-test-gap.md](docs/decisions/008-accept-atomic-replacement-test-gap.md)。
-该决定记录了最终原子替换失败未被直接故障注入验证的边界、人类接受范围和必须重新评估的
-条件；对应既有证据见
-[docs/evidence/003-delete-task.md#证据边界](docs/evidence/003-delete-task.md#证据边界)。
-
-最近完成的产品决策：
-[docs/decisions/007-delete-task.md](docs/decisions/007-delete-task.md)。
-
-最近完成的产品计划：
-[docs/exec-plans/completed/012-delete-task.md](docs/exec-plans/completed/012-delete-task.md)。
-
-删除功能的实施与失败安全证据：
-[docs/evidence/003-delete-task.md](docs/evidence/003-delete-task.md)。
-
-最近完成的 Harness 决策：
-[docs/decisions/006-risk-tiered-harness-flow.md](docs/decisions/006-risk-tiered-harness-flow.md)。
-
-最近完成的 Harness 决策：
-[docs/decisions/005-architecture-navigation-map.md](docs/decisions/005-architecture-navigation-map.md)。
-
-最近完成的 Harness 计划：
-[docs/exec-plans/completed/011-architecture-navigation-map.md](docs/exec-plans/completed/011-architecture-navigation-map.md)。
-
-最近完成的并行 Harness 决策：
-[docs/decisions/004-parallel-worktree-experiment.md](docs/decisions/004-parallel-worktree-experiment.md)。
-
-最近完成的并行计划：
-
-- [docs/exec-plans/completed/009-show-task.md](docs/exec-plans/completed/009-show-task.md)
-- [docs/exec-plans/completed/010-task-summary.md](docs/exec-plans/completed/010-task-summary.md)
-
-并行实验的远程与合并证据：
-[docs/evidence/002-parallel-worktree-experiment.md](docs/evidence/002-parallel-worktree-experiment.md)。
-
-最近完成的主分支门禁计划：
-[docs/exec-plans/completed/008-main-branch-gate.md](docs/exec-plans/completed/008-main-branch-gate.md)。
-
-最近完成的 Actions 升级计划：
-[docs/exec-plans/completed/007-actions-node24-upgrade.md](docs/exec-plans/completed/007-actions-node24-upgrade.md)。
-
-最近完成的 Harness 执行计划：
-[docs/exec-plans/completed/006-environment-bootstrap.md](docs/exec-plans/completed/006-environment-bootstrap.md)。
-
-不得把启动骨架能够运行描述为产品功能已经完成；产品进度以
-[SPEC.md](SPEC.md#5-验收标准) 中的验收标准为准。
-
-最近完成的可靠性计划：
-[docs/exec-plans/completed/005-corrupt-data-safety.md](docs/exec-plans/completed/005-corrupt-data-safety.md)。
-
-最近完成的 complete 功能计划：
-[docs/exec-plans/completed/004-complete-task.md](docs/exec-plans/completed/004-complete-task.md)。
-
-最近完成的 list 功能计划：
-[docs/exec-plans/completed/003-list-tasks.md](docs/exec-plans/completed/003-list-tasks.md)。
-
-最近完成的 Harness 计划：
-[docs/exec-plans/completed/002-build-idempotency-guard.md](docs/exec-plans/completed/002-build-idempotency-guard.md)。
-
-最近完成的功能计划：
-[docs/exec-plans/completed/001-add-task.md](docs/exec-plans/completed/001-add-task.md)。
+持续时间和协作复杂度选择三级流程。历史工件由文档索引集中导航，`AGENTS.md` 不再随任务
+完成而追加历史清单。
 
 ## 关键边界
 
@@ -95,7 +33,10 @@ JAR 已经建立；`add`、`list`、`complete`、`show`、`summary`、`delete` �
 - Application 不得依赖具体持久化实现；
 - Bootstrap 是 CLI 与 Infrastructure 的组合入口；
 - 修改架构前必须先更新 [ARCHITECTURE.md](ARCHITECTURE.md)；
-- 修改产品行为前必须先更新 [SPEC.md](SPEC.md) 及验收标准。
+- 修改产品行为前必须先更新 [SPEC.md](SPEC.md) 及验收标准；
+- 不得把启动骨架能够运行描述为产品功能已经完成，产品进度以验收标准为准；
+- 不得声称最终原子替换失败已经被直接故障注入验证；相关风险的接受边界和重评条件从
+  [文档索引](docs/README.md) 查阅。
 
 完整规则及原因见 [ARCHITECTURE.md](ARCHITECTURE.md#4-分层与依赖)。
 
