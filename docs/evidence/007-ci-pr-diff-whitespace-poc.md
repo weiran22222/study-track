@@ -1,6 +1,6 @@
 # CI PR 完整差异空白门禁本地 POC 证据
 
-状态：远程负向探针已验证，恢复验证尚未发生
+状态：远程负向与恢复探针已验证，待功能 PR 合并与最终 main 验证
 
 日期：2026-07-28
 
@@ -126,15 +126,20 @@ Maven 验证。对应的
 - `Authority`：决策卡 016 与 Git 官方 `diff --check` 文档链接。
 
 这证明 PR-only 门禁会拒绝包含 Git 空白错误的完整 PR 差异，同时 `push` 路径保持既有
-语义。恢复结果尚未发生：当前只在本地工作树删除了探针文件，尚未提交、推送或观察恢复
-后的远程 `verify`。
+语义。
+
+恢复提交 `4ed1257259c88351a727c578e0ff2d58f5bbdec5` 删除了探针文件。该提交的
+[`pull_request` run](https://github.com/weiran22222/study-track/actions/runs/30354620115)
+与 [`push` run](https://github.com/weiran22222/study-track/actions/runs/30354615583)
+均成功，提交检查显示 `2/2` 通过，PR #28 恢复为 `Ready to merge`。
 
 ## 证据边界
 
 本证据记录两个规划阶段 Git 范围以及功能实施阶段仓库脚本 POC、静态测试、JDK 21 完整
 `verify` 和清理事实。它证明本地脚本能区分干净与空白错误范围，且当前 Windows Maven
 验证不依赖系统 `sh`。它还记录 PR #28 已经发生的负向提交、`push` 成功、
-`pull_request` 失败、六字段诊断和合并被禁用事实。
+`pull_request` 失败、六字段诊断、合并被禁用，以及删除探针后的两个远程 run 成功和
+PR 恢复为可合并状态。
 
-GitHub PR 与 Actions 是上述远程事实的权威记录。恢复后的远程门禁成功、功能合并及最终
-`main` 验证均尚未发生或观察，不得从本地删除探针文件推断。
+GitHub PR 与 Actions 是上述远程事实的权威记录。功能 PR 合并及最终 `main` 验证尚未
+发生或观察，不得从当前 `Ready to merge` 状态推断。

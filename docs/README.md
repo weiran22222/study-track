@@ -37,7 +37,7 @@
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
-- [016：实施 CI PR 完整差异空白门禁](exec-plans/016-ci-pr-diff-whitespace-gate.md)
+- [016：实施 CI PR 完整差异空白门禁](exec-plans/completed/016-ci-pr-diff-whitespace-gate.md)
 - [015：重新打开单个任务](exec-plans/completed/015-reopen-task.md)
 - [014：Unicode 安全的标题文件输入](exec-plans/completed/014-unicode-safe-title-file-input.md)
 - [013：重命名单个任务](exec-plans/completed/013-rename-task.md)
