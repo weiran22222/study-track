@@ -81,11 +81,13 @@ class VerificationSubjectGuardTest {
         () ->
             assertTrue(
                 powershell.contains("git symbolic-ref --quiet --short HEAD")
-                    && posix.contains("git symbolic-ref --quiet --short HEAD"),
+                    && powershell.contains("$currentBranch -cne $ExpectedBranch")
+                    && posix.contains("git symbolic-ref --quiet --short HEAD")
+                    && posix.contains("[ \"$current_branch\" != \"$expected_branch\" ]"),
                 failure(
                     Path.of("scripts"),
-                    "The guards no longer perform the same attached-branch check.",
-                    "Use git symbolic-ref --quiet --short HEAD in both guards.")),
+                    "The guards no longer perform the same case-sensitive branch check.",
+                    "Read the attached branch and compare exact case in both guards.")),
         () ->
             assertTrue(
                 powershell.contains("git rev-parse --verify HEAD")
@@ -285,6 +287,10 @@ class VerificationSubjectGuardTest {
         runNativeGuard(repository, subjectSha, "codex/wrong-branch"),
         "current branch",
         "The guard accepted a branch different from the handoff manifest.");
+    assertGuardFailure(
+        runNativeGuard(repository, subjectSha, TEST_BRANCH.toUpperCase(Locale.ROOT)),
+        "current branch",
+        "The guard accepted a branch that differed only by letter case.");
 
     Files.writeString(trackedFile, "dirty\n", StandardCharsets.UTF_8);
     assertGuardFailure(

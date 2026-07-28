@@ -101,7 +101,7 @@ if ($branchExitCode -ne 0) {
 }
 
 $currentBranch = $currentBranch.Trim()
-if ($currentBranch -ne $ExpectedBranch) {
+if ($currentBranch -cne $ExpectedBranch) {
   Stop-VerificationSubjectCheck `
     -Location "current branch: $currentBranch" `
     -Invariant "The checked-out branch must exactly equal the handoff source branch $ExpectedBranch." `

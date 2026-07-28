@@ -230,6 +230,13 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 以上仅是 generator 自检，不是 evaluator `PASS`，也不表示实施 PR、远端 CI、合并或最终
 `develop` 验证已经发生。
 
+协调者随后冻结 Subject SHA
+`a551365b9a9d8a7cdc8598a274dd23df48e3ca30`。独立 evaluator 对该 SHA 给出真实 `FAIL`：
+PowerShell guard 使用默认大小写不敏感的分支比较，错误接受了仅字母大小写不同的 expected
+branch，而 POSIX guard 正确拒绝。该报告已回流 generator；旧 SHA 与旧结论已经失效，
+generator 改用明确大小写敏感的精确比较并补充同场景回归。修复后的新 SHA 尚未冻结或
+独立验证。
+
 ## 阶段 3：同一 SHA 的 PR、CI 与合并
 
 1. 主智能体推送已独立 `PASS` 的精确 Subject SHA，创建 `codex/* → develop` PR；
