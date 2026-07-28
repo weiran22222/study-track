@@ -1,6 +1,6 @@
 # 执行计划 018：实施 generator/evaluator 职责分离
 
-状态：规划中，待规划 PR 独立验证与人类明确批准
+状态：实施中，generator 本地实现与自检完成，待冻结与独立验证
 
 ## 目标与权限边界
 
@@ -8,19 +8,21 @@
 [决策卡 021](../decisions/021-generator-evaluator-role-separation.md)。目标是把同一任务的
 实现和最终本地验证强制交给不同子智能体，并把 evaluator 结论绑定到精确、不可变的提交。
 
-这是第三级 Harness 变更。当前规划 PR 只新增决策卡、执行计划和索引，不修改
-`AGENTS.md`、脚本、测试、CI、产品、架构或远程设置。规划 PR 与后续实施 PR 都必须实际
-试运行本协议；不得把计划步骤、PR、远端 CI 或合并写成已经发生。
+这是第三级 Harness 变更。学习者已于 2026-07-29 明确批准决策卡 021、规划 PR #35
+合并及按本计划实施；规划 PR 已合并，合并后的 `develop` push `verify` run
+30379095072 已成功。当前实施阶段可以更新 `AGENTS.md`、两个 guard、对应测试和本计划
+事实，但不得改变 CI 身份、产品、架构、数据格式、远程权限或决策卡 020/计划 017。
 
-学习者于 2026-07-29 的“OK，继续”只授权生成和验证规划工件及规划 PR，不等于批准本
-方案、合并规划 PR 或实施角色协议。下文阶段 1～3 是供人类决策的拟议实施步骤；规划 PR
-完成独立验证与 required `verify` 后必须停止，只有人类明确批准决策卡 021 并授权合并与
-实施，才可继续。
+规划 PR 与实施 PR 都必须实际试运行本协议；不得把尚未发生的 evaluator 结论、实施 PR、
+远端 CI、合并或最终 `develop` 验证写成已经发生。
 
 ## 已知前置与独立待办
 
 - 实施基线必须是 GitHub `origin/develop` 的精确、成功验证提交，实际工作分支仍为
   `codex/*`；
+- 本次实施分支从 `origin/develop` 的
+  `bb1d4af4bca0f1bf449d00095866dadd91737aec` 创建；generator 开始时已确认本地
+  `HEAD` 与该 base 相同；
 - 决策卡 020 与计划 017 的状态陈述已经落后于实际发布闭环。这是独立文档收尾待办，
   不是本计划范围；本计划不得顺手修复，也不得把历史状态文字当作当前远端事实；
 - 远端分支、PR、评论、保护和 Actions 状态必须从 GitHub 权威记录回读，不能由计划推断。
@@ -143,6 +145,9 @@ Required pre/post guard:
 
 ## 阶段 0：规划 PR 试运行
 
+规划 PR #35 已按人类授权合并，合并后的 `develop` push `verify` run 30379095072 已成功。
+远端 PR 评论、Check Run 和 Actions 保留该阶段的详细权威证据；本计划不复制报告全文。
+
 本规划 PR 本身必须按新协议试运行，以尽早暴露交接缺口：
 
 1. 主智能体从精确 `origin/develop` 创建 `codex/*` 规划分支，记录 base SHA；
@@ -206,6 +211,25 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 8. `INCONCLUSIVE` 时不得推进入合并判断；先恢复可信交接或验证环境，再重新验证；
 9. 只有 `PASS` 才进入远端 PR 阶段。
 
+## 阶段 1 generator 已发生本地事实
+
+2026-07-29，generator 在
+`codex/generator-evaluator-separation` 的未提交实施工作树中完成第一版实现与自检：
+
+- 使用 `D:\work\jdk\jdk-21.0.11` 运行 `.\scripts\check-environment.ps1`，报告 Java 21
+  与 Maven Wrapper 3.9.12；
+- `.\mvnw.cmd -Dtest=VerificationSubjectGuardTest,DocumentationNavigationTest,BranchFlowGuardTest,PullRequestDiffGuardTest test`
+  通过，16 个相关测试无失败；
+- `.\mvnw.cmd verify` 通过，122 个测试无失败；
+- `VerificationSubjectGuardTest` 在临时 Git 仓库中覆盖正确 SHA/branch/clean/index，
+  并受控拒绝旧 SHA、错误分支、dirty worktree、staged index、缺少参数和非 Git 目录；
+- 当前 Windows `PATH` 没有系统 `sh`；使用 Git for Windows 的明确 `sh.exe` 路径运行
+  `sh -n ./scripts/check-verification-subject.sh` 已通过。POSIX 行为场景仍需后续
+  evaluator/远端 Linux `verify` 按计划独立复验。
+
+以上仅是 generator 自检，不是 evaluator `PASS`，也不表示实施 PR、远端 CI、合并或最终
+`develop` 验证已经发生。
+
 ## 阶段 3：同一 SHA 的 PR、CI 与合并
 
 1. 主智能体推送已独立 `PASS` 的精确 Subject SHA，创建 `codex/* → develop` PR；
@@ -263,18 +287,18 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 
 - [ ] 规划 PR 留有不同 generator/evaluator 对精确 SHA 的试运行报告，并在 required
   `verify` 成功后取得人类对决策卡 021、规划 PR 合并及实施的明确批准；
-- [ ] 决策卡 021 与计划 018 只在上述明确批准后经规划 PR 合入；
-- [ ] `AGENTS.md` 明确四方职责、串行 handoff、状态机、SHA 失效和完成定义；
-- [ ] generator 与 evaluator 的禁止权限清晰且与 Codex-managed Worktree 决策一致；
-- [ ] 两个跨平台 guard 入口实现 branch/HEAD/SHA/clean/index 前后检查，失败反馈满足
+- [x] 决策卡 021 与计划 018 只在上述明确批准后经规划 PR 合入；
+- [x] `AGENTS.md` 明确四方职责、串行 handoff、状态机、SHA 失效和完成定义；
+- [x] generator 与 evaluator 的禁止权限清晰且与 Codex-managed Worktree 决策一致；
+- [x] 两个跨平台 guard 入口实现 branch/HEAD/SHA/clean/index 前后检查，失败反馈满足
   六字段要求；
-- [ ] 静态契约和本地场景覆盖 guard、角色边界及 required `verify` 不变；
+- [x] 静态契约和本地场景覆盖 guard、角色边界及 required `verify` 不变；
 - [ ] 实施由 generator 子智能体完成，主智能体冻结 SHA，不同 evaluator 只读验证；
-- [ ] 至少试验并记录一次可控的 `FAIL -> IMPLEMENTING -> 新 SHA -> VERIFYING` 回流，
+- [x] 至少试验并记录一次可控的 `FAIL -> IMPLEMENTING -> 新 SHA -> VERIFYING` 回流，
   或在不伪造产品缺陷的前提下用 guard/测试 fixture 证明旧结论失效路径；
 - [ ] evaluator 报告使用统一格式，未写入被验证提交，由主智能体保存到 PR 评论；
 - [ ] evaluator `PASS` 与 required `verify` 对同一 PR head SHA 成功；
-- [ ] 没有新增伪造身份的 `independent-verification` check，没有手工 worktree；
+- [x] 没有新增伪造身份的 `independent-verification` check，没有手工 worktree；
 - [ ] JDK 21 下相关测试与完整 `verify` 通过，最终 `develop` push `verify` 由 GitHub
   权威记录确认；
 - [ ] 没有修改产品、架构、数据格式、远程权限或计划 017/决策 020 的陈旧状态。
