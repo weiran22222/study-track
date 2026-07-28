@@ -10,6 +10,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import picocli.CommandLine;
@@ -538,6 +539,118 @@ class StudyTrackApplicationTest {
   }
 
   @Test
+  void titleFileRenameUsesStrictUtf8AndIgnoresOptionalBom(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    final Path titleFile = temporaryDirectory.resolve("title.txt");
+    execute("--data-file", dataFile.toString(), "add", "Old title");
+    byte[] title = "  新标题 😀  \r\n".getBytes(StandardCharsets.UTF_8);
+    byte[] withBom = new byte[title.length + 3];
+    withBom[0] = (byte) 0xEF;
+    withBom[1] = (byte) 0xBB;
+    withBom[2] = (byte) 0xBF;
+    System.arraycopy(title, 0, withBom, 3, title.length);
+    Files.write(titleFile, withBom);
+
+    CommandResult result =
+        execute(
+            "--data-file",
+            dataFile.toString(),
+            "rename",
+            "1",
+            "--title-file",
+            titleFile.toString());
+
+    assertEquals(0, result.exitCode());
+    assertEquals("Renamed task 1." + System.lineSeparator(), result.output());
+    assertEquals("", result.error());
+    assertTrue(
+        Files.readString(dataFile, StandardCharsets.UTF_8)
+            .contains("\"title\" : \"新标题 😀\""));
+  }
+
+  @Test
+  void titleFileInputFailuresWinOverCorruptTaskDataAndPreserveIt(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("corrupt.json");
+    byte[] corruptData = "{\"nextId\":".getBytes(StandardCharsets.UTF_8);
+    Files.write(dataFile, corruptData);
+    Path missing = temporaryDirectory.resolve("missing.txt");
+    Path directory =
+        Files.createDirectory(temporaryDirectory.resolve("title-directory"));
+    Path malformed = temporaryDirectory.resolve("malformed.txt");
+    Files.write(malformed, new byte[] {(byte) 0xC3, (byte) 0x28});
+
+    for (Path titleSource : List.of(missing, directory, malformed)) {
+      CommandResult result =
+          execute(
+              "--data-file",
+              dataFile.toString(),
+              "rename",
+              "1",
+              "--title-file",
+              titleSource.toString());
+
+      assertEquals(1, result.exitCode(), titleSource.toString());
+      assertEquals("", result.output(), titleSource.toString());
+      assertEquals(
+          "Title file error: Unable to read UTF-8 title file: "
+              + titleSource
+              + System.lineSeparator(),
+          result.error(),
+          titleSource.toString());
+      assertArrayEquals(corruptData, Files.readAllBytes(dataFile), titleSource.toString());
+    }
+  }
+
+  @Test
+  void invalidTitleFileContentWinsOverMissingTaskAndDoesNotCreateData(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("missing-data.json");
+    Path titleFile = temporaryDirectory.resolve("long-title.txt");
+    Files.writeString(titleFile, "😀".repeat(201), StandardCharsets.UTF_8);
+
+    CommandResult result =
+        execute(
+            "--data-file",
+            dataFile.toString(),
+            "rename",
+            "99",
+            "--title-file",
+            titleFile.toString());
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertEquals(
+        "Task title must contain between 1 and 200 characters." + System.lineSeparator(),
+        result.error());
+    assertFalse(Files.exists(dataFile));
+  }
+
+  @Test
+  void conflictingRenameTitleSourcesFailBeforeReadingEitherFile(
+      @TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("missing-data.json");
+    Path titleFile = temporaryDirectory.resolve("missing-title.txt");
+
+    CommandResult result =
+        execute(
+            "--data-file",
+            dataFile.toString(),
+            "rename",
+            "1",
+            "Inline title",
+            "--title-file",
+            titleFile.toString());
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertTrue(result.error().contains("mutually exclusive"));
+    assertFalse(result.error().contains("Title file error"));
+    assertFalse(Files.exists(dataFile));
+  }
+
+  @Test
   void idempotentRenameDoesNotChangeDataFileBytes(@TempDir Path temporaryDirectory)
       throws Exception {
     Path dataFile = temporaryDirectory.resolve("tasks.json");
@@ -608,6 +721,20 @@ class StudyTrackApplicationTest {
     assertEquals("", result.output());
     assertTrue(result.error().contains("Invalid value for positional parameter"));
     assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void negativeIntegerRenameIdReachesTaskLookupWithoutCreatingDataFile(
+      @TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("missing.json");
+
+    CommandResult result =
+        execute("--data-file", dataFile.toString(), "rename", "-1", "New title");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertEquals("Task -1 not found." + System.lineSeparator(), result.error());
+    assertFalse(Files.exists(dataFile));
   }
 
   @Test
