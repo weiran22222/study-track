@@ -1,6 +1,6 @@
-# 重命名单个任务本地实施证据
+# 重命名单个任务实施证据
 
-状态：本地实施与子智能体验证完成；主智能体审查和远程门禁待验证
+状态：已完成
 
 日期：2026-07-28
 
@@ -109,11 +109,20 @@ F4208908F3729D8B9D93799EEF623DF34FC54A18ACB5227B49F0B2789D1D28F9
 本地 Maven 使用已有依赖缓存，因此环境自检、测试和 JAR 成功不构成干净机器无缓存冷
 启动证明。真实 JAR 的文件系统结论只直接适用于本次 Windows 临时目录场景。
 
-## 待验证的远程结果
+## 已确认的远程结果
 
-- 功能分支尚未 push；
-- 功能 PR 尚未创建；
-- push 与 PR 的远程 `verify` 尚未运行；
-- 功能尚未合并到受保护 `main`；
-- 最终 `main` 远程 `verify` 尚未运行；
-- 在以上结果完成前，AC-15 不能在受保护主线上标记为已实现，计划 013 也不能归档。
+决策卡 010、`SPEC.md` 2.7 节、AC-15 和执行计划 013 通过
+[规划 PR #15](https://github.com/weiran22222/study-track/pull/15) 合并为 `main`
+提交 `5dda087`。合并后的
+[`verify #56`](https://github.com/weiran22222/study-track/actions/runs/30329239077)
+成功。
+
+功能分支的 `push verify #57` 成功。功能
+[PR #16](https://github.com/weiran22222/study-track/pull/16) 的
+[`verify #58`](https://github.com/weiran22222/study-track/actions/runs/30330065132)
+成功，PR 随后合并到受保护 `main`。功能合并后的 `main` 提交为
+`a3aa8fc5e04fd64ea1cc26ae5dbff943aa8d56ab`，其
+[`verify #59`](https://github.com/weiran22222/study-track/actions/runs/30330109497)
+成功。
+
+因此，AC-15 已在受保护主线上实现并验证，执行计划 013 可以归档。
