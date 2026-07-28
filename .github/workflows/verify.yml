@@ -13,6 +13,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check pull request branch flow
+        if: github.event_name == 'pull_request'
+        run: >-
+          sh ./scripts/check-branch-flow.sh
+          "${{ github.event.pull_request.base.ref }}"
+          "${{ github.event.pull_request.head.ref }}"
+
       - name: Check the complete pull request diff
         if: github.event_name == 'pull_request'
         run: >-

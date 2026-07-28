@@ -41,7 +41,7 @@
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
-- [017：迁移 develop 集成与 main 生产发布分支模型](exec-plans/017-develop-production-branch-model.md)
+- [017：迁移 develop 集成与 main 生产发布分支模型](exec-plans/017-develop-production-branch-model.md)（实施中：远程迁移已到 S4）
 - [016：实施 CI PR 完整差异空白门禁](exec-plans/completed/016-ci-pr-diff-whitespace-gate.md)
 - [015：重新打开单个任务](exec-plans/completed/015-reopen-task.md)
 - [014：Unicode 安全的标题文件输入](exec-plans/completed/014-unicode-safe-title-file-input.md)
