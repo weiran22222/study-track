@@ -125,6 +125,18 @@
 - `push` 没有 PR 范围，不运行该差异门禁。Windows Maven 验证不执行 POSIX 脚本，也不
   依赖系统 `sh`。
 
+## Worktree 只读审计
+
+需要发现本地 worktree 卫生风险时，从仓库根在 Windows PowerShell 5.1 中运行：
+
+```powershell
+.\scripts\audit-worktrees.ps1
+```
+
+脚本只读取 Git 状态并输出 `PRIMARY`、`ATTENTION` 或 `REVIEW-CANDIDATE`。候选只表示
+工作树干净、有本地分支及 upstream，且相对 upstream 没有 ahead/behind；仍须由人类确认
+任务与 PR 已完成。脚本不会移除 worktree、删除分支、修改文件或 push。
+
 ## 验证命令
 
 首次进入仓库或构建环境变化后，先阅读
