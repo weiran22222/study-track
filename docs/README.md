@@ -50,6 +50,7 @@
 - [001：main 合并门禁验证](evidence/001-main-branch-gate.md)
 - [002：并行 worktree 实验](evidence/002-parallel-worktree-experiment.md)
 - [003：永久删除任务实施证据](evidence/003-delete-task.md)
+- [004：重命名任务本地实施证据](evidence/004-rename-task.md)
 
 ## 复盘反馈
 

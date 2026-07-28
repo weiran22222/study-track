@@ -1,6 +1,6 @@
 # 执行计划 013：重命名单个任务
 
-状态：进行中（规划已完成，实施尚未开始）
+状态：进行中（本地实施与子智能体验证已完成，主智能体审查及远程门禁待验证）
 
 ## 目标
 
@@ -71,6 +71,20 @@
 
 如果实施发现必须改变核心架构边界、数据格式、依赖、CI 或远程权限，子智能体必须停止并
 报告范围扩大，不得自行改变本计划或降低风险级别。
+
+## 实际实现决策
+
+- 在 `StudyTaskService` 中提取私有 `normalizeTitle`，由 `addTask` 和 `renameTask` 共同复用
+  `String.strip()`、Unicode 码点计数和同一异常；这避免两份校验行为漂移，没有扩大为
+  产品范围之外的重构；
+- 使用 `RenameTaskResult` 枚举显式区分 `RENAMED` 与 `ALREADY_NAMED`，让 CLI 只负责
+  输出和退出码映射；
+- `renameTask` 在规范化和校验成功后才调用一次 `findAll`；任务存在且标题变化时构造只
+  改 `title` 的新 `StudyTask` 并调用一次现有 `update`，幂等与不存在路径不调用写端口；
+- `RenameCommand` 沿用现有命令的异常映射，注册到 `StudyTrackCommand`；Picocli 在调用
+  Application 前拒绝非整数 ID 和缺少标题；
+- `TaskRepository`、`JsonTaskRepository` 生产实现、JSON 格式、依赖、ArchUnit、CI 和
+  远程设置均未改变。Repository 测试直接证明现有 `update` 路径保留元数据与相对顺序。
 
 ## 实施阶段
 
@@ -157,17 +171,33 @@
 6. 主智能体独立审查与复验
 7. 受保护 PR 合并后回查最终 `main` 的远程 `verify`
 
+## 本地验证
+
+- JDK 21 环境自检：通过；默认 Java 17 不满足门禁，因此所有 Maven 与真实 JAR 命令均
+  显式使用本机既有 `D:\work\jdk\jdk-21.0.11`，没有修改仓库或机器级配置；
+- Application 与 Repository 定向测试：31 项通过；
+- CLI 与 Bootstrap 定向测试：35 项通过；
+- JDK 21 打包：78 项通过并生成 `target/study-track.jar`；
+- 真实 JAR 临时目录验收：成功重命名已完成任务，`show`、`list`、`summary` 一致；
+  幂等、不存在、无效标题和损坏 JSON 场景的原文件 SHA-256 均不变，无数据文件场景
+  未创建文件；
+- JDK 21 完整 `verify`：78 项通过，Checkstyle、JUnit、ArchUnit 和可执行 JAR 打包全部
+  成功；
+- 详细输出、哈希与证据边界见
+  [`docs/evidence/004-rename-task.md`](../evidence/004-rename-task.md)；
+- 主智能体审查、功能分支 push、功能 PR、远程 CI、合并和最终 `main` 验证均待验证。
+
 ## 进度
 
 - [x] 人类批准产品语义
 - [x] 决策卡 010、`SPEC.md` 2.7 节和 AC-15 已起草
 - [x] 执行计划 013 已起草
 - [ ] 规划 PR 通过并合并
-- [ ] 后续子智能体开始实施
-- [ ] Application 与 Repository 行为完成
-- [ ] CLI 与组合入口行为完成
-- [ ] 失败安全与真实 JAR 验收完成
-- [ ] 子智能体完整 `verify` 通过
+- [x] 后续子智能体开始实施
+- [x] Application 与 Repository 行为完成
+- [x] CLI 与组合入口行为完成
+- [x] 失败安全与真实 JAR 验收完成
+- [x] 子智能体完整 `verify` 通过
 - [ ] 主智能体审查与独立复验
 - [ ] 功能 PR 通过并合并
 - [ ] 最终 `main` 远程 `verify` 成功，证据和计划归档

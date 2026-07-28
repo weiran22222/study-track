@@ -216,6 +216,102 @@ class StudyTaskServiceTest {
     assertEquals(0, repository.deleteCalls);
   }
 
+  @Test
+  void renamesPendingTaskWithStrippedTitleAndPersistsOnce() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(7, "Old title", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    RenameTaskResult result = service.renameTask(7, "  New title  ");
+
+    assertEquals(RenameTaskResult.RENAMED, result);
+    assertEquals(new StudyTask(7, "New title", false), repository.updatedTask);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(1, repository.updateCalls);
+  }
+
+  @Test
+  void renamesCompletedTaskWithoutChangingCompletionState() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(4, "Old title", true));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    RenameTaskResult result = service.renameTask(4, "New title");
+
+    assertEquals(RenameTaskResult.RENAMED, result);
+    assertEquals(new StudyTask(4, "New title", true), repository.updatedTask);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(1, repository.updateCalls);
+  }
+
+  @Test
+  void renamingToExistingTitleIsIdempotentWithoutPersisting() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(3, "Same title", true));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    RenameTaskResult result = service.renameTask(3, "  Same title  ");
+
+    assertEquals(RenameTaskResult.ALREADY_NAMED, result);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
+  void invalidRenameTitleFailsBeforeReadingRepository() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "Existing title", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    InvalidTaskTitleException exception =
+        assertThrows(InvalidTaskTitleException.class, () -> service.renameTask(1, " \t "));
+
+    assertEquals(InvalidTaskTitleException.MESSAGE, exception.getMessage());
+    assertEquals(0, repository.findAllCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
+  void overlongRenameTitleFailsBeforeReadingRepository() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    StudyTaskService service = new StudyTaskService(repository);
+
+    assertThrows(
+        InvalidTaskTitleException.class, () -> service.renameTask(99, "x".repeat(201)));
+
+    assertEquals(0, repository.findAllCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
+  void renameAcceptsExactlyTwoHundredUnicodeCodePoints() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "Old title", false));
+    StudyTaskService service = new StudyTaskService(repository);
+    String title = "😃".repeat(200);
+
+    RenameTaskResult result = service.renameTask(1, title);
+
+    assertEquals(RenameTaskResult.RENAMED, result);
+    assertEquals(new StudyTask(1, title, false), repository.updatedTask);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(1, repository.updateCalls);
+  }
+
+  @Test
+  void renamingMissingTaskFailsWithoutPersisting() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "Existing title", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    TaskNotFoundException exception =
+        assertThrows(TaskNotFoundException.class, () -> service.renameTask(99, "New title"));
+
+    assertEquals("Task 99 not found.", exception.getMessage());
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
   private static final class RecordingTaskRepository implements TaskRepository {
 
     private int createCalls;
