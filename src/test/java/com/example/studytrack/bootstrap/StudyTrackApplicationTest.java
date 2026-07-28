@@ -312,6 +312,110 @@ class StudyTrackApplicationTest {
   }
 
   @Test
+  void reopenCommandChangesOnlyTargetStatusAndKeepsReadViewsConsistent(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 10,
+          "tasks": [
+            {"id": 2, "title": "Keep pending", "completed": false},
+            {"id": 6, "title": "Reopen target", "completed": true},
+            {"id": 9, "title": "Keep completed", "completed": true}
+          ]
+        }
+        """,
+        StandardCharsets.UTF_8);
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "reopen", "6");
+
+    assertEquals(0, result.exitCode());
+    assertEquals("Reopened task 6." + System.lineSeparator(), result.output());
+    assertEquals("", result.error());
+    String json = Files.readString(dataFile, StandardCharsets.UTF_8);
+    assertTrue(json.contains("\"nextId\" : 10"));
+    assertTrue(json.indexOf("\"id\" : 2") < json.indexOf("\"id\" : 6"));
+    assertTrue(json.indexOf("\"id\" : 6") < json.indexOf("\"id\" : 9"));
+    assertTrue(json.contains("\"id\" : 6"));
+    assertTrue(json.contains("\"title\" : \"Reopen target\""));
+    assertEquals(
+        """
+        [ ] 2 Keep pending
+        [ ] 6 Reopen target
+        [x] 9 Keep completed
+        """
+            .replace("\n", System.lineSeparator()),
+        execute("--data-file", dataFile.toString(), "list").output());
+    assertEquals(
+        "[ ] 6 Reopen target" + System.lineSeparator(),
+        execute("--data-file", dataFile.toString(), "show", "6").output());
+    assertEquals(
+        """
+        Total: 3
+        Pending: 2
+        Completed: 1
+        """
+            .replace("\n", System.lineSeparator()),
+        execute("--data-file", dataFile.toString(), "summary").output());
+  }
+
+  @Test
+  void reopenCommandIsIdempotentWithoutChangingDataFile(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "Already pending");
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    CommandResult result = execute("--data-file", dataFile.toString(), "reopen", "1");
+
+    assertEquals(0, result.exitCode());
+    assertEquals("Task 1 is already pending." + System.lineSeparator(), result.output());
+    assertEquals("", result.error());
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void missingReopenTargetDoesNotChangeOrCreateDataFile(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path existingDataFile = temporaryDirectory.resolve("existing.json");
+    execute("--data-file", existingDataFile.toString(), "add", "Existing task");
+    final byte[] originalData = Files.readAllBytes(existingDataFile);
+
+    CommandResult existingResult =
+        execute("--data-file", existingDataFile.toString(), "reopen", "99");
+    Path missingDataFile = temporaryDirectory.resolve("missing.json");
+    final CommandResult missingResult =
+        execute("--data-file", missingDataFile.toString(), "reopen", "99");
+
+    assertEquals(2, existingResult.exitCode());
+    assertEquals("", existingResult.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), existingResult.error());
+    assertArrayEquals(originalData, Files.readAllBytes(existingDataFile));
+    assertEquals(2, missingResult.exitCode());
+    assertEquals("", missingResult.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), missingResult.error());
+    assertFalse(Files.exists(missingDataFile));
+  }
+
+  @Test
+  void nonIntegerReopenIdentifierDoesNotChangeExistingData(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "Existing task");
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    CommandResult result =
+        execute("--data-file", dataFile.toString(), "reopen", "not-an-integer");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertTrue(result.error().contains("Invalid value for positional parameter"));
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
   void deleteCommandRemovesCompletedAndPendingTasksWithoutReusingIds(
       @TempDir Path temporaryDirectory) throws Exception {
     Path dataFile = temporaryDirectory.resolve("tasks.json");
@@ -759,7 +863,8 @@ class StudyTrackApplicationTest {
         {"show", "1"},
         {"summary"},
         {"delete", "1"},
-        {"rename", "1", "New title"}
+        {"rename", "1", "New title"},
+        {"reopen", "1"}
     };
 
     for (int dataIndex = 0; dataIndex < corruptData.length; dataIndex++) {

@@ -94,6 +94,28 @@ public final class StudyTaskService {
   }
 
   /**
+   * Reopens a completed learning task.
+   *
+   * @param taskId task identifier
+   * @return whether this request changed the task
+   * @throws TaskNotFoundException when no task has the requested identifier
+   */
+  public ReopenTaskResult reopenTask(long taskId) {
+    StudyTask task =
+        repository.findAll().stream()
+            .filter(candidate -> candidate.id() == taskId)
+            .findFirst()
+            .orElseThrow(() -> new TaskNotFoundException(taskId));
+
+    if (!task.completed()) {
+      return ReopenTaskResult.ALREADY_PENDING;
+    }
+
+    repository.update(new StudyTask(task.id(), task.title(), false));
+    return ReopenTaskResult.REOPENED;
+  }
+
+  /**
    * Permanently deletes a learning task.
    *
    * @param taskId task identifier

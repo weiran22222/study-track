@@ -237,7 +237,7 @@ class JsonTaskRepositoryTest {
     TaskPersistenceException exception =
         assertThrows(
             TaskPersistenceException.class,
-            () -> repository.update(new StudyTask(1, "New title", true)));
+            () -> repository.update(new StudyTask(1, "Keep original bytes", false)));
 
     assertTrue(exception.getMessage().startsWith("Unable to write data file "));
     assertArrayEquals(originalData, Files.readAllBytes(dataFile));

@@ -19,6 +19,7 @@ import picocli.CommandLine.Spec;
       AddCommand.class,
       ListCommand.class,
       CompleteCommand.class,
+      ReopenCommand.class,
       ShowCommand.class,
       SummaryCommand.class,
       DeleteCommand.class,
