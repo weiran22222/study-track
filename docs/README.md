@@ -34,6 +34,7 @@
 - [016：为 CI 增加 PR 完整差异空白门禁](decisions/016-ci-pr-diff-whitespace-gate.md)
 - [017：增强 reopen 幂等失败诊断](decisions/017-reopen-failure-diagnostics.md)
 - [018：只读审计本地 worktree](decisions/018-worktree-hygiene-audit.md)
+- [019：使用 Codex-managed Worktree/Handoff](decisions/019-codex-managed-worktree-lifecycle.md)
 
 ## 执行计划
 
