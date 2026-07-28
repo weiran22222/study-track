@@ -1,6 +1,6 @@
 # CI PR 完整差异空白门禁本地 POC 证据
 
-状态：本地脚本 POC 与 JDK 21 验证完成，远程门禁尚未验证
+状态：远程负向探针已验证，恢复验证尚未发生
 
 日期：2026-07-28
 
@@ -105,12 +105,36 @@ Checkstyle 行长警告；实施中已缩短该行。随后运行完整命令：
 `scripts/check-pr-diff.sh` 或系统 `sh`；新增 Java 契约测试只以 UTF-8 读取 workflow、
 脚本、POM 和 Windows 环境检查文本。
 
+## PR #28 远程负向探针
+
+PR #28 在初始功能提交 `8922a26` 上显示 `2/2` 检查成功。随后推送专用负向探针提交
+`07f977715bfbd964d69e8bc8bb0404c3ca325060`，其中
+`poc-ci-whitespace.txt` 的文件尾包含新增空行。
+
+该提交触发的 `push` 检查成功，证明没有 PR 上下文的 `push` 事件仍只运行既有环境与
+Maven 验证。对应的
+[`pull_request` run](https://github.com/weiran22222/study-track/actions/runs/30354267196)
+在 4 秒后失败，PR 合并被禁用。失败
+[Job 日志](https://github.com/weiran22222/study-track/actions/runs/30354267196/job/90258688563?pr=28)
+保留 Git 的 `poc-ci-whitespace.txt:2: new blank line at EOF.` 位置诊断，并包含：
+
+- `Location`：直接包含 `poc-ci-whitespace.txt:2: new blank line at EOF.` 原始 Git 诊断；
+- `Invariant`：完整 PR `base...head` 差异不得包含 Git 空白错误；
+- `Reason`：`git diff --check` 检测到空白错误并以非零状态退出；
+- `Fix`：删除报告的行尾空白或文件尾多余空行；
+- `Recheck`：使用相同 base/head SHA 重新运行仓库脚本；
+- `Authority`：决策卡 016 与 Git 官方 `diff --check` 文档链接。
+
+这证明 PR-only 门禁会拒绝包含 Git 空白错误的完整 PR 差异，同时 `push` 路径保持既有
+语义。恢复结果尚未发生：当前只在本地工作树删除了探针文件，尚未提交、推送或观察恢复
+后的远程 `verify`。
+
 ## 证据边界
 
 本证据记录两个规划阶段 Git 范围以及功能实施阶段仓库脚本 POC、静态测试、JDK 21 完整
 `verify` 和清理事实。它证明本地脚本能区分干净与空白错误范围，且当前 Windows Maven
-验证不依赖系统 `sh`。
+验证不依赖系统 `sh`。它还记录 PR #28 已经发生的负向提交、`push` 成功、
+`pull_request` 失败、六字段诊断和合并被禁用事实。
 
-远程负向探针及恢复结果必须在功能 PR 实际发生后以 GitHub PR 与 Actions 为权威记录，
-不得从本地 POC 预填或推断。本证据没有运行或修改 GitHub Actions 外部状态，也没有观察
-功能 PR、远程门禁失败或恢复、功能合并及最终 `main` 验证。
+GitHub PR 与 Actions 是上述远程事实的权威记录。恢复后的远程门禁成功、功能合并及最终
+`main` 验证均尚未发生或观察，不得从本地删除探针文件推断。
