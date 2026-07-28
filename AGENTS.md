@@ -120,10 +120,21 @@
 - 本地 `.\mvnw.cmd verify`（Windows）或 `./mvnw verify`（macOS/Linux）是产品代码、
   架构和构建产物的完整机械验收入口；
 - GitHub Actions 的同名 `verify` Job 在 `push` 和 `pull_request` 事件中都运行环境自检
-  与 Maven `verify`；仅在 `pull_request` 事件中，它还使用事件提供的 base/head SHA 调用
-  `sh ./scripts/check-pr-diff.sh`，检查 PR 的完整 `base...head` 差异；
-- `push` 没有 PR 范围，不运行该差异门禁。Windows Maven 验证不执行 POSIX 脚本，也不
-  依赖系统 `sh`。
+  与 Maven `verify`；仅在 `pull_request` 事件中，它先使用事件提供的 base/head ref
+  检查分支流，再使用 base/head SHA 检查 PR 的完整 `base...head` 差异；
+- `push` 没有 PR 范围，不运行分支流或 PR 差异门禁。Windows Maven 验证不执行 POSIX
+  脚本，也不依赖系统 `sh`。
+
+## 分支工作流
+
+- `develop` 是 GitHub 默认分支和日常集成基线；普通 `codex/*` 从最新 `develop`
+  建立，并通过 PR 合回 `develop`；
+- `main` 是需要人工发布批准的生产发布基线，不表示已经部署；正常发布只使用
+  `develop → main` PR；
+- 紧急修复使用从最新 `main` 建立的 `hotfix/* → main` PR，合并后必须通过
+  `main → develop` PR 回流；
+- `develop` 与 `main` 都要求 PR、严格 `verify`、管理员不可绕过，并禁止强推和删除；
+- 分支流检查只允许上述普通、release、hotfix 和 hotfix 回流四种 PR 拓扑。
 
 ## 临时工作树协作
 

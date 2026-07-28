@@ -1,6 +1,6 @@
 # 决策卡 020：develop 集成与 main 生产发布分支模型
 
-状态：已批准，待实施
+状态：远程迁移至受保护 develop 默认分支，实施中
 
 日期：2026-07-28
 
@@ -68,6 +68,20 @@ StudyTrack 当前没有真实部署流程。即使 `main` 被定义为生产发�
 GitHub 的分支 ref、默认分支、Branch Protection、PR、检查和 Actions 结果是远程事实的
 权威来源。历史文档只解释意图，实施时必须逐步通过 GitHub 回读，不得凭本地状态或本文
 声称远程迁移已经发生。
+
+## 已发生的远程迁移事实
+
+2026-07-28，实施前远程迁移已经完成以下经 GitHub 回读的事实：
+
+- `develop` 从精确 `main` SHA `3620e6b2dfc12911c93075f126e09141a1623ed3` 创建；
+- `develop` initial push 的 `verify` run `#114` 成功；
+- `develop` 与 `main` 均要求 PR、required `verify`、strict/up-to-date、管理员不可
+  绕过，并禁止强推和删除；
+- 两条长期分支均未要求 approvals；
+- 远端 `HEAD` 已验证指向 `refs/heads/develop`。
+
+这些事实只证明远程分支入口和保护迁移已经到位。实现 PR、第一次 release PR、最终
+`main` 验证和任何部署均尚未发生；当前仍没有真实部署。
 
 ## 风险等级
 

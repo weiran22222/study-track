@@ -1,6 +1,6 @@
 # 执行计划 017：迁移 develop 集成与 main 生产发布分支模型
 
-状态：规划中
+状态：远程迁移已到 S4，实施中
 
 ## 目标与权限边界
 
@@ -38,6 +38,19 @@ GitHub 默认分支、Branch Protection、Ruleset、远程权限或 CI。实施�
 
 任何状态验证失败都停留在最近一个已验证状态；不得跳过状态、交换 S2/S3/S4 的顺序，或
 让未保护 `develop` 成为默认分支。
+
+## 已发生的远程事实
+
+2026-07-28，GitHub 权威记录已经确认：
+
+- `develop` 从 `main` SHA `3620e6b2dfc12911c93075f126e09141a1623ed3` 精确创建；
+- `develop` initial push `verify` run `#114` 成功；
+- `develop` 和 `main` 的保护均为 require PR、required `verify`、strict/up-to-date、
+  no bypass、禁止强推和禁止删除，approvals 未要求；
+- 远端 `HEAD` 指向 `refs/heads/develop`。
+
+因此远程迁移状态已达到 S4。尚未发生实施 PR、`develop → main` release PR、最终
+`main` 验证或部署，不得把后续计划步骤写成已完成。
 
 ## 阶段 0：规划 PR 走当前 main 流程
 
