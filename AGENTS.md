@@ -26,6 +26,12 @@ JAR 已经建立；`add`、`list`、`complete`、`show`、`summary`、`delete` �
 当前反馈工件：
 [docs/feedback/002-parallel-worktree-retrospective.md](docs/feedback/002-parallel-worktree-retrospective.md)。
 
+当前已接受的 Harness 证据边界决策：
+[docs/decisions/008-accept-atomic-replacement-test-gap.md](docs/decisions/008-accept-atomic-replacement-test-gap.md)。
+该决定记录了最终原子替换失败未被直接故障注入验证的边界、人类接受范围和必须重新评估的
+条件；对应既有证据见
+[docs/evidence/003-delete-task.md#证据边界](docs/evidence/003-delete-task.md#证据边界)。
+
 最近完成的产品决策：
 [docs/decisions/007-delete-task.md](docs/decisions/007-delete-task.md)。
 
