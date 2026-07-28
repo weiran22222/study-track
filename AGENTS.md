@@ -162,8 +162,8 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 报告不得写入被验证提交。协调者在 evaluator 前后分别运行
 `scripts/check-verification-subject.ps1`（Windows）或
 `scripts/check-verification-subject.sh`（macOS/Linux），检查 manifest 分支、Subject
-SHA、干净工作树和空暂存区。完整协议与证据边界见
-[执行计划 018](docs/exec-plans/018-generator-evaluator-role-separation.md)。
+SHA、干净工作树和空暂存区。完整协议与证据边界从
+[文档索引](docs/README.md)查阅执行计划 018。
 
 ## 提交前暂存检查
 

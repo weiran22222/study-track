@@ -1,6 +1,6 @@
 # 决策卡 021：分离实现 generator 与独立验证 evaluator
 
-状态：已批准，实施中
+状态：已批准并实施
 
 日期：2026-07-29
 
@@ -44,8 +44,23 @@
 [规划 PR #35](https://github.com/weiran22222/study-track/pull/35) 随后已经合并；
 合并后的 `develop` push
 [`verify` run 30379095072](https://github.com/weiran22222/study-track/actions/runs/30379095072)
-已经成功。这些事实授权在新的 `codex/*` 实施分支更新 `AGENTS.md`、增加 guard 和测试，
-但不预先证明实施提交的 evaluator 结论、PR CI、合并或最终 `develop` 验证。
+已经成功。
+
+实施过程随后冻结第一版 Subject SHA
+`a551365b9a9d8a7cdc8598a274dd23df48e3ca30`；不同 evaluator 发现 PowerShell guard
+的分支比较不区分大小写并给出 `FAIL`。该报告回流同一 generator 后，修复提交
+`063392c9c77f64445ea725e85fdec6c2c16dfbdd` 改为精确区分大小写并增加回归场景；旧报告
+随新 SHA 失效，同一 evaluator 对新 SHA 完整复验后给出 `PASS`，相关测试 16/16、完整
+测试 122/122。实施
+[PR #36](https://github.com/weiran22222/study-track/pull/36) 的 head 与 evaluator 报告及
+required `verify` 均绑定该新 SHA；PR 评论保留第一次 `FAIL` 与修复后 `PASS`。学习者明确
+批准合并后，PR #36 合入 `develop`，合并提交为
+`75c87f1620985c8a4af6981439345fd176eda2e2`，最终 `develop` push
+[`verify` run 30382996038](https://github.com/weiran22222/study-track/actions/runs/30382996038)
+成功。`main` 未改变，也没有发生部署。
+
+这些记录证明了精确 SHA、失败回流、同 SHA required `verify` 和合并后验证闭环；它们不
+证明 generator/evaluator 的密码学身份或平台级身份认证。
 
 批准的最小协议为：
 
@@ -137,7 +152,7 @@ PR、评论、Check Run 和 Actions 是远端审计证据的权威来源。
 
 ### 机械边界与身份边界
 
-实施阶段提供一个最小的验证对象检查入口，在 evaluator 开始前和结束后检查：
+实施已经提供一个最小的验证对象检查入口，在 evaluator 开始前和结束后检查：
 
 - 当前分支符合 manifest，或在受管隔离模式下为明确的 detached 状态；
 - `HEAD` 精确等于 Subject SHA；
@@ -167,5 +182,5 @@ handoff manifest 和 PR 评论来提供可审计证据。不得新增一个无�
 - 不允许 generator、evaluator 或主智能体手工管理临时 worktree；
 - 不在本规划 PR 实施 `AGENTS.md`、脚本、测试或 CI 变更。
 
-具体实施、试运行、停止条件和验收证据见
-[执行计划 018](../exec-plans/018-generator-evaluator-role-separation.md)。
+具体实施、试运行、停止条件和验收证据见已归档的
+[执行计划 018](../exec-plans/completed/018-generator-evaluator-role-separation.md)。
