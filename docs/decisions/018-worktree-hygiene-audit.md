@@ -1,6 +1,6 @@
 # 决策卡 018：只读审计本地 worktree
 
-状态：已批准
+状态：已被 [决策卡 019](019-codex-managed-worktree-lifecycle.md) 取代
 
 日期：2026-07-28
 
