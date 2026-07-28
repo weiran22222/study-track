@@ -111,7 +111,7 @@ Repository 将存储异常转换为项目定义的持久化异常；CLI 只负�
 
 ## 7. 验证流水线
 
-唯一的完整验证入口是：
+本地产品代码、架构与构建产物的唯一完整验证入口是：
 
 ```powershell
 .\mvnw.cmd verify
@@ -126,7 +126,16 @@ Repository 将存储异常转换为项目定义的持久化异常；CLI 只负�
 5. ArchUnit 架构测试；
 6. 可执行 JAR 打包。
 
-CI 和本地开发使用相同命令，避免出现两套验收逻辑。
+GitHub Actions 的 `verify` Job 在 `push` 和 `pull_request` 事件中都先执行环境自检，
+再运行同一 Maven 命令，避免出现两套产品与架构验收逻辑。除此之外，Job 只在
+`pull_request` 事件中使用事件提供的 base/head SHA 调用
+`sh ./scripts/check-pr-diff.sh`，检查 PR 的完整 `base...head` 差异；checkout 必须获取
+完整历史，使两个端点及合并基点可达。`push` 事件没有 PR 语义，不运行该差异门禁。
+
+PR 差异门禁是 CI 合并验收，不绑定 Maven 生命周期。本地 Windows `.\mvnw.cmd verify`
+不执行 POSIX 脚本，也不依赖系统 `sh`。提交前的 `git diff --cached --check`、本地
+Maven `verify` 和 PR-only 完整差异门禁分别保护暂存内容、产品/架构构建和最终 PR 差异，
+不能互相替代。
 
 ### 构建幂等性
 

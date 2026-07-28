@@ -1,10 +1,10 @@
 # 执行计划 016：实施 CI PR 完整差异空白门禁
 
-状态：待实施
+状态：本地实施完成，远程功能 PR 验证进行中
 
 ## 目标
 
-实施[决策卡 016](../decisions/016-ci-pr-diff-whitespace-gate.md)：在现有受保护 `main`
+实施[决策卡 016](../../decisions/016-ci-pr-diff-whitespace-gate.md)：在现有受保护 `main`
 所要求的 `verify` Job 中，对每个 PR 的完整 `base...head` 差异运行 Git 空白错误检查，
 同时保持 `push` 事件的既有环境自检和 Maven `verify`，并保持 Windows 本地完整验证
 不依赖系统 `sh`。
@@ -21,7 +21,7 @@
   产品/架构验证入口，PR 的同名必需 Job 还会检查完整差异；
 - `src/test/java/com/example/studytrack/architecture/` 下的适当静态契约测试：读取
   workflow 与脚本文本，保护关键接线，不执行 shell；
-- 本计划与[证据 007](../evidence/007-ci-pr-diff-whitespace-poc.md)：在功能实施阶段只根据
+- 本计划与[证据 007](../../evidence/007-ci-pr-diff-whitespace-poc.md)：在功能实施阶段只根据
   已发生事实更新状态和证据边界。
 
 不修改 `SPEC.md`、产品代码、产品测试、依赖、JSON、分支保护、远程权限或 Job 名称。
@@ -129,9 +129,9 @@
 - [x] 人类批准第三级门禁语义变更与推荐方案
 - [x] 本地 `git diff --check` 干净/失败 POC 完成并清理
 - [x] 决策卡、执行计划和 POC 证据起草
-- [ ] 规划 PR 通过并合并
-- [ ] 功能脚本、workflow、验证地图和静态契约测试完成
-- [ ] 本地脚本探针与 JDK 21 完整 `verify` 通过
+- [x] 规划 PR 通过并合并
+- [x] 功能脚本、workflow、验证地图和静态契约测试完成
+- [x] 本地脚本探针与 JDK 21 完整 `verify` 通过
 - [ ] 功能 PR 远程负向探针按预期失败并给出完整诊断
 - [ ] 删除探针后功能 PR 必需 `verify` 通过
 - [ ] 功能 PR 通过并合并
@@ -139,7 +139,10 @@
 
 ## 当前证据边界
 
-[证据 007](../evidence/007-ci-pr-diff-whitespace-poc.md)只证明 Git 原生
-`diff --check` 对一个既有干净范围退出 `0`，并对一个本地悬空提交中的文件尾新增空行
-退出 `1`。脚本、workflow、静态契约测试、功能 PR 远程失败/恢复、合并与最终 `main`
-均尚未实施或观察，不能由该 POC 推断。
+[证据 007](../../evidence/007-ci-pr-diff-whitespace-poc.md)记录了规划阶段 Git 原生 POC，
+以及功能实施阶段已经发生的仓库脚本干净/失败探针、静态契约测试、JDK 21 完整
+`verify` 和临时仓库清理事实。当前本地分支已实施脚本、workflow 接线和验证地图。
+
+功能 PR 的远程失败/恢复、功能合并与最终 `main` 均尚未观察，不能由本地 POC 或
+`verify` 推断。按照决策卡 011 的精简三级流程，本计划将在功能 PR 的远程失败与恢复探针
+实际完成后、合并前归档；其余远程事实以实际 GitHub PR 与 Actions 记录为权威。
