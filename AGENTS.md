@@ -114,6 +114,17 @@
 
 普通 `git diff --check` 不包含未跟踪新文件，不能把它当成提交内容的完整检查。
 
+## 验证范围
+
+- 提交前检查使用 `git diff --cached --check`，只检查将要提交的完整暂存内容；
+- 本地 `.\mvnw.cmd verify`（Windows）或 `./mvnw verify`（macOS/Linux）是产品代码、
+  架构和构建产物的完整机械验收入口；
+- GitHub Actions 的同名 `verify` Job 在 `push` 和 `pull_request` 事件中都运行环境自检
+  与 Maven `verify`；仅在 `pull_request` 事件中，它还使用事件提供的 base/head SHA 调用
+  `sh ./scripts/check-pr-diff.sh`，检查 PR 的完整 `base...head` 差异；
+- `push` 没有 PR 范围，不运行该差异门禁。Windows Maven 验证不执行 POSIX 脚本，也不
+  依赖系统 `sh`。
+
 ## 验证命令
 
 首次进入仓库或构建环境变化后，先阅读
@@ -125,7 +136,7 @@ Windows：
 .\scripts\check-environment.ps1
 ```
 
-自检通过后：
+自检通过后运行本地完整产品、架构与构建验证：
 
 ```powershell
 .\mvnw.cmd verify
@@ -137,7 +148,7 @@ macOS/Linux：
 sh ./scripts/check-environment.sh
 ```
 
-自检通过后：
+自检通过后运行本地完整产品、架构与构建验证：
 
 ```bash
 ./mvnw verify
