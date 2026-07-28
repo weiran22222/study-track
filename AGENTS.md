@@ -15,19 +15,13 @@
 本文件只提供稳定地图和工作约定，不复制其他文档的完整内容，也不逐项登记已完成任务。
 需要理解现状形成原因时，从文档索引渐进查阅相关历史工件。
 
-## 当前阶段
+## 权威事实与机械验收
 
-当前是 Harness v14：规格、架构、Maven Wrapper、Checkstyle、ArchUnit、CI 和可执行
-JAR 已经建立；`add`、`list`、`complete`、`show`、`summary`、`delete`、`rename`
-及损坏 JSON 失败安全均已完成。当前 `SPEC.md` 的 AC-01～AC-16 已实现并有自动验证。
-GitHub Actions 已远程运行成功，两个官方 Action 已升级到 Node.js 24 运行时；`main`
-已建立强制 PR、最新分支和 `verify` 合并门禁。首次双 worktree、双子智能体、双 PR
-并行实验已经完成并有证据。架构目录已降为包级导航与关键入口，不再维护完整代码文件
-清单。Harness 变更现在按风险、持续时间和协作复杂度选择三级流程。历史工件由文档索引
-集中导航，`AGENTS.md` 不再随任务完成而追加历史清单。`rename <id> <new-title>` 及其
-UTF-8 标题文件形式 `rename <id> --title-file <path>` 已按第三级流程实现并验证。第三级
-流程的工件已经明确单一职责，并默认使用规划 PR 与功能 PR 两个阶段；独立收尾 PR 只在
-存在合并后外部事实、远程状态变化、结果偏差或遗留风险时使用。
+当前产品行为与验收标准以 [SPEC.md](SPEC.md) 为唯一权威。本文件不维护 Harness 版本号、
+逐项验收状态或功能完成清单；需要了解历史理由时，从 [文档索引](docs/README.md) 按需查阅。
+
+`verify` 是仓库的机械验收入口，完整命令和执行内容见下方“验证命令”及
+[ARCHITECTURE.md](ARCHITECTURE.md#7-验证流水线)。
 
 ## 关键边界
 
