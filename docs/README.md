@@ -35,7 +35,7 @@
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
-- [015：重新打开单个任务](exec-plans/015-reopen-task.md)
+- [015：重新打开单个任务](exec-plans/completed/015-reopen-task.md)
 - [014：Unicode 安全的标题文件输入](exec-plans/completed/014-unicode-safe-title-file-input.md)
 - [013：重命名单个任务](exec-plans/completed/013-rename-task.md)
 - [001：实现添加学习任务](exec-plans/completed/001-add-task.md)
@@ -58,6 +58,7 @@
 - [003：永久删除任务实施证据](evidence/003-delete-task.md)
 - [004：重命名任务实施证据](evidence/004-rename-task.md)
 - [005：Unicode 安全的标题文件输入实施证据](evidence/005-unicode-safe-title-file-input.md)
+- [006：重新打开单个任务实施证据](evidence/006-reopen-task.md)
 
 ## 复盘反馈
 

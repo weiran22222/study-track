@@ -187,6 +187,50 @@ class StudyTaskServiceTest {
   }
 
   @Test
+  void reopensCompletedTaskAndPreservesIdentifierAndTitle() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks =
+        List.of(
+            new StudyTask(2, "保留任务", false),
+            new StudyTask(7, "重新打开", true));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    ReopenTaskResult result = service.reopenTask(7);
+
+    assertEquals(ReopenTaskResult.REOPENED, result);
+    assertEquals(new StudyTask(7, "重新打开", false), repository.updatedTask);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(1, repository.updateCalls);
+  }
+
+  @Test
+  void reopeningAlreadyPendingTaskDoesNotPersist() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "保持未完成", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    ReopenTaskResult result = service.reopenTask(1);
+
+    assertEquals(ReopenTaskResult.ALREADY_PENDING, result);
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
+  void reopeningMissingTaskFailsWithoutPersisting() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks = List.of(new StudyTask(1, "已有任务", true));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    TaskNotFoundException exception =
+        assertThrows(TaskNotFoundException.class, () -> service.reopenTask(99));
+
+    assertEquals("Task 99 not found.", exception.getMessage());
+    assertEquals(1, repository.findAllCalls);
+    assertEquals(0, repository.updateCalls);
+  }
+
+  @Test
   void deletesExistingTaskAfterConfirmingItExists() {
     RecordingTaskRepository repository = new RecordingTaskRepository();
     repository.tasks =
