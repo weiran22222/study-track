@@ -20,7 +20,8 @@ import picocli.CommandLine.Spec;
       CompleteCommand.class,
       ShowCommand.class,
       SummaryCommand.class,
-      DeleteCommand.class
+      DeleteCommand.class,
+      RenameCommand.class
     })
 public final class StudyTrackCommand implements Callable<Integer> {
 

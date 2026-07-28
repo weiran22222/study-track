@@ -489,6 +489,128 @@ class StudyTrackApplicationTest {
   }
 
   @Test
+  void renameCommandChangesOnlyTitleAndKeepsAllReadViewsConsistent(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 8,
+          "tasks": [
+            {"id": 2, "title": "Keep me", "completed": false},
+            {"id": 5, "title": "Old title", "completed": true}
+          ]
+        }
+        """,
+        StandardCharsets.UTF_8);
+
+    CommandResult result =
+        execute("--data-file", dataFile.toString(), "rename", "5", "  New title  ");
+
+    assertEquals(0, result.exitCode());
+    assertEquals("Renamed task 5." + System.lineSeparator(), result.output());
+    assertEquals("", result.error());
+    String json = Files.readString(dataFile, StandardCharsets.UTF_8);
+    assertTrue(json.contains("\"nextId\" : 8"));
+    assertTrue(json.indexOf("\"id\" : 2") < json.indexOf("\"id\" : 5"));
+    assertTrue(json.contains("\"title\" : \"Keep me\""));
+    assertTrue(json.contains("\"title\" : \"New title\""));
+    assertTrue(json.contains("\"completed\" : true"));
+    assertEquals(
+        """
+        [ ] 2 Keep me
+        [x] 5 New title
+        """
+            .replace("\n", System.lineSeparator()),
+        execute("--data-file", dataFile.toString(), "list").output());
+    assertEquals(
+        "[x] 5 New title" + System.lineSeparator(),
+        execute("--data-file", dataFile.toString(), "show", "5").output());
+    assertEquals(
+        """
+        Total: 2
+        Pending: 1
+        Completed: 1
+        """
+            .replace("\n", System.lineSeparator()),
+        execute("--data-file", dataFile.toString(), "summary").output());
+  }
+
+  @Test
+  void idempotentRenameDoesNotChangeDataFileBytes(@TempDir Path temporaryDirectory)
+      throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "Same title");
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    CommandResult result =
+        execute("--data-file", dataFile.toString(), "rename", "1", "  Same title  ");
+
+    assertEquals(0, result.exitCode());
+    assertEquals(
+        "Task 1 already has that title." + System.lineSeparator(), result.output());
+    assertEquals("", result.error());
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void missingRenameTargetDoesNotChangeOrCreateDataFile(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path existingDataFile = temporaryDirectory.resolve("existing.json");
+    execute("--data-file", existingDataFile.toString(), "add", "Existing task");
+    final byte[] originalData = Files.readAllBytes(existingDataFile);
+
+    CommandResult existingResult =
+        execute("--data-file", existingDataFile.toString(), "rename", "99", "New title");
+    Path missingDataFile = temporaryDirectory.resolve("missing.json");
+    final CommandResult missingResult =
+        execute("--data-file", missingDataFile.toString(), "rename", "99", "New title");
+
+    assertEquals(2, existingResult.exitCode());
+    assertEquals("", existingResult.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), existingResult.error());
+    assertArrayEquals(originalData, Files.readAllBytes(existingDataFile));
+    assertEquals(2, missingResult.exitCode());
+    assertEquals("", missingResult.output());
+    assertEquals("Task 99 not found." + System.lineSeparator(), missingResult.error());
+    assertFalse(Files.exists(missingDataFile));
+  }
+
+  @Test
+  void invalidRenameTitleWinsOverMissingTaskWithoutCreatingDataFile(
+      @TempDir Path temporaryDirectory) {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+
+    CommandResult result =
+        execute("--data-file", dataFile.toString(), "rename", "99", "   ");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertEquals(
+        "Task title must contain between 1 and 200 characters." + System.lineSeparator(),
+        result.error());
+    assertFalse(Files.exists(dataFile));
+  }
+
+  @Test
+  void nonIntegerRenameIdDoesNotChangeDataFile(@TempDir Path temporaryDirectory)
+      throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    execute("--data-file", dataFile.toString(), "add", "Existing task");
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    CommandResult result =
+        execute(
+            "--data-file", dataFile.toString(), "rename", "not-an-integer", "New title");
+
+    assertEquals(2, result.exitCode());
+    assertEquals("", result.output());
+    assertTrue(result.error().contains("Invalid value for positional parameter"));
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
   void commandsRejectCorruptDataWithoutChangingOriginalBytes(@TempDir Path temporaryDirectory)
       throws Exception {
     String[] corruptData = {
@@ -509,7 +631,8 @@ class StudyTrackApplicationTest {
         {"complete", "1"},
         {"show", "1"},
         {"summary"},
-        {"delete", "1"}
+        {"delete", "1"},
+        {"rename", "1", "New title"}
     };
 
     for (int dataIndex = 0; dataIndex < corruptData.length; dataIndex++) {

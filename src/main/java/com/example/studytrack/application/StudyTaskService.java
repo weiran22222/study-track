@@ -30,16 +30,7 @@ public final class StudyTaskService {
    * @throws InvalidTaskTitleException when the stripped title is outside the allowed range
    */
   public StudyTask addTask(String rawTitle) {
-    if (rawTitle == null) {
-      throw new InvalidTaskTitleException();
-    }
-
-    String title = rawTitle.strip();
-    int codePointCount = title.codePointCount(0, title.length());
-    if (codePointCount < 1 || codePointCount > MAXIMUM_TITLE_CODE_POINTS) {
-      throw new InvalidTaskTitleException();
-    }
-
+    String title = normalizeTitle(rawTitle);
     return repository.create(title);
   }
 
@@ -115,5 +106,43 @@ public final class StudyTaskService {
     }
 
     repository.delete(taskId);
+  }
+
+  /**
+   * Renames a learning task while preserving its identifier and completion state.
+   *
+   * @param taskId task identifier
+   * @param rawTitle new title supplied by the user
+   * @return whether this request changed the task title
+   * @throws InvalidTaskTitleException when the stripped title is outside the allowed range
+   * @throws TaskNotFoundException when no task has the requested identifier
+   */
+  public RenameTaskResult renameTask(long taskId, String rawTitle) {
+    String title = normalizeTitle(rawTitle);
+    StudyTask task =
+        repository.findAll().stream()
+            .filter(candidate -> candidate.id() == taskId)
+            .findFirst()
+            .orElseThrow(() -> new TaskNotFoundException(taskId));
+
+    if (title.equals(task.title())) {
+      return RenameTaskResult.ALREADY_NAMED;
+    }
+
+    repository.update(new StudyTask(task.id(), title, task.completed()));
+    return RenameTaskResult.RENAMED;
+  }
+
+  private String normalizeTitle(String rawTitle) {
+    if (rawTitle == null) {
+      throw new InvalidTaskTitleException();
+    }
+
+    String title = rawTitle.strip();
+    int codePointCount = title.codePointCount(0, title.length());
+    if (codePointCount < 1 || codePointCount > MAXIMUM_TITLE_CODE_POINTS) {
+      throw new InvalidTaskTitleException();
+    }
+    return title;
   }
 }

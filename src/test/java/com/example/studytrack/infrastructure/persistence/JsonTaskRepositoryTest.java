@@ -181,6 +181,71 @@ class JsonTaskRepositoryTest {
     }
   }
 
+  @Test
+  void updateRenamesOnlyRequestedTaskAndPreservesMetadataAndOrder(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 12,
+          "tasks": [
+            {"id": 2, "title": "First", "completed": false},
+            {"id": 6, "title": "Old title", "completed": true},
+            {"id": 9, "title": "Third", "completed": false}
+          ]
+        }
+        """);
+    JsonTaskRepository repository = new JsonTaskRepository(dataFile);
+
+    repository.update(new StudyTask(6, "New title", true));
+
+    JsonNode root = objectMapper.readTree(dataFile.toFile());
+    assertEquals(12, root.get("nextId").asLong());
+    assertEquals(3, root.get("tasks").size());
+    assertEquals(2, root.get("tasks").get(0).get("id").asLong());
+    assertEquals("First", root.get("tasks").get(0).get("title").asText());
+    assertFalse(root.get("tasks").get(0).get("completed").asBoolean());
+    assertEquals(6, root.get("tasks").get(1).get("id").asLong());
+    assertEquals("New title", root.get("tasks").get(1).get("title").asText());
+    assertTrue(root.get("tasks").get(1).get("completed").asBoolean());
+    assertEquals(9, root.get("tasks").get(2).get("id").asLong());
+    assertEquals("Third", root.get("tasks").get(2).get("title").asText());
+    assertFalse(root.get("tasks").get(2).get("completed").asBoolean());
+  }
+
+  @Test
+  void updateWriteFailurePreservesOriginalBytesAndCleansTemporaryFile(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 3,
+          "tasks": [
+            {"id": 1, "title": "Keep original bytes", "completed": true},
+            {"id": 2, "title": "Other task", "completed": false}
+          ]
+        }
+        """);
+    byte[] originalData = Files.readAllBytes(dataFile);
+    ObjectMapper failingMapper = new ObjectMapper(new FailingWriteJsonFactory());
+    JsonTaskRepository repository = new JsonTaskRepository(dataFile, failingMapper);
+
+    TaskPersistenceException exception =
+        assertThrows(
+            TaskPersistenceException.class,
+            () -> repository.update(new StudyTask(1, "New title", true)));
+
+    assertTrue(exception.getMessage().startsWith("Unable to write data file "));
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+    try (var paths = Files.list(temporaryDirectory)) {
+      assertEquals(List.of(dataFile), paths.toList());
+    }
+  }
+
   private static final class FailingWriteJsonFactory extends JsonFactory {
 
     @Override
