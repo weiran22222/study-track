@@ -176,18 +176,42 @@ java -jar target/study-track.jar delete 1
 
 ### 2.7 重命名任务
 
-只修改指定任务的标题：
+只修改指定任务的标题。标题必须恰好使用以下一种来源。
+
+内联标题：
 
 ```powershell
 java -jar target/study-track.jar rename 1 "深入学习 Harness Engineering"
 ```
 
+UTF-8 标题文件：
+
+```powershell
+java -jar target/study-track.jar rename 1 --title-file title.txt
+```
+
+`--title-file` 用于避免完整 Unicode 标题经过 Shell 和操作系统原生命令行编码。文件路径
+仍作为普通命令行参数传递；跨平台验收使用 ASCII 路径，不承诺当前原生命令行无法表示的
+路径字符。
+
 参数按以下顺序处理：
 
-1. Picocli 解析任务 ID；非整数 ID 由 Picocli 报告为参数错误并返回退出码 `2`；
-2. 新标题先使用 Java `String.strip()` 去除首尾空白，再校验为 `1..200` 个 Unicode
+1. Picocli 解析任务 ID 和标题来源；非整数 ID、没有标题来源或同时提供内联标题与
+   `--title-file` 时，由 Picocli 报告为参数错误并返回退出码 `2`；
+2. 使用 `--title-file` 时，在 JVM 内严格按 UTF-8 读取完整文件；允许并忽略文件开头的
+   一个 UTF-8 BOM；
+3. 新标题先使用 Java `String.strip()` 去除首尾空白，再校验为 `1..200` 个 Unicode
    码点；
-3. 标题有效后才读取任务数据。
+4. 标题有效后才读取任务数据。
+
+参数解析失败时不得读取标题文件或任务数据，也不得创建或修改数据文件。
+
+标题文件不存在、是目录、不可读或包含非法 UTF-8 时：
+
+- 向标准错误写入
+  `Title file error: Unable to read UTF-8 title file: <path>`；
+- 退出码为 `1`；
+- 不读取、创建或修改任务数据文件。
 
 标题无效时：
 
@@ -217,8 +241,9 @@ java -jar target/study-track.jar rename 1 "深入学习 Harness Engineering"
 - 不创建或修改数据文件。
 
 数据文件不存在时按任务不存在处理且不创建文件。JSON 损坏或持久化失败时返回退出码
-`1`，不得覆盖或部分修改原文件。由于标题校验先于任务读取，标题无效且任务不存在时先
-报告标题错误，且不读取数据。
+`1`，不得覆盖或部分修改原文件。标题文件读取和标题校验均先于任务读取：标题文件失败
+时先报告标题文件错误；标题无效且任务不存在时先报告标题错误；两种情况都不读取任务
+数据。
 
 第一版重命名不修改任务 ID 或完成状态，不提供通用字段编辑、批量重命名、交互式编辑器、
 标题历史或撤销功能。
@@ -280,6 +305,7 @@ java -jar target/study-track.jar rename 1 "深入学习 Harness Engineering"
 | AC-13 | `summary` 正确统计总数、未完成数和已完成数；空库和成功路径均保持只读。 |
 | AC-14 | `delete` 永久删除指定任务并保持 `nextId` 不变；成功、不存在、无数据文件、损坏 JSON 和持久化失败路径均符合退出码及失败安全约定。 |
 | AC-15 | `rename` 在读取数据前按 `add` 规则校验标题；成功时只修改标题并保留 `id`、`completed`、`nextId` 和其他任务，标题相同则不写入；无效标题、不存在、非整数 ID、无数据文件、损坏 JSON 和持久化失败路径均符合输出、退出码及失败安全约定。 |
+| AC-16 | `rename --title-file` 在 JVM 内严格读取 UTF-8 标题并与内联标题互斥；参数、读取、解码或标题校验失败时不得访问任务数据，200 个补充平面 Unicode 码点成功且 201 个失败不修改数据。 |
 
 统一验收入口：
 

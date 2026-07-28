@@ -29,9 +29,9 @@
 src/main/java/com/example/studytrack/
 ├── bootstrap/       # 组合 CLI 与 Infrastructure 并启动应用
 ├── cli/             # 解析命令、调用用例并映射输出和退出码
-├── application/     # 编排用例服务并定义持久化端口
+├── application/     # 编排用例服务并定义输入与持久化端口
 ├── domain/          # 保存任务实体及领域状态
-└── infrastructure/  # 实现持久化端口并读写 JSON
+└── infrastructure/  # 实现外部输入与持久化端口
 ```
 
 关键入口：
@@ -63,19 +63,24 @@ Bootstrap 负责实例化和连接上述组件。
 
 ### Application
 
-包含用例服务和 `TaskRepository` 端口。它可以依赖 Domain，但不能依赖 CLI、Infrastructure、Picocli、Jackson 或文件系统 API。
+包含用例服务，并定义由外部适配器实现的输入和持久化端口。它可以依赖 Domain，但不能
+依赖 CLI、Infrastructure、Picocli、Jackson 或文件系统 API。输入端口必须使用不依赖
+文件系统 API 的值，不得把 `Path` 或字符集实现细节带入 Application。
 
 ### Infrastructure
 
-实现 `TaskRepository`，负责读取和原子写入 JSON。它可以依赖 Domain 和 Application 中的端口，不能包含命令行展示逻辑。
+实现 Application 端口：`persistence` 负责读取和原子写入 JSON，`input` 负责严格读取
+UTF-8 标题文件。它可以依赖 Domain 和 Application 中的端口，不能包含命令行展示逻辑。
 
 ### CLI
 
-负责参数解析、调用 Application 服务以及把结果转换为标准输出、标准错误和退出码。它不得直接使用 Jackson 或 `java.nio.file`。
+负责参数解析、通过注入的 Application 端口解析标题来源、调用 Application 服务，以及
+把结果转换为标准输出、标准错误和退出码。它不得直接使用 Jackson 或 `java.nio.file`。
 
 ### Bootstrap
 
-是唯一允许同时依赖 CLI 和 Infrastructure 的位置，负责组合对象并启动 Picocli。
+是唯一允许同时依赖 CLI 和 Infrastructure 的位置，负责组合标题输入、任务持久化与 CLI
+并启动 Picocli。
 
 ## 5. 机械化架构规则
 
