@@ -26,6 +26,7 @@
 - [008：接受原子替换失败的直接测试缺口](decisions/008-accept-atomic-replacement-test-gap.md)
 - [009：控制智能体导航中的文档熵](decisions/009-documentation-entropy-control.md)
 - [010：重命名单个任务](decisions/010-rename-task.md)
+- [011：精简第三级工件与收尾流程](decisions/011-lean-tier3-artifacts.md)
 
 ## 执行计划
 
@@ -56,3 +57,4 @@
 
 - [001：第一次 Harness 实战复盘](feedback/001-first-harness-retrospective.md)
 - [002：并行 worktree 实战复盘](feedback/002-parallel-worktree-retrospective.md)
+- [003：rename 三级流程复盘](feedback/003-rename-task-retrospective.md)
