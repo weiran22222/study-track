@@ -29,11 +29,13 @@
 - [011：精简第三级工件与收尾流程](decisions/011-lean-tier3-artifacts.md)
 - [012：使用 UTF-8 标题文件绕过 Windows 命令行编码边界](decisions/012-unicode-safe-title-file-input.md)
 - [013：移除导航中的易变 Harness 进度](decisions/013-remove-volatile-harness-progress.md)
+- [014：重新打开单个任务](decisions/014-reopen-task.md)
 
 ## 执行计划
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
+- [015：重新打开单个任务](exec-plans/015-reopen-task.md)
 - [014：Unicode 安全的标题文件输入](exec-plans/completed/014-unicode-safe-title-file-input.md)
 - [013：重命名单个任务](exec-plans/completed/013-rename-task.md)
 - [001：实现添加学习任务](exec-plans/completed/001-add-task.md)
