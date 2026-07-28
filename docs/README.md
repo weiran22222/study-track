@@ -32,6 +32,7 @@
 - [014：重新打开单个任务](decisions/014-reopen-task.md)
 - [015：提交前检查完整暂存内容](decisions/015-staged-diff-check.md)
 - [016：为 CI 增加 PR 完整差异空白门禁](decisions/016-ci-pr-diff-whitespace-gate.md)
+- [017：增强 reopen 幂等失败诊断](decisions/017-reopen-failure-diagnostics.md)
 
 ## 执行计划
 
