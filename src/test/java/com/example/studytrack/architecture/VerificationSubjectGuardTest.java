@@ -20,8 +20,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 class VerificationSubjectGuardTest {
 
-  private static final Path AGENTS = Path.of("AGENTS.md");
-  private static final Path WORKFLOW = Path.of(".github", "workflows", "verify.yml");
+  private static final Path WORKFLOW_DOCUMENT = Path.of("WORKFLOW.md");
+  private static final Path VERIFY_WORKFLOW = Path.of(".github", "workflows", "verify.yml");
   private static final Path POWERSHELL_GUARD =
       Path.of("scripts", "check-verification-subject.ps1");
   private static final Path POSIX_GUARD =
@@ -41,8 +41,8 @@ class VerificationSubjectGuardTest {
   @TempDir Path temporaryDirectory;
 
   @Test
-  void stableNavigationReferencesBothReadOnlyGuards() throws IOException {
-    String agents = readRequiredFile(AGENTS);
+  void stableWorkflowReferencesBothReadOnlyGuards() throws IOException {
+    String workflow = readRequiredFile(WORKFLOW_DOCUMENT);
 
     assertAll(
         () ->
@@ -61,11 +61,11 @@ class VerificationSubjectGuardTest {
                     "Restore the shell guard at its stable scripts path.")),
         () ->
             assertTrue(
-                agents.contains("scripts/check-verification-subject.ps1")
-                    && agents.contains("scripts/check-verification-subject.sh"),
+                workflow.contains("scripts/check-verification-subject.ps1")
+                    && workflow.contains("scripts/check-verification-subject.sh"),
                 failure(
-                    AGENTS,
-                    "AGENTS.md no longer navigates to both subject guard entry points.",
+                    WORKFLOW_DOCUMENT,
+                    "WORKFLOW.md no longer navigates to both subject guard entry points.",
                     "Reference both stable scripts paths in the frozen-SHA handoff workflow.")));
   }
 
@@ -156,28 +156,29 @@ class VerificationSubjectGuardTest {
   }
 
   @Test
-  void agentsDefinesRolesLightweightHandoffsAndSameShaCompletionContract() throws IOException {
-    String agents = readRequiredFile(AGENTS);
+  void workflowDefinesRolesLightweightHandoffsAndSameShaCompletionContract()
+      throws IOException {
+    String workflow = readRequiredFile(WORKFLOW_DOCUMENT);
 
     assertAll(
         () ->
             assertTrue(
-                agents.contains("**generator**")
-                    && agents.contains("**evaluator**")
-                    && agents.contains("**协调者**")
-                    && agents.contains("**人类**"),
+                workflow.contains("**generator**")
+                    && workflow.contains("**evaluator**")
+                    && workflow.contains("**协调者**")
+                    && workflow.contains("**人类**"),
                 failure(
-                    AGENTS,
+                    WORKFLOW_DOCUMENT,
                     "One or more of the four stable roles is missing.",
                     "Define generator, evaluator, coordinator, and human responsibilities.")),
         () ->
             assertTrue(
-                agents.contains("SPEC_READY → IMPLEMENTING → FROZEN(<Subject SHA>) → VERIFYING")
-                    && agents.contains("PASS")
-                    && agents.contains("FAIL → IMPLEMENTING")
-                    && agents.contains("INCONCLUSIVE"),
+                workflow.contains("SPEC_READY → IMPLEMENTING → FROZEN(<Subject SHA>) → VERIFYING")
+                    && workflow.contains("PASS")
+                    && workflow.contains("FAIL → IMPLEMENTING")
+                    && workflow.contains("INCONCLUSIVE"),
                 failure(
-                    AGENTS,
+                    WORKFLOW_DOCUMENT,
                     "The approved handoff state machine is incomplete.",
                     "Restore the frozen-SHA verification state transitions.")),
         () ->
@@ -186,10 +187,10 @@ class VerificationSubjectGuardTest {
                         "协调者交给 generator 的最小任务交接只包含：\\R+```text\\R"
                             + "Task:\\RAcceptance criteria:\\RAllowed scope:\\R"
                             + "Prohibitions:\\R```")
-                    .matcher(agents)
+                    .matcher(workflow)
                     .find(),
                 failure(
-                    AGENTS,
+                    WORKFLOW_DOCUMENT,
                     "The generator handoff is not the approved four-field minimum.",
                     "Keep only Task, Acceptance criteria, Allowed scope, and Prohibitions.")),
         () ->
@@ -198,73 +199,73 @@ class VerificationSubjectGuardTest {
                         "协调者交给 evaluator 的最小交接只包含：\\R+```text\\R"
                             + "Task:\\RAcceptance criteria:\\RSubject SHA:\\RGenerator:\\R"
                             + "Evaluator:\\RMutation allowed: no\\R```")
-                    .matcher(agents)
+                    .matcher(workflow)
                     .find(),
                 failure(
-                    AGENTS,
+                    WORKFLOW_DOCUMENT,
                     "The evaluator handoff is not the approved six-field minimum.",
                     "Keep only the six evaluator handoff fields from decision 022.")),
         () ->
             assertTrue(
-                agents.contains("Commands executed:")
-                    && agents.contains("Independent scenarios:")
-                    && agents.contains("Findings:")
-                    && agents.contains("Residual gaps:")
-                    && agents.contains("Verdict: PASS | FAIL | INCONCLUSIVE"),
+                workflow.contains("Commands executed:")
+                    && workflow.contains("Independent scenarios:")
+                    && workflow.contains("Findings:")
+                    && workflow.contains("Residual gaps:")
+                    && workflow.contains("Verdict: PASS | FAIL | INCONCLUSIVE"),
                 failure(
-                    AGENTS,
+                    WORKFLOW_DOCUMENT,
                     "The evaluator report no longer records the required evidence.",
                     "Restore exact SHA, commands, scenarios, findings, gaps, and verdict.")),
         () ->
             assertTrue(
-                agents.contains("任何修复产生新 SHA 后，旧报告立即失效")
-                    && agents.contains("required `verify`")
-                    && agents.contains("同一 Subject SHA"),
+                workflow.contains("任何修复产生新 SHA 后，旧报告立即失效")
+                    && workflow.contains("required `verify`")
+                    && workflow.contains("同一 Subject SHA"),
                 failure(
-                    AGENTS,
+                    WORKFLOW_DOCUMENT,
                     "SHA invalidation or same-SHA required verify completion is missing.",
                     "Bind evaluator PASS and required verify to the same immutable SHA.")),
         () ->
             assertTrue(
-                agents.contains("`independent-verification` 的普通 CI Job")
-                    && agents.contains("只有收到人类明确指令后才能创建或切换分支")
-                    && agents.contains(
+                workflow.contains("`independent-verification` 的普通 CI Job")
+                    && workflow.contains("只有收到人类明确指令后才能创建或切换分支")
+                    && workflow.contains(
                         "协调者可按任务需要自行决定是否使用额外子智能体以及是否并行")
-                    && agents.contains("仍必须依次进行"),
+                    && workflow.contains("仍必须依次进行"),
                 failure(
-                    AGENTS,
+                    WORKFLOW_DOCUMENT,
                     "The human branch authority, coordinator discretion, or serial SHA flow "
                         + "is missing.",
                     "Restore the lightweight coordination contract from decision 022.")),
         () ->
             assertFalse(
-                agents.contains("serial shared")
-                    || agents.contains("managed detached")
-                    || agents.contains("Codex-managed Worktree")
-                    || agents.contains("git worktree"),
+                workflow.contains("serial shared")
+                    || workflow.contains("managed detached")
+                    || workflow.contains("Codex-managed Worktree")
+                    || workflow.contains("git worktree"),
                 failure(
-                    AGENTS,
+                    WORKFLOW_DOCUMENT,
                     "Active navigation still mandates a worktree or branch verification mode.",
                     "Keep runtime layout out of the active generator/evaluator contract.")));
   }
 
   @Test
   void workflowRetainsOnlyTheRequiredVerifyIdentity() throws IOException {
-    String workflow = readRequiredFile(WORKFLOW);
+    String workflow = readRequiredFile(VERIFY_WORKFLOW);
 
     assertAll(
         () ->
             assertTrue(
                 Pattern.compile("(?m)^jobs:\\R\\s{2}verify:\\s*$").matcher(workflow).find(),
                 failure(
-                    WORKFLOW,
+                    VERIFY_WORKFLOW,
                     "The required workflow job is no longer named verify.",
                     "Keep the existing jobs.verify identity unchanged.")),
         () ->
             assertFalse(
                 workflow.toLowerCase(Locale.ROOT).contains("independent-verification"),
                 failure(
-                    WORKFLOW,
+                    VERIFY_WORKFLOW,
                     "The workflow claims an identity it cannot authenticate.",
                     "Remove the independent-verification job or check.")));
   }
@@ -485,7 +486,8 @@ class VerificationSubjectGuardTest {
         Reason: %s
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=VerificationSubjectGuardTest test, then .\\mvnw.cmd verify.
-        Authority: docs/decisions/022-simplify-agent-handoff.md and
+        Authority: WORKFLOW.md, docs/decisions/022-simplify-agent-handoff.md,
+        docs/decisions/026-slim-agent-navigation.md, and
         docs/exec-plans/completed/019-simplify-agent-handoff.md
         """
         .formatted(location, reason, fix);
