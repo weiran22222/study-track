@@ -1,10 +1,9 @@
 param(
-  [string] $ExpectedSha,
-  [string] $ExpectedBranch
+  [string] $SubjectSha
 )
 
-$authority = "docs/decisions/021-generator-evaluator-role-separation.md and " +
-  "docs/exec-plans/completed/018-generator-evaluator-role-separation.md"
+$authority = "docs/decisions/022-simplify-agent-handoff.md and " +
+  "docs/exec-plans/completed/019-simplify-agent-handoff.md"
 
 function Stop-VerificationSubjectCheck {
   param(
@@ -21,35 +20,34 @@ Location: $Location
 Invariant: $Invariant
 Reason: $Reason
 Fix: $Fix
-Recheck: .\scripts\check-verification-subject.ps1 "<subject-sha>" "<source-branch>"
+Recheck: .\scripts\check-verification-subject.ps1 "<subject-sha>"
 Authority: $authority
 "@
   )
   exit 1
 }
 
-if ($PSBoundParameters.Count -ne 2 -or $args.Count -ne 0) {
+if ($PSBoundParameters.Count -ne 1 -or $args.Count -ne 0) {
   Stop-VerificationSubjectCheck `
     -Location "scripts/check-verification-subject.ps1 arguments" `
-    -Invariant "Serial shared verification requires exactly one immutable Subject SHA and one source branch." `
-    -Reason "Expected exactly two arguments: Subject SHA and source branch." `
-    -Fix "Pass the full commit SHA and exact branch from the handoff manifest as separate arguments."
+    -Invariant "Verification requires exactly one immutable Subject SHA." `
+    -Reason "Expected exactly one argument: the full Subject SHA." `
+    -Fix "Pass the full commit SHA from the evaluator handoff as the only argument."
 }
 
-if ([string]::IsNullOrWhiteSpace($ExpectedSha) -or
-    [string]::IsNullOrWhiteSpace($ExpectedBranch)) {
+if ([string]::IsNullOrWhiteSpace($SubjectSha)) {
   Stop-VerificationSubjectCheck `
-    -Location "expected SHA or branch argument" `
-    -Invariant "The handoff Subject SHA and source branch must both be non-empty." `
-    -Reason "At least one required handoff value is empty." `
-    -Fix "Copy both non-empty values directly from the coordinator's handoff manifest."
+    -Location "Subject SHA argument" `
+    -Invariant "The handoff Subject SHA must be non-empty." `
+    -Reason "The required Subject SHA is empty." `
+    -Fix "Copy the non-empty full Subject SHA directly from the evaluator handoff."
 }
 
-if ($ExpectedSha -notmatch "^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$") {
+if ($SubjectSha -notmatch "^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$") {
   Stop-VerificationSubjectCheck `
-    -Location "expected SHA: $ExpectedSha" `
+    -Location "Subject SHA: $SubjectSha" `
     -Invariant "The verification subject must be identified by a full immutable Git object ID." `
-    -Reason "The expected SHA is not a full 40- or 64-hexadecimal-character object ID." `
+    -Reason "The Subject SHA is not a full 40- or 64-hexadecimal-character object ID." `
     -Fix "Use the full Subject SHA recorded by the coordinator; do not pass a ref or abbreviation."
 }
 
@@ -66,47 +64,28 @@ $insideExitCode = $LASTEXITCODE
 if ($insideExitCode -ne 0 -or $insideWorkTree.Trim() -ne "true") {
   Stop-VerificationSubjectCheck `
     -Location "current directory" `
-    -Invariant "The guard must run inside the StudyTrack Git working tree being handed off." `
+    -Invariant "The guard must run inside the StudyTrack Git repository being handed off." `
     -Reason "Git did not identify the current directory as a working tree (exit $insideExitCode): $insideWorkTree" `
-    -Fix "Change to the handed-off repository root without changing branches or files, then rerun."
+    -Fix "Change to the handed-off repository root without changing files, then rerun."
 }
 
-$resolvedExpectedSha = (& git rev-parse --verify --quiet "$ExpectedSha`^{commit}" 2>&1) -join `
+$resolvedSubjectSha = (& git rev-parse --verify --quiet "$SubjectSha`^{commit}" 2>&1) -join `
   [Environment]::NewLine
-$expectedExitCode = $LASTEXITCODE
-if ($expectedExitCode -ne 0) {
+$subjectExitCode = $LASTEXITCODE
+if ($subjectExitCode -ne 0) {
   Stop-VerificationSubjectCheck `
-    -Location "expected SHA: $ExpectedSha" `
-    -Invariant "The manifest Subject SHA must resolve to a commit in the handed-off repository." `
-    -Reason "Git could not resolve the expected SHA to a commit (exit $expectedExitCode): $resolvedExpectedSha" `
-    -Fix "Fetch or restore the handed-off history outside evaluator execution, then provide the exact commit."
+    -Location "Subject SHA: $SubjectSha" `
+    -Invariant "The handoff Subject SHA must resolve to a commit in the handed-off repository." `
+    -Reason "Git could not resolve the Subject SHA to a commit (exit $subjectExitCode): $resolvedSubjectSha" `
+    -Fix "Ask the coordinator to provide a repository containing the exact frozen commit."
 }
 
-if ($resolvedExpectedSha.Trim().ToLowerInvariant() -ne $ExpectedSha.ToLowerInvariant()) {
+if ($resolvedSubjectSha.Trim().ToLowerInvariant() -ne $SubjectSha.ToLowerInvariant()) {
   Stop-VerificationSubjectCheck `
-    -Location "expected SHA: $ExpectedSha" `
+    -Location "Subject SHA: $SubjectSha" `
     -Invariant "The supplied full Subject SHA must name the exact commit Git resolves." `
-    -Reason "Git resolved the expected value to $($resolvedExpectedSha.Trim())." `
+    -Reason "Git resolved the supplied value to $($resolvedSubjectSha.Trim())." `
     -Fix "Copy the canonical full Subject SHA from the coordinator's frozen handoff."
-}
-
-$currentBranch = (& git symbolic-ref --quiet --short HEAD 2>&1) -join [Environment]::NewLine
-$branchExitCode = $LASTEXITCODE
-if ($branchExitCode -ne 0) {
-  Stop-VerificationSubjectCheck `
-    -Location "current branch" `
-    -Invariant "Serial shared verification must remain attached to the manifest source branch." `
-    -Reason "Git could not read an attached branch (exit $branchExitCode); detached mode is not supported by this entry point." `
-    -Fix "Ask the coordinator to restore the serial shared handoff on the expected branch, then rerun."
-}
-
-$currentBranch = $currentBranch.Trim()
-if ($currentBranch -cne $ExpectedBranch) {
-  Stop-VerificationSubjectCheck `
-    -Location "current branch: $currentBranch" `
-    -Invariant "The checked-out branch must exactly equal the handoff source branch $ExpectedBranch." `
-    -Reason "The current branch does not match the expected source branch." `
-    -Fix "Stop verification and ask the coordinator to provide the correct serial shared checkout."
 }
 
 $currentHead = (& git rev-parse --verify HEAD 2>&1) -join [Environment]::NewLine
@@ -120,10 +99,10 @@ if ($headExitCode -ne 0) {
 }
 
 $currentHead = $currentHead.Trim()
-if ($currentHead.ToLowerInvariant() -ne $ExpectedSha.ToLowerInvariant()) {
+if ($currentHead.ToLowerInvariant() -ne $SubjectSha.ToLowerInvariant()) {
   Stop-VerificationSubjectCheck `
     -Location "HEAD: $currentHead" `
-    -Invariant "HEAD must exactly equal the handoff Subject SHA $ExpectedSha." `
+    -Invariant "HEAD must exactly equal the handoff Subject SHA $SubjectSha." `
     -Reason "The checked-out commit differs from the frozen verification subject." `
     -Fix "Stop verification; the coordinator must freeze and hand off the intended commit again."
 }
@@ -157,10 +136,7 @@ if (-not [string]::IsNullOrEmpty($statusOutput)) {
 }
 
 Write-Output "StudyTrack verification subject check passed."
-Write-Output "Mode: serial shared"
-Write-Output "Expected branch: $ExpectedBranch"
-Write-Output "Current branch: $currentBranch"
-Write-Output "Expected SHA: $ExpectedSha"
+Write-Output "Subject SHA: $SubjectSha"
 Write-Output "HEAD: $currentHead"
-Write-Output "Worktree: clean (git status --porcelain is empty)"
+Write-Output "Working tree: clean (git status --porcelain is empty)"
 Write-Output "Index: empty (git diff --cached --quiet succeeded)"

@@ -98,51 +98,56 @@
 
 ## 标准工作流
 
-需要修改仓库的任务按 [决策卡 021](docs/decisions/021-generator-evaluator-role-separation.md)
-分离实现与最终本地验证：
+需要修改仓库的任务按
+[决策卡 022](docs/decisions/022-simplify-agent-handoff.md) 分离实现与最终本地验证：
 
-1. 人类批准目标和验收标准后，协调者固定 base、创建分支并把批准范围交给 generator；
-2. generator 检查规格、代码与测试，以最小改动实现并增加自动测试，运行相关测试和完整
-   `verify`，但只能把结果报告为 generator 自检；
+1. 人类批准目标、验收标准以及是否创建或切换分支；未收到明确指令时，协调者保持当前
+   分支不变；
+2. 协调者使用下方最小 generator 交接委派实现；generator 以最小改动实现并增加自动
+   测试，运行相关测试和完整 `verify`，但只能把结果报告为 generator 自检；
 3. generator 停止写入后，协调者审查、提交并冻结 `FROZEN(<Subject SHA>)`；
-4. 不同且不继承 generator 对话的 evaluator 在串行共享工作树中运行前置 guard、只读
-   独立验证和后置 guard，给出 `PASS`、`FAIL` 或 `INCONCLUSIVE`；
+4. 不同且不继承 generator 对话的 evaluator 运行前置 guard、只读独立验证和后置
+   guard，给出 `PASS`、`FAIL` 或 `INCONCLUSIVE`；
 5. `FAIL` 由协调者交回 generator；任何修复产生新 SHA 后，旧报告立即失效并重新交接；
 6. `INCONCLUSIVE` 不得视为通过；只有 evaluator `PASS` 与 required `verify` 同时覆盖
    同一 Subject SHA，协调者才可进入正常 PR 合并判断；
 7. 如果检查失败，根据错误修复根因并重新验证，不绕过受保护 PR 或门禁。
 
-### 角色与串行交接
+### 角色与冻结 SHA 交接
 
 - **generator**：只实现批准的代码、测试和文档并运行自检；不得创建或切换分支，不得
   stage、commit、push、操作 GitHub、给出最终 `PASS` 或替代 evaluator；
-- **evaluator**：只依赖仓库、handoff manifest 和精确 Subject SHA 进行只读独立验证；
-  不得修改或修复文件，不得 stage、commit、push、切换分支、管理 worktree 或操作
-  GitHub；
-- **协调者**：管理分支、审查和提交、冻结 SHA、检查交接状态、保存 evaluator 报告并
-  协调失败回流；不得用自身判断替代独立 evaluator、复用失效报告或绕过门禁；
-- **人类**：决定产品目标、验收标准、重大 Harness 变更和是否发布。
+- **evaluator**：只依赖仓库、最小交接和精确 Subject SHA 进行只读独立验证；不得修改或
+  修复文件，不得 stage、commit、push、切换分支或操作 GitHub；
+- **协调者**：审查和提交、冻结 SHA、检查交接状态、保存 evaluator 报告并协调失败回流；
+  只有收到人类明确指令后才能创建或切换分支，不得用自身判断替代独立 evaluator、复用
+  失效报告或绕过门禁；
+- **人类**：决定产品目标、验收标准、重大 Harness 变更、是否创建或切换分支以及是否
+  发布。
 
+协调者可按任务需要自行决定是否使用额外子智能体以及是否并行；同一修改任务的
+generator 写入、协调者冻结 Subject SHA、不同 evaluator 只读验证仍必须依次进行。
 状态依次为 `SPEC_READY → IMPLEMENTING → FROZEN(<Subject SHA>) → VERIFYING`，验证只可
-进入 `PASS`、`FAIL → IMPLEMENTING` 或 `INCONCLUSIVE`。第一版只允许串行共享工作树；
-generator 停止写入且协调者冻结提交后，evaluator 才能开始。
+进入 `PASS`、`FAIL → IMPLEMENTING` 或 `INCONCLUSIVE`。
 
-协调者交给 evaluator 的 handoff manifest 至少包含：
+协调者交给 generator 的最小任务交接只包含：
 
 ```text
 Task:
-Repository:
-Source branch:
-Expected base ref:
-Expected base SHA:
+Acceptance criteria:
+Allowed scope:
+Prohibitions:
+```
+
+协调者交给 evaluator 的最小交接只包含：
+
+```text
+Task:
+Acceptance criteria:
 Subject SHA:
-Generator agent/task id:
-Evaluator agent/task id:
-Specification / acceptance criteria:
-Required repository documents:
-Working-tree mode: serial shared
+Generator:
+Evaluator:
 Mutation allowed: no
-Required pre/post guard:
 ```
 
 evaluator 报告至少包含：
@@ -151,7 +156,6 @@ evaluator 报告至少包含：
 Subject SHA:
 Generator:
 Evaluator:
-Specification / acceptance criteria:
 Commands executed:
 Independent scenarios:
 Findings:
@@ -161,9 +165,13 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 
 报告不得写入被验证提交。协调者在 evaluator 前后分别运行
 `scripts/check-verification-subject.ps1`（Windows）或
-`scripts/check-verification-subject.sh`（macOS/Linux），检查 manifest 分支、Subject
-SHA、干净工作树和空暂存区。完整协议与证据边界从
-[文档索引](docs/README.md)查阅执行计划 018。
+`scripts/check-verification-subject.sh`（macOS/Linux），只传一个完整 Subject SHA，
+检查该 SHA 解析为提交、`HEAD` 精确相等、工作树干净且暂存区为空。完整协议与实施步骤
+见 [决策卡 022](docs/decisions/022-simplify-agent-handoff.md) 和
+[文档索引](docs/README.md)中的已归档执行计划 019。
+
+不同智能体身份仍由协调记录、最小交接与 evaluator 报告审计；不得通过新增名为
+`independent-verification` 的普通 CI Job 或 required check 伪造身份保证。
 
 ## 提交前暂存检查
 
@@ -194,15 +202,6 @@ SHA、干净工作树和空暂存区。完整协议与证据边界从
   `main → develop` PR 回流；
 - `develop` 与 `main` 都要求 PR、严格 `verify`、管理员不可绕过，并禁止强推和删除；
 - 分支流检查只允许上述普通、release、hotfix 和 hotfix 回流四种 PR 拓扑。
-
-## 临时工作树协作
-
-- 智能体不得为临时任务手工运行 `git worktree add`、`git worktree remove` 或
-  `git worktree prune`；
-- 需要隔离工作树或任务移交时，优先使用 Codex-managed Worktree/Handoff；
-- 如果该能力不可用，改为串行工作并请求协调，不得自行创建临时 worktree。
-- 不得通过新增名为 `independent-verification` 的普通 CI Job 或 required check 伪造
-  不同智能体身份；第一版的身份分离由协调日志、handoff manifest 和 evaluator 报告审计。
 
 ## 验证命令
 
@@ -245,7 +244,7 @@ sh ./scripts/check-environment.sh
 - 新增或修改的行为有自动测试；
 - `verify` 全部通过；
 - 不同 evaluator 对冻结的 Subject SHA 给出 `PASS`，且 required `verify` 覆盖同一 SHA；
-- evaluator 前后 guard 均确认分支、HEAD、工作树和暂存区没有改变；
+- evaluator 前后 guard 均确认 Subject SHA、HEAD、工作树和暂存区没有改变；
 - 文档与实际命令、目录和行为保持一致；
 - 没有未经规格授权的顺手功能。
 
