@@ -1,6 +1,6 @@
 # 执行计划 022：按标题字面子串筛选任务列表
 
-状态：规划中
+状态：实施中（功能 generator 本地自检已完成）
 
 ## 目标与权威边界
 
@@ -115,11 +115,33 @@
 - [x] 五个规划工件已起草
 - [ ] 规划 PR 已创建并通过 evaluator 与同 SHA required `verify`
 - [ ] 规划 PR 已由人类决定合入 `develop`
-- [ ] 功能 generator 已完成实现、自动测试、真实 JAR 与完整 `verify` 自检
+- [x] 功能 generator 已完成实现、自动测试、真实 JAR 与完整 `verify` 自检
 - [ ] 功能 Subject SHA 已由不同 evaluator 独立验证
 - [ ] 功能 PR required `verify` 与 evaluator 覆盖同一 head 并由人类决定合并
 - [ ] 精确最终 `develop` SHA 的 push `verify` 已成功
 - [ ] 观察收尾 PR 已回填实际结果并归档本计划
 
-当前勾选项只表示本规划请求中已经发生的人类批准与文档起草，不表示任何 PR、远程 CI、
-功能实现、evaluator 结论、合并、最终 `develop` 验证或 Harness 效果已经发生。
+当前勾选项只表示已经发生的人类批准、文档起草和本地 generator 自检，不表示任何 PR、
+远程 CI、evaluator 结论、合并、最终 `develop` 验证或 Harness 效果已经发生。
+
+### 2026-07-29 功能 generator 本地结果
+
+- 在既有 Application/CLI 分层内实现查询 `strip()`、Unicode 码点校验、Java
+  `String.contains` 字面匹配及与状态条件的 AND 组合；未改变 Repository 协议、JSON
+  格式或写入路径；
+- 增加 Application 与组合 CLI 自动测试，机械检查无效查询时 Repository 零调用，并
+  覆盖 200/201 个补充平面码点、大小写、字面元字符、排序/格式、无匹配、无文件、损坏
+  JSON、缺参数和文件无副作用；
+- 初始环境自检因继承的 JDK 17 失败；只为命令进程选择本机 JDK 21 后通过。第一次定向
+  测试成功但出现 5 条新增 Checkstyle 使用距离告警，声明相应测试变量为 `final` 后重跑
+  不再出现；
+- JDK 21 定向测试实际为 68 项、0 失败；完整 `.\mvnw.cmd verify` 实际为 139 项、
+  0 失败，并生成真实 `target/study-track.jar`；
+- 在系统临时目录运行真实 JAR 的字面元字符、大小写、状态 AND、无匹配、无效查询、
+  缺参数、无文件和损坏 JSON 代表场景，核对退出码、输出、文件存在性和 SHA-256；
+- Windows 原生命令行未能可靠承载 200 个补充平面字符的手工内联参数；调用端测试值为
+  200 个码点，但原生启动链传给子进程的参数已转换。未扩大为查询文件功能，200/201
+  码点语义由 JVM 内 Application 与组合 CLI 自动测试覆盖；
+- 完整实际命令、结果、哈希与未发生事实边界见
+  [证据 008](../evidence/008-list-title-search.md)。本节只是 generator 本地进度，不是
+  evaluator `PASS`，不表示任何 PR、CI、合并或最终 `develop` 事实。

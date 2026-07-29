@@ -145,6 +145,193 @@ class StudyTrackApplicationTest {
   }
 
   @Test
+  void listContainsUsesLiteralCaseSensitiveMatchingAndStatusAnd(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 6,
+          "tasks": [
+            {"id": 5, "title": "Harness .* pending", "completed": false},
+            {"id": 1, "title": "Harness .* completed", "completed": true},
+            {"id": 3, "title": "harness .* lowercase", "completed": false},
+            {"id": 2, "title": "Harness plain pending", "completed": false}
+          ]
+        }
+        """,
+        StandardCharsets.UTF_8);
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    final CommandResult literal =
+        execute("--data-file", dataFile.toString(), "list", "--contains", "  .*  ");
+    final CommandResult combined =
+        execute(
+            "--data-file",
+            dataFile.toString(),
+            "list",
+            "--status",
+            "pending",
+            "--contains",
+            "Harness");
+
+    assertEquals(0, literal.exitCode());
+    assertEquals(
+        """
+        [x] 1 Harness .* completed
+        [ ] 3 harness .* lowercase
+        [ ] 5 Harness .* pending
+        """
+            .replace("\n", System.lineSeparator()),
+        literal.output());
+    assertEquals("", literal.error());
+    assertEquals(0, combined.exitCode());
+    assertEquals(
+        """
+        [ ] 2 Harness plain pending
+        [ ] 5 Harness .* pending
+        """
+            .replace("\n", System.lineSeparator()),
+        combined.output());
+    assertEquals("", combined.error());
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
+  void listContainsHandlesUnicodeBoundaryNoMatchAndMissingData(
+      @TempDir Path temporaryDirectory) throws Exception {
+    String validSearchText = "😀".repeat(200);
+    Path dataFile = temporaryDirectory.resolve("tasks.json");
+    Files.writeString(
+        dataFile,
+        """
+        {
+          "nextId": 2,
+          "tasks": [
+            {"id": 1, "title": "%s", "completed": false}
+          ]
+        }
+        """.formatted(validSearchText),
+        StandardCharsets.UTF_8);
+    final byte[] originalData = Files.readAllBytes(dataFile);
+
+    final CommandResult boundary =
+        execute(
+            "--data-file",
+            dataFile.toString(),
+            "list",
+            "--contains",
+            validSearchText);
+    final CommandResult unmatched =
+        execute(
+            "--data-file",
+            dataFile.toString(),
+            "list",
+            "--contains",
+            "not present");
+    Path missingDataFile = temporaryDirectory.resolve("missing.json");
+    final CommandResult missing =
+        execute(
+            "--data-file",
+            missingDataFile.toString(),
+            "list",
+            "--contains",
+            "anything");
+
+    assertEquals(0, boundary.exitCode());
+    assertEquals(
+        "[ ] 1 " + validSearchText + System.lineSeparator(), boundary.output());
+    assertEquals("", boundary.error());
+    assertEquals(0, unmatched.exitCode());
+    assertEquals("No tasks." + System.lineSeparator(), unmatched.output());
+    assertEquals("", unmatched.error());
+    assertEquals(0, missing.exitCode());
+    assertEquals("No tasks." + System.lineSeparator(), missing.output());
+    assertEquals("", missing.error());
+    assertArrayEquals(originalData, Files.readAllBytes(dataFile));
+    assertFalse(Files.exists(missingDataFile));
+  }
+
+  @Test
+  void invalidOrMissingContainsTextFailsBeforeDataAccess(
+      @TempDir Path temporaryDirectory) throws Exception {
+    String[] invalidSearchText = {" \t ", "😀".repeat(201)};
+
+    for (int index = 0; index < invalidSearchText.length; index++) {
+      Path dataFile = temporaryDirectory.resolve("corrupt-" + index + ".json");
+      byte[] corruptData = "{\"nextId\":".getBytes(StandardCharsets.UTF_8);
+      Files.write(dataFile, corruptData);
+
+      CommandResult result =
+          execute(
+              "--data-file",
+              dataFile.toString(),
+              "list",
+              "--contains",
+              invalidSearchText[index]);
+
+      assertEquals(2, result.exitCode());
+      assertEquals("", result.output());
+      assertEquals(
+          "Search text must contain between 1 and 200 characters."
+              + System.lineSeparator(),
+          result.error());
+      assertArrayEquals(corruptData, Files.readAllBytes(dataFile));
+    }
+
+    Path corruptMissingArgumentDataFile =
+        temporaryDirectory.resolve("corrupt-missing-argument.json");
+    byte[] corruptData = "{\"nextId\":".getBytes(StandardCharsets.UTF_8);
+    Files.write(corruptMissingArgumentDataFile, corruptData);
+    CommandResult missingArgument =
+        execute(
+            "--data-file",
+            corruptMissingArgumentDataFile.toString(),
+            "list",
+            "--contains");
+
+    assertEquals(2, missingArgument.exitCode());
+    assertEquals("", missingArgument.output());
+    assertTrue(
+        missingArgument.error().contains("Missing required parameter for option '--contains'"));
+    assertFalse(missingArgument.error().contains("Data file error:"));
+    assertArrayEquals(corruptData, Files.readAllBytes(corruptMissingArgumentDataFile));
+
+    Path missingDataFile = temporaryDirectory.resolve("not-created.json");
+    CommandResult missingArgumentWithoutData =
+        execute(
+            "--data-file",
+            missingDataFile.toString(),
+            "list",
+            "--contains");
+
+    assertEquals(2, missingArgumentWithoutData.exitCode());
+    assertFalse(Files.exists(missingDataFile));
+  }
+
+  @Test
+  void validListContainsReportsCorruptDataWithoutChangingIt(
+      @TempDir Path temporaryDirectory) throws Exception {
+    Path dataFile = temporaryDirectory.resolve("corrupt.json");
+    byte[] corruptData = "{\"nextId\":".getBytes(StandardCharsets.UTF_8);
+    Files.write(dataFile, corruptData);
+
+    CommandResult result =
+        execute(
+            "--data-file",
+            dataFile.toString(),
+            "list",
+            "--contains",
+            "valid");
+
+    assertEquals(1, result.exitCode());
+    assertEquals("", result.output());
+    assertTrue(result.error().startsWith("Data file error:"));
+    assertArrayEquals(corruptData, Files.readAllBytes(dataFile));
+  }
+
+  @Test
   void unsupportedListStatusesReturnUsageExitCode(@TempDir Path temporaryDirectory) {
     String[] unsupportedStatuses = {"unknown", "PENDING"};
 

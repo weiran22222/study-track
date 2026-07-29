@@ -46,6 +46,21 @@ public final class StudyTaskService {
   }
 
   /**
+   * Lists learning tasks whose saved titles contain the validated search text.
+   *
+   * @param rawSearchText search text supplied by the user
+   * @return matching persisted tasks ordered by identifier
+   * @throws InvalidSearchTextException when the stripped text is outside the allowed range
+   */
+  public List<StudyTask> listTasks(String rawSearchText) {
+    String searchText = normalizeSearchText(rawSearchText);
+    return repository.findAll().stream()
+        .filter(task -> task.title().contains(searchText))
+        .sorted(Comparator.comparingLong(StudyTask::id))
+        .toList();
+  }
+
+  /**
    * Summarizes all persisted learning tasks by completion state.
    *
    * @return immutable task counts
@@ -166,5 +181,19 @@ public final class StudyTaskService {
       throw new InvalidTaskTitleException();
     }
     return title;
+  }
+
+  private String normalizeSearchText(String rawSearchText) {
+    if (rawSearchText == null) {
+      throw new InvalidSearchTextException();
+    }
+
+    String searchText = rawSearchText.strip();
+    int codePointCount =
+        searchText.codePointCount(0, searchText.length());
+    if (codePointCount < 1 || codePointCount > MAXIMUM_TITLE_CODE_POINTS) {
+      throw new InvalidSearchTextException();
+    }
+    return searchText;
   }
 }
