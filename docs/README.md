@@ -41,6 +41,7 @@
 - [022：简化 generator/evaluator 交接](decisions/022-simplify-agent-handoff.md)
 - [023：本地 develop 只从 origin/develop 安全纯快进](decisions/023-local-develop-fast-forward-policy.md)
 - [024：以 Harness 落地效果验证为项目终极目标](decisions/024-harness-effect-validation-goal.md)
+- [025：建立稳定的文档地图导航](decisions/025-documentation-map-navigation.md)
 
 ## 执行计划
 

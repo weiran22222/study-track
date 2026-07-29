@@ -62,6 +62,65 @@ class DocumentationNavigationTest {
   }
 
   @Test
+  void agentDocumentationMapKeepsStableFirstHopAndProgressiveDisclosure()
+      throws IOException {
+    String agents = readRequiredFile(AGENTS);
+    String map =
+        requiredSection(
+            agents, "## 开始工作前：文档地图", "## 权威事实与机械验收");
+    Set<String> linkTargets = markdownLinkTargets(map);
+
+    assertContainsAll(
+        AGENTS,
+        map,
+        Set.of(
+            "工作约定",
+            "当前权威事实",
+            "辅助说明",
+            "历史入口",
+            "历史工件",
+            "docs/decisions/",
+            "docs/exec-plans/",
+            "docs/evidence/",
+            "docs/feedback/",
+            "根级稳定文档",
+            "渐进查阅",
+            "只提供第一跳",
+            "不逐项列出历史工件",
+            "不形成完整文件清单"),
+        "Restore the compact first-hop map and progressive history disclosure.");
+
+    for (String stableEntry :
+        Set.of(
+            "AGENTS.md",
+            "HARNESS.md",
+            "SPEC.md",
+            "ARCHITECTURE.md",
+            "docs/README.md",
+            "docs/environment.md")) {
+      assertTrue(
+          linkTargets.contains(stableEntry),
+          failure(
+              AGENTS,
+              "The documentation map no longer links stable entry: " + stableEntry,
+              "Restore the stable first-hop link and its reading guidance."));
+    }
+
+    assertFalse(
+        linkTargets.stream()
+            .anyMatch(
+                target ->
+                    target.startsWith("docs/decisions/")
+                        || target.startsWith("docs/exec-plans/")
+                        || target.startsWith("docs/evidence/")
+                        || target.startsWith("docs/feedback/")),
+        failure(
+            AGENTS,
+            "The first-hop map links individual historical artifacts.",
+            "Keep historical categories descriptive and disclose files through docs/README.md."));
+  }
+
+  @Test
   void everyManagedDocumentIsLinkedFromTheIndex() throws IOException {
     String index = readRequiredFile(DOCUMENT_INDEX);
     Set<String> linkTargets = markdownLinkTargets(index);
@@ -97,6 +156,7 @@ class DocumentationNavigationTest {
 
   @Test
   void localMarkdownLinksAndEnvironmentEntryRemainValid() throws IOException {
+    String agents = readRequiredFile(AGENTS);
     String index = readRequiredFile(DOCUMENT_INDEX);
     Set<String> linkTargets = markdownLinkTargets(index);
 
@@ -107,19 +167,29 @@ class DocumentationNavigationTest {
             "The build environment guide is not discoverable from the documentation index.",
             "Add a Markdown link to environment.md under the important documentation section."));
 
-    for (String linkTarget : linkTargets) {
+    assertLocalMarkdownLinksResolve(AGENTS, agents);
+    assertLocalMarkdownLinksResolve(DOCUMENT_INDEX, index);
+  }
+
+  private static void assertLocalMarkdownLinksResolve(Path document, String markdown) {
+    Path parent = document.getParent();
+    Path base = parent == null ? Path.of("") : parent;
+
+    for (String linkTarget : markdownLinkTargets(markdown)) {
       if (!linkTarget.endsWith(".md")) {
         continue;
       }
-      Path linkedDocument = DOCUMENT_INDEX.getParent().resolve(linkTarget).normalize();
+      Path linkedDocument = base.resolve(linkTarget).normalize();
       assertTrue(
           Files.isRegularFile(linkedDocument),
           failure(
-              DOCUMENT_INDEX,
+              document,
               "A local Markdown link points to a missing file: " + linkTarget,
               "Restore "
                   + linkedDocument
-                  + " or update docs/README.md to the current Markdown path."));
+                  + " or update "
+                  + document
+                  + " to the current Markdown path."));
     }
   }
 
@@ -252,6 +322,18 @@ class DocumentationNavigationTest {
     return matcher.results().map(result -> result.group(1)).collect(Collectors.toSet());
   }
 
+  private static String requiredSection(String markdown, String heading, String nextHeading) {
+    int start = markdown.indexOf(heading);
+    int end = markdown.indexOf(nextHeading);
+    assertTrue(
+        start >= 0 && end > start,
+        failure(
+            AGENTS,
+            "The stable documentation map section cannot be located.",
+            "Restore the documentation map before the authority and verification section."));
+    return markdown.substring(start, end);
+  }
+
   private static String readRequiredFile(Path file) throws IOException {
     assertTrue(
         Files.isRegularFile(file),
@@ -272,7 +354,8 @@ class DocumentationNavigationTest {
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=DocumentationNavigationTest test, then .\\mvnw.cmd verify.
         Authority: HARNESS.md, docs/decisions/009-documentation-entropy-control.md,
-        docs/decisions/024-harness-effect-validation-goal.md, and docs/README.md
+        docs/decisions/024-harness-effect-validation-goal.md,
+        docs/decisions/025-documentation-map-navigation.md, and docs/README.md
         """
         .formatted(location, reason, fix);
   }
