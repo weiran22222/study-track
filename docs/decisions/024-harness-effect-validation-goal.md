@@ -1,6 +1,6 @@
 # 决策卡 024：以 Harness 落地效果验证为项目终极目标
 
-状态：已批准（规划阶段，尚未改变活跃 Harness 行为）
+状态：已实施（仓库内稳定文档、导航与机械检查）
 
 日期：2026-07-29
 
@@ -143,16 +143,28 @@ StudyTrack CLI 提供规模小、文件本地化、输出确定且已有自动�
   记录证明的事实继续以这些记录为准。
 
 详细文件范围、同 SHA 验证和 GitHub-only 集成顺序见
-[执行计划 021](../exec-plans/021-harness-effect-validation-goal.md)。
+[执行计划 021](../exec-plans/completed/021-harness-effect-validation-goal.md)。
 
 ## 风险等级、当前边界与回退
 
 这是第三级 Harness 变化：它纠正项目终极目的并新增长期评估语义，影响未来 Harness
-选择，必须先由规划 PR 固化决定和计划，再由功能 PR 激活稳定导航与机械检查。
+选择，因此使用规划 PR 固化决定和计划，再由功能 PR 激活稳定导航与机械检查。
 
-本规划 PR 只允许新增本决策、活跃计划 021 和索引项。它不修改活跃 Harness 行为、
+规划 PR 的批准范围只允许新增本决策、活跃计划 021 和索引项。它不修改活跃 Harness 行为、
 `AGENTS.md`、`SPEC.md`、`ARCHITECTURE.md`、脚本、测试、CI、产品代码、依赖、权限、
-分支保护或部署，也不声称已经观察到任何 Harness 效果。
+分支保护或部署。
+
+## 仓库内实施边界
+
+2026-07-29，功能工作树已经形成根级 `HARNESS.md`、`AGENTS.md` 与文档索引的简短导航，
+并扩展 `DocumentationNavigationTest` 守护稳定权威边界、效果协议与可行动诊断。
+`SPEC.md`、`ARCHITECTURE.md`、产品代码、其他测试、脚本、CI、依赖和远程设置没有纳入
+功能范围。
+
+本状态只记录仓库内实施已经形成，不表示不同 evaluator 已给出 `PASS`、required CI 已
+成功、功能 PR 已创建或合并、最终 `develop` 已验证或更新，也不表示已经观察到正向
+Harness 效果、发生发布或部署。generator 自检由本次交接报告，远程事实只能由实际发生后
+的对应权威记录证明。
 
 规划或功能 PR 合并前可关闭对应 PR。功能合入后如框架造成误导、重复记录或维护负担，
 通过新的受保护 Harness PR 修正或回退稳定文档、导航和测试；不得删除真实的 PR/Actions/

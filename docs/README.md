@@ -8,6 +8,7 @@
 - [产品规格](../SPEC.md)描述当前有效的产品行为和验收标准；
 - [架构说明](../ARCHITECTURE.md)描述当前有效的技术选择、分层和依赖约束；
 - [智能体导航](../AGENTS.md)描述当前有效的工作约定和机械门禁入口；
+- [Harness 目的与效果评估](../HARNESS.md)描述项目终极目的、实验载体和效果评估协议；
 - 决策记录解释现状形成的历史理由，可能被后续决策取代，不能凌驾于当前规格或架构之上。
 
 ## 重要说明
@@ -45,7 +46,7 @@
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
-- [021：建立 Harness 目的与落地效果验证框架](exec-plans/021-harness-effect-validation-goal.md)（进行中：规划 PR）
+- [021：建立 Harness 目的与落地效果验证框架](exec-plans/completed/021-harness-effect-validation-goal.md)（仓库内实施已完成）
 - [020：实施本地 develop 安全纯快进策略](exec-plans/completed/020-local-develop-fast-forward-policy.md)（仓库内实施已完成）
 - [019：简化 generator/evaluator 交接](exec-plans/completed/019-simplify-agent-handoff.md)（实施计划已完成）
 - [018：实施 generator/evaluator 职责分离](exec-plans/completed/018-generator-evaluator-role-separation.md)（已完成）

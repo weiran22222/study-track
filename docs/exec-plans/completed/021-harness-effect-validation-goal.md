@@ -1,10 +1,10 @@
 # 执行计划 021：建立 Harness 目的与落地效果验证框架
 
-状态：进行中（规划 PR）
+状态：已完成（仓库内实施，2026-07-29；功能 PR 远程阶段未记录）
 
 ## 目标与权威边界
 
-实施[决策卡 024](../decisions/024-harness-effect-validation-goal.md)：把学习、验证和演进
+实施[决策卡 024](../../decisions/024-harness-effect-validation-goal.md)：把学习、验证和演进
 Harness Engineering 实践确立为项目终极目的，以 StudyTrack CLI 作为受控实验载体，
 建立一套最小、可审计且不以流程数量冒充成功的 Harness 落地效果框架。
 
@@ -217,16 +217,29 @@ Mutation allowed: no
 revert `HARNESS.md`、导航和对应测试；不得本地改写 `develop`、删除真实历史记录、关闭
 required 门禁或把 `INCONCLUSIVE` 当作通过。
 
+## 已发生的本地实施事实
+
+功能工作树已经新增根级 `HARNESS.md`，并形成 `AGENTS.md`、`docs/README.md` 的简短导航
+和 `DocumentationNavigationTest` 的稳定语义检查。测试守护三层权威、上游固定学习快照、
+本地采用方向、落地/效果区分、六个维度、最小评估声明、证据复用、反指标与六字段诊断。
+
+本次 diff 没有修改 `SPEC.md`、`ARCHITECTURE.md`、产品代码、其他测试、脚本、CI、依赖、
+数据格式或远程设置。generator 自检的精确命令与结果由本次交接报告，不在此预写。
+本节不表示 evaluator `PASS`、required CI、功能 PR、GitHub 合并、最终 `develop` 验证或
+本地更新已经发生，也不表示 Harness 已产生正向效果、发生发布或部署。
+
 ## 验收标准
 
-- [ ] 规划 PR 只包含决策 024、活跃计划 021 和索引；
-- [ ] `HARNESS.md` 稳定区分终极目标、上游学习来源和受控产品载体；
-- [ ] `HARNESS.md` 定义六个效果维度、最小评估声明、证据复用、无基线和反指标边界；
-- [ ] `AGENTS.md` 与 `docs/README.md` 提供简洁导航，不复制评估手册；
-- [ ] `SPEC.md`、`ARCHITECTURE.md` 和 StudyTrack 产品行为未改变；
-- [ ] 文档机械检查覆盖稳定目的、权威边界、效果维度和上游学习输入边界；
+- [x] 规划 [PR #42](https://github.com/weiran22222/study-track/pull/42) 只包含决策 024、
+  活跃计划 021 和 `docs/README.md`，经规划 evaluator `PASS` 与同 head required
+  `verify` 后通过 GitHub 合并；
+- [x] `HARNESS.md` 稳定区分终极目标、上游学习来源和受控产品载体；
+- [x] `HARNESS.md` 定义六个效果维度、最小评估声明、证据复用、无基线和反指标边界；
+- [x] `AGENTS.md` 与 `docs/README.md` 提供简洁导航，不复制评估手册；
+- [x] `SPEC.md`、`ARCHITECTURE.md` 和 StudyTrack 产品行为未改变；
+- [x] 文档机械检查覆盖稳定目的、权威边界、效果维度和上游学习输入边界；
 - [ ] generator 自检、不同 evaluator `PASS` 与 required `verify` 覆盖同一功能 Subject
   SHA；
 - [ ] 规划与功能 PR 都只在 GitHub 合入，最终 `develop` 精确 SHA 的 push `verify`
   成功后，本地 `develop` 才通过仓库 updater 纯快进；
-- [ ] 没有补造历史测量、重复强制证据文件、管理员绕过、远程权限变化或部署声明。
+- [x] 仓库内实施没有补造历史测量、强制重复证据文件、远程权限变化或部署声明。
