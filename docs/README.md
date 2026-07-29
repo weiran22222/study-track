@@ -50,7 +50,7 @@
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
-- [022：按标题字面子串筛选任务列表](exec-plans/022-list-title-search.md)（规划中）
+- [022：按标题字面子串筛选任务列表](exec-plans/completed/022-list-title-search.md)（已完成）
 - [021：建立 Harness 目的与落地效果验证框架](exec-plans/completed/021-harness-effect-validation-goal.md)（仓库内实施已完成）
 - [020：实施本地 develop 安全纯快进策略](exec-plans/completed/020-local-develop-fast-forward-policy.md)（仓库内实施已完成）
 - [019：简化 generator/evaluator 交接](exec-plans/completed/019-simplify-agent-handoff.md)（实施计划已完成）
@@ -91,4 +91,4 @@
 - [003：rename 三级流程复盘](feedback/003-rename-task-retrospective.md)
 - [004：Unicode 边界与状态漂移复盘](feedback/004-unicode-boundary-harness-retrospective.md)
 - [005：当前 Harness 效果基线](feedback/005-current-harness-effect-baseline.md)
-- [006：`list --contains` 与精简导航后的 Harness 前瞻观察](feedback/006-list-title-search-observation.md)（待观察）
+- [006：`list --contains` 与精简导航后的 Harness 前瞻观察](feedback/006-list-title-search-observation.md)（已完成，证据不足）

@@ -1,11 +1,11 @@
 # 执行计划 022：按标题字面子串筛选任务列表
 
-状态：实施中（功能 generator 本地自检已完成）
+状态：已完成（产品观察单元已结束；收尾工件已形成）
 
 ## 目标与权威边界
 
-实施[决策卡 027](../decisions/027-list-title-search.md)和
-[`SPEC.md` 2.2 节及 AC-18](../../SPEC.md#22-查看任务)，为 `list` 增加已批准的标题筛选
+实施[决策卡 027](../../decisions/027-list-title-search.md)和
+[`SPEC.md` 2.2 节及 AC-18](../../../SPEC.md#22-查看任务)，为 `list` 增加已批准的标题筛选
 能力。本计划只记录实施阶段、风险、验证方法、停止条件和进度；完整产品协议只以
 `SPEC.md` 为权威。
 
@@ -113,19 +113,48 @@
 
 - [x] 人类批准产品目标、最小边界和第三级规划
 - [x] 五个规划工件已起草
-- [ ] 规划 PR 已创建并通过 evaluator 与同 SHA required `verify`
-- [ ] 规划 PR 已由人类决定合入 `develop`
+- [x] 规划 PR 已创建并通过 evaluator 与同 SHA required `verify`
+- [x] 规划 PR 已由人类决定合入 `develop`
 - [x] 功能 generator 已完成实现、自动测试、真实 JAR 与完整 `verify` 自检
-- [ ] 功能 Subject SHA 已由不同 evaluator 独立验证
-- [ ] 功能 PR required `verify` 与 evaluator 覆盖同一 head 并由人类决定合并
-- [ ] 精确最终 `develop` SHA 的 push `verify` 已成功
-- [ ] 观察收尾 PR 已回填实际结果并归档本计划
+- [x] 功能 Subject SHA 已由不同 evaluator 独立验证
+- [x] 功能 PR required `verify` 与 evaluator 覆盖同一 head 并由人类决定合并
+- [x] 精确最终 `develop` SHA 的 push `verify` 已成功
+- [x] 观察收尾内容已回填实际结果并在当前工作树归档本计划
 
-当前勾选项只表示已经发生的人类批准、文档起草和本地 generator 自检，不表示任何 PR、
-远程 CI、evaluator 结论、合并、最终 `develop` 验证或 Harness 效果已经发生。
+最后一项只表示收尾工件已经形成并完成归档；本提交不记录或声称承载这些工件的 PR、CI、
+合并或最终 `develop` 远程事实。相关远程事实无论处于何种状态，都不回扩已经结束的产品
+观察单元。
 
-### 2026-07-29 功能 generator 本地结果
+## 实际结果
 
+### 2026-07-29 规划阶段
+
+- 规划冻结 Subject SHA 为
+  `e030cab7a6ac6bc3be93a8b9aeed151d3f6ee1f5`；generator 在 JDK 21 下完整
+  `.\mvnw.cmd verify` 为 132/132；
+- 不同规划 evaluator 前后 guard 均绑定该 SHA，结论为 `PASS`：定向 7/7、完整
+  132/132，没有规划 finding。PowerShell Maven 定向调用曾需要修正引号，使属性作为
+  完整参数传入；这是验证工具调用边界，不是规划 finding 或产品缺陷；
+- [PR #47](https://github.com/weiran22222/study-track/pull/47) 的分支 push
+  [run 30448735930](https://github.com/weiran22222/study-track/actions/runs/30448735930)、
+  PR [run 30448751053](https://github.com/weiran22222/study-track/actions/runs/30448751053)
+  均为 `verify/success`；人类决定合并后形成
+  `383dbd2cd4d00641a389148f766bdf4a9e3a3409`，其最终 develop push
+  [run 30448960186](https://github.com/weiran22222/study-track/actions/runs/30448960186)
+  为 `verify/success`。
+
+### 2026-07-29 功能阶段
+
+- 功能冻结 Subject SHA 为
+  `c5bd758e6bc0c57aaa7493d9f00e31153efe7855`；不同功能 evaluator 前后 guard 均绑定该
+  SHA，结论为 `PASS`：定向 68/68、完整 139/139，没有缺陷 finding；
+- [PR #48](https://github.com/weiran22222/study-track/pull/48) 的分支 push
+  [run 30450528279](https://github.com/weiran22222/study-track/actions/runs/30450528279)、
+  PR [run 30450546994](https://github.com/weiran22222/study-track/actions/runs/30450546994)
+  均为 `verify/success`；人类决定合并后形成
+  `d9f6f08cc8c785e14989a2c93d410d3b06f4a209`，其最终 develop push
+  [run 30453206695](https://github.com/weiran22222/study-track/actions/runs/30453206695)
+  为 `verify/success`；
 - 在既有 Application/CLI 分层内实现查询 `strip()`、Unicode 码点校验、Java
   `String.contains` 字面匹配及与状态条件的 AND 组合；未改变 Repository 协议、JSON
   格式或写入路径；
@@ -143,5 +172,15 @@
   200 个码点，但原生启动链传给子进程的参数已转换。未扩大为查询文件功能，200/201
   码点语义由 JVM 内 Application 与组合 CLI 自动测试覆盖；
 - 完整实际命令、结果、哈希与未发生事实边界见
-  [证据 008](../evidence/008-list-title-search.md)。本节只是 generator 本地进度，不是
-  evaluator `PASS`，不表示任何 PR、CI、合并或最终 `develop` 事实。
+  [证据 008](../../evidence/008-list-title-search.md)。证据文件只保存 generator 本地
+  事实；本节前两项远程事实由对应 PR 与 Actions 定位，不反向改写证据 008 的边界。
+
+### 2026-07-29 观察收尾
+
+- [反馈 006](../../feedback/006-list-title-search-observation.md)已按预注册八字段和全部
+  六维度回填，结论为“证据不足”；
+- 规格批准后没有额外产品语义澄清或人工微观指挥；人类选择产品边界、当前分支、规划合并
+  和功能合并属于必需治理，不计为非计划补救；
+- 本计划已在当前工作树移入 `docs/exec-plans/completed/`，索引与决策状态已同步；
+- 这些收尾内容表示 generator 写入已经形成；本提交不记录或声称承载这些工件的 PR、CI、
+  合并、最终 `develop` 远程事实或新的 evaluator 结论。
