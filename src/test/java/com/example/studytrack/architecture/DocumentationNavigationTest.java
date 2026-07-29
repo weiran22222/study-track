@@ -18,7 +18,11 @@ import org.junit.jupiter.api.Test;
 class DocumentationNavigationTest {
 
   private static final Path AGENTS = Path.of("AGENTS.md");
+  private static final Path HARNESS = Path.of("HARNESS.md");
   private static final Path DOCUMENT_INDEX = Path.of("docs", "README.md");
+  private static final String UPSTREAM_SNAPSHOT =
+      "github.com/deusyu/harness-engineering/blob/"
+          + "90208d60687e47eb350606a584837e4cce7ab403/";
   private static final Set<Path> MANAGED_CATEGORIES =
       Set.of(
           Path.of("docs", "decisions"),
@@ -119,6 +123,130 @@ class DocumentationNavigationTest {
     }
   }
 
+  @Test
+  void harnessPurposeAndEffectProtocolStayDiscoverable() throws IOException {
+    String agents = readRequiredFile(AGENTS);
+    String harness = readRequiredFile(HARNESS);
+    String index = readRequiredFile(DOCUMENT_INDEX);
+
+    assertAll(
+        () ->
+            assertTrue(
+                agents.contains("](HARNESS.md)"),
+                failure(
+                    AGENTS,
+                    "AGENTS.md no longer links the stable Harness purpose document.",
+                    "Add a concise Markdown link to HARNESS.md without copying its protocol.")),
+        () ->
+            assertTrue(
+                markdownLinkTargets(index).contains("../HARNESS.md"),
+                failure(
+                    DOCUMENT_INDEX,
+                    "The current-fact index no longer links the Harness purpose document.",
+                    "Add ../HARNESS.md to the current-fact navigation.")));
+
+    assertContainsAll(
+        HARNESS,
+        harness,
+        Set.of(
+            "终极目标",
+            "Harness 变化落地",
+            "受控实验载体",
+            "[SPEC.md](SPEC.md)",
+            "完整产品行为与验收标准的唯一权威",
+            "学习输入，不自动成为本仓库权威",
+            UPSTREAM_SNAPSHOT),
+        "Restore the three-layer purpose and authority boundary in HARNESS.md.");
+
+    assertContainsAll(
+        HARNESS,
+        harness,
+        Set.of(
+            "人类掌舵、智能体执行",
+            "仓库即记录系统",
+            "地图而非手册",
+            "机械化执行",
+            "智能体可读性",
+            "反馈回路",
+            "熵管理"),
+        "Restore the locally adopted Harness Engineering directions.");
+
+    assertContainsAll(
+        HARNESS,
+        harness,
+        Set.of(
+            "落地是评估前提，不是正向效果证明",
+            "结果正确性",
+            "自主性与人类掌舵负担",
+            "反馈回路有效性",
+            "可复现性与可追踪性",
+            "交付效率",
+            "熵与维护成本"),
+        "Restore the landing/effect distinction and all six effect dimensions.");
+
+    assertContainsAll(
+        HARNESS,
+        harness,
+        Set.of(
+            "变化与假设",
+            "观察单元",
+            "适用维度",
+            "基线状态",
+            "无基线",
+            "实际结果与证据",
+            "反例与残余缺口",
+            "维护成本",
+            "正向 | 混合 | 无明显效果 | 负向 | 证据不足"),
+        "Restore every field and allowed conclusion in the minimal evaluation statement.");
+
+    assertContainsAll(
+        HARNESS,
+        harness,
+        Set.of(
+            "PR diff/review",
+            "GitHub Actions",
+            "冻结 Subject SHA",
+            "generator/evaluator 报告",
+            "现有反馈记录",
+            "不强制创建重复 evidence 文件",
+            "不得补造",
+            "PR 数",
+            "提交数",
+            "代码量",
+            "文档数量",
+            "检查数量",
+            "智能体数量",
+            "流程步骤数量",
+            "一次绿色 `verify`",
+            "一次 evaluator `PASS`",
+            "一次 PR 合并",
+            "不能单独证明 Harness 产生正向效果"),
+        "Restore the evidence-reuse, no-fabrication, and anti-metric boundaries.");
+  }
+
+  @Test
+  void documentationFailuresRemainActionable() {
+    String diagnostic = failure(HARNESS, "example reason", "example fix");
+
+    assertContainsAll(
+        HARNESS,
+        diagnostic,
+        Set.of("Location:", "Invariant:", "Reason:", "Fix:", "Recheck:", "Authority:"),
+        "Restore all six actionable diagnostic fields in failure().");
+  }
+
+  private static void assertContainsAll(
+      Path location, String content, Set<String> required, String fix) {
+    for (String anchor : required) {
+      assertTrue(
+          content.contains(anchor),
+          failure(
+              location,
+              "Required stable documentation anchor is missing: " + anchor,
+              fix));
+    }
+  }
+
   private static Set<String> markdownLinkTargets(String markdown) {
     Matcher matcher = MARKDOWN_LINK.matcher(markdown);
     return matcher.results().map(result -> result.group(1)).collect(Collectors.toSet());
@@ -138,13 +266,13 @@ class DocumentationNavigationTest {
     return """
         Documentation navigation invariant violated.
         Location: %s
-        Invariant: AGENTS.md must remain a stable map, while every Markdown file under
-        docs/decisions, docs/exec-plans, docs/evidence, and docs/feedback is discoverable
-        through docs/README.md.
+        Invariant: AGENTS.md must remain a stable map, HARNESS.md must preserve the project
+        purpose and evaluation contract, and managed documents must remain discoverable.
         Reason: %s
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=DocumentationNavigationTest test, then .\\mvnw.cmd verify.
-        Authority: docs/decisions/009-documentation-entropy-control.md and docs/README.md
+        Authority: HARNESS.md, docs/decisions/009-documentation-entropy-control.md,
+        docs/decisions/024-harness-effect-validation-goal.md, and docs/README.md
         """
         .formatted(location, reason, fix);
   }
