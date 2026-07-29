@@ -84,3 +84,4 @@
 - [002：并行 worktree 实战复盘](feedback/002-parallel-worktree-retrospective.md)
 - [003：rename 三级流程复盘](feedback/003-rename-task-retrospective.md)
 - [004：Unicode 边界与状态漂移复盘](feedback/004-unicode-boundary-harness-retrospective.md)
+- [005：当前 Harness 效果基线](feedback/005-current-harness-effect-baseline.md)
