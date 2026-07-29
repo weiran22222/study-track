@@ -1,6 +1,6 @@
 # 决策卡 023：本地 develop 只从 origin/develop 安全纯快进
 
-状态：已批准，待实施
+状态：已实施（仓库内规则、入口与自动测试）
 
 日期：2026-07-29
 
@@ -103,7 +103,18 @@ Harness 使用“规划 PR → 功能 PR”：
 3. 两个 PR 都必须遵守 generator/evaluator 同一冻结 SHA 验证、required `verify` 和
    GitHub-only 合并；功能 PR 合并后才使用新入口更新本地 `develop`。
 
-计划中的阶段是待执行工作，不表示实现、测试、PR、CI、合并或远端变化已经发生。
+本决策批准时，上述阶段只是待执行计划，不曾据此预写实现、测试、PR、CI、合并或远端
+变化；当前实际边界见下节。
+
+## 仓库内实施边界
+
+2026-07-29，功能工作树已经实现 `AGENTS.md` 稳定规则、PowerShell/POSIX 安全更新入口及
+`LocalDevelopUpdateTest`，执行计划 020 随功能 diff 归档。入口实现不读取 GitHub；调用者
+仍必须先回读精确最终 `develop` SHA 的 push `verify` 成功记录，再把该 SHA 作为唯一参数。
+
+本状态只说明仓库内实现已经形成，不表示独立 evaluator 已给出 `PASS`、required CI 已
+成功、功能 PR 已创建或合并、远端 `develop` 已改变、本地 `develop` 已运行新入口更新，
+也不表示发生部署。上述事实只能在实际发生后由对应权威记录证明。
 
 ## 回退
 

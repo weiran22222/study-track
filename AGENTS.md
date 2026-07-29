@@ -203,6 +203,21 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 - `develop` 与 `main` 都要求 PR、严格 `verify`、管理员不可绕过，并禁止强推和删除；
 - 分支流检查只允许上述普通、release、hotfix 和 hotfix 回流四种 PR 拓扑。
 
+### 本地 develop 安全更新
+
+- 禁止在本地 `develop` 上 merge、rebase 或 cherry-pick feature 或其他本地分支；任何
+  进入远端 `develop` 的变更都必须通过受保护 GitHub PR 合并；
+- GitHub 合并后，先回读最终 `origin/develop` 的精确 SHA，并确认该 SHA 的 required
+  push `verify` 成功；只有完成这项远端验证后，才可更新本地 `develop`；
+- Windows 使用 `.\scripts\update-local-develop.ps1 "<verified-develop-sha>"`，
+  macOS/Linux 使用
+  `sh ./scripts/update-local-develop.sh "<verified-develop-sha>"`；
+- 两个入口只接受一个已验证的完整 40 位 SHA，唯一更新源为 `origin/develop`。入口要求
+  当前分支精确为 `develop`、工作树和暂存区干净、本地 `HEAD` 不领先且不分叉，并只执行
+  no-op 或 fast-forward-only 更新；
+- 任一前置、fetch、SHA、提交关系、更新或后置检查失败时必须停止；不得通过 reset、
+  rebase、cherry-pick、切换分支、push、GitHub 操作或自动清理来修复。
+
 ## 验证命令
 
 首次进入仓库或构建环境变化后，先阅读
