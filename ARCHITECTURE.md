@@ -126,11 +126,18 @@ Repository 将存储异常转换为项目定义的持久化异常；CLI 只负�
 5. ArchUnit 架构测试；
 6. 可执行 JAR 打包。
 
-GitHub Actions 的 `verify` Job 在 `push` 和 `pull_request` 事件中都先执行环境自检，
-再运行同一 Maven 命令，避免出现两套产品与架构验收逻辑。除此之外，Job 只在
-`pull_request` 事件中使用事件提供的 base/head SHA 调用
-`sh ./scripts/check-pr-diff.sh`，检查 PR 的完整 `base...head` 差异；checkout 必须获取
-完整历史，使两个端点及合并基点可达。`push` 事件没有 PR 语义，不运行该差异门禁。
+GitHub Actions 保留唯一且同名的 `jobs.verify`。`pull_request` 未按目标分支过滤，因此
+覆盖所有 PR 目标分支；activity types 采用 GitHub 对未配置 `types` 的默认集合，而不是
+显式启用全部类型。每次实际触发都运行完整 PR 门禁：先使用事件提供的 base/head ref
+检查分支流，再使用 base/head SHA 调用 `sh ./scripts/check-pr-diff.sh` 检查完整
+`base...head` 差异；checkout 必须获取完整历史，使两个端点及合并基点可达。随后 Job
+执行 JDK 21 环境自检和同一 Maven 命令。
+
+`push` 事件只匹配 `develop` 与 `main`，用于长期分支更新后的最终非 PR 验证；普通
+`codex/*`、`hotfix/*` 等工作分支 push 不触发 CI。`develop` 与 `main` 的 push 没有 PR
+语义，不运行分支流或差异门禁，但仍执行同一 JDK 21 环境自检和 Maven `verify`。因此
+PR 门禁、长期分支最终验证和本地 Maven 验收共用产品与架构验证入口，又不会为工作分支
+push 重复运行一次完整构建。
 
 PR 差异门禁是 CI 合并验收，不绑定 Maven 生命周期。本地 Windows `.\mvnw.cmd verify`
 不执行 POSIX 脚本，也不依赖系统 `sh`。提交前的 `git diff --cached --check`、本地

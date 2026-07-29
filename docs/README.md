@@ -33,7 +33,7 @@
 - [013：移除导航中的易变 Harness 进度](decisions/013-remove-volatile-harness-progress.md)
 - [014：重新打开单个任务](decisions/014-reopen-task.md)
 - [015：提交前检查完整暂存内容](decisions/015-staged-diff-check.md)
-- [016：为 CI 增加 PR 完整差异空白门禁](decisions/016-ci-pr-diff-whitespace-gate.md)
+- [016：为 CI 增加 PR 完整差异空白门禁](decisions/016-ci-pr-diff-whitespace-gate.md)（“所有 push”触发范围已由 028 部分取代）
 - [017：增强 reopen 幂等失败诊断](decisions/017-reopen-failure-diagnostics.md)
 - [018：只读审计本地 worktree](decisions/018-worktree-hygiene-audit.md)
 - [019：使用 Codex-managed Worktree/Handoff](decisions/019-codex-managed-worktree-lifecycle.md)（已由 022 取代）
@@ -45,11 +45,13 @@
 - [025：建立稳定的文档地图导航](decisions/025-documentation-map-navigation.md)
 - [026：精简智能体导航并分离操作工作流](decisions/026-slim-agent-navigation.md)
 - [027：按标题字面子串筛选任务列表](decisions/027-list-title-search.md)
+- [028：精简 CI verify 触发](decisions/028-streamline-ci-triggers.md)
 
 ## 执行计划
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
+- [023：精简 CI verify 触发](exec-plans/completed/023-streamline-ci-triggers.md)（仓库内实施已完成）
 - [022：按标题字面子串筛选任务列表](exec-plans/completed/022-list-title-search.md)（已完成）
 - [021：建立 Harness 目的与落地效果验证框架](exec-plans/completed/021-harness-effect-validation-goal.md)（仓库内实施已完成）
 - [020：实施本地 develop 安全纯快进策略](exec-plans/completed/020-local-develop-fast-forward-policy.md)（仓库内实施已完成）
