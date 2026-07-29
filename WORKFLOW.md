@@ -175,11 +175,15 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 - 提交前检查使用 `git diff --cached --check`，只检查将要提交的完整暂存内容；
 - 本地 `.\mvnw.cmd verify`（Windows）或 `./mvnw verify`（macOS/Linux）是产品代码、
   架构和构建产物的完整机械验收入口；
-- GitHub Actions 的同名 `verify` Job 在 `push` 和 `pull_request` 事件中都运行环境自检
-  与 Maven `verify`；仅在 `pull_request` 事件中，它先使用事件提供的 base/head ref
-  检查分支流，再使用 base/head SHA 检查 PR 的完整 `base...head` 差异；
-- `push` 没有 PR 范围，不运行分支流或 PR 差异门禁。Windows Maven 验证不执行 POSIX
-  脚本，也不依赖系统 `sh`。
+- GitHub Actions 保留同名 `jobs.verify`：`pull_request` 未按目标分支过滤，覆盖所有
+  PR 目标分支；activity types 采用 GitHub 对未配置 `types` 的默认集合。每次实际触发
+  先使用事件提供的 base/head ref 检查分支流，再使用 base/head SHA 检查完整
+  `base...head` 差异，随后运行 JDK 21 环境自检和 Maven `verify`；
+- `push` 只匹配 `develop` 与 `main`，作为长期分支更新后的最终非 PR 验证，继续运行
+  JDK 21 环境自检和 Maven `verify`，但不运行没有 PR 语义的分支流或差异门禁；
+- 普通 `codex/*`、`hotfix/*` 等工作分支 push 不触发 CI。generator 仍须在 JDK 21 下
+  本地运行相关测试与完整 `verify`；创建或更新 PR 后由 `pull_request` 事件运行完整
+  required 门禁。Windows Maven 验证不执行 POSIX 脚本，也不依赖系统 `sh`。
 
 ## 分支工作流
 
@@ -189,6 +193,8 @@ Verdict: PASS | FAIL | INCONCLUSIVE
   `develop → main` PR；
 - 紧急修复使用从最新 `main` 建立的 `hotfix/* → main` PR，合并后必须通过
   `main → develop` PR 回流；
+- 普通工作分支 push 不运行 CI；所有 PR 运行完整门禁，`develop` 与 `main` 的 push
+  运行合并或发布基线更新后的最终非 PR `verify`；
 - `develop` 与 `main` 都要求 PR、严格 `verify`、管理员不可绕过，并禁止强推和删除；
 - 分支流检查只允许上述普通、release、hotfix 和 hotfix 回流四种 PR 拓扑。
 

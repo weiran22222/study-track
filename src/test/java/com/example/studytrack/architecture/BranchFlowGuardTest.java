@@ -23,8 +23,6 @@ class BranchFlowGuardTest {
       Pattern.compile(
           "^\\s*(develop:codex/\\?\\*|main:develop|main:hotfix/\\?\\*|develop:main)\\)$",
           Pattern.MULTILINE);
-  private static final Pattern WORKFLOW_EVENTS =
-      Pattern.compile("(?m)^on:\\R\\s{2}push:\\R\\s{2}pull_request:");
 
   @Test
   void workflowRunsBranchFlowFirstAndOnlyForPullRequests() throws IOException {
@@ -59,14 +57,7 @@ class BranchFlowGuardTest {
                   WORKFLOW,
                   "The branch-flow step no longer receives the event base/head refs.",
                   "Pass pull_request.base.ref and head.ref as separate quoted arguments."));
-        },
-        () ->
-            assertTrue(
-                WORKFLOW_EVENTS.matcher(workflow).find(),
-                failure(
-                    WORKFLOW,
-                    "The verify workflow no longer covers both push and pull_request events.",
-                    "Keep push verification while limiting branch flow to pull requests.")));
+        });
   }
 
   @Test
@@ -161,7 +152,7 @@ class BranchFlowGuardTest {
         Pull request branch-flow invariant violated.
         Location: %s
         Invariant: the required verify job must reject every PR topology except the four
-        routes authorized by decision 020, while push continues normal non-PR verification.
+        routes authorized by decision 020, while branch-flow remains pull_request-only.
         Reason: %s
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=BranchFlowGuardTest test, then .\\mvnw.cmd verify.
