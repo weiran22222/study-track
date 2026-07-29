@@ -82,6 +82,7 @@
 - [005：Unicode 安全的标题文件输入实施证据](evidence/005-unicode-safe-title-file-input.md)
 - [006：重新打开单个任务实施证据](evidence/006-reopen-task.md)
 - [007：CI PR 完整差异空白门禁本地 POC](evidence/007-ci-pr-diff-whitespace-poc.md)
+- [008：`list --contains` 本地 generator 实施证据](evidence/008-list-title-search.md)
 
 ## 复盘反馈
 

@@ -1,5 +1,6 @@
 package com.example.studytrack.cli;
 
+import com.example.studytrack.application.InvalidSearchTextException;
 import com.example.studytrack.application.StudyTaskService;
 import com.example.studytrack.application.TaskPersistenceException;
 import com.example.studytrack.domain.StudyTask;
@@ -27,6 +28,12 @@ public final class ListCommand implements Callable<Integer> {
       converter = TaskStatusConverter.class)
   private TaskStatus status;
 
+  @Option(
+      names = "--contains",
+      paramLabel = "TEXT",
+      description = "Filter tasks whose saved title contains the text.")
+  private String contains;
+
   @Spec private CommandSpec commandSpec;
 
   @Override
@@ -34,7 +41,10 @@ public final class ListCommand implements Callable<Integer> {
     StudyTaskService service = parentCommand.serviceFactory().create(parentCommand.dataFile());
     try {
       List<StudyTask> tasks =
-          service.listTasks().stream().filter(this::matchesSelectedStatus).toList();
+          (contains == null ? service.listTasks() : service.listTasks(contains))
+              .stream()
+              .filter(this::matchesSelectedStatus)
+              .toList();
       if (tasks.isEmpty()) {
         commandSpec.commandLine().getOut().println("No tasks.");
         return ExitCode.OK;
@@ -48,6 +58,9 @@ public final class ListCommand implements Callable<Integer> {
             .printf("[%s] %d %s%n", marker, task.id(), task.title());
       }
       return ExitCode.OK;
+    } catch (InvalidSearchTextException exception) {
+      commandSpec.commandLine().getErr().println(exception.getMessage());
+      return ExitCode.USAGE;
     } catch (TaskPersistenceException exception) {
       commandSpec.commandLine().getErr().println("Data file error: " + exception.getMessage());
       return ExitCode.SOFTWARE;

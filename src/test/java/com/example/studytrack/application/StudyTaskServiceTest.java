@@ -83,6 +83,70 @@ class StudyTaskServiceTest {
   }
 
   @Test
+  void stripsSearchTextAndMatchesSavedTitlesLiterallyWithCaseSensitivity() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    repository.tasks =
+        List.of(
+            new StudyTask(5, "Harness .* details", false),
+            new StudyTask(1, "literal .* marker", true),
+            new StudyTask(3, "harness .* lowercase", false),
+            new StudyTask(2, "Harness plain", false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    List<StudyTask> literalMatches = service.listTasks("  .*  ");
+    List<StudyTask> caseSensitiveMatches = service.listTasks("Harness");
+
+    assertEquals(
+        List.of(
+            new StudyTask(1, "literal .* marker", true),
+            new StudyTask(3, "harness .* lowercase", false),
+            new StudyTask(5, "Harness .* details", false)),
+        literalMatches);
+    assertEquals(
+        List.of(
+            new StudyTask(2, "Harness plain", false),
+            new StudyTask(5, "Harness .* details", false)),
+        caseSensitiveMatches);
+    assertEquals(2, repository.findAllCalls);
+    assertEquals(0, repository.createCalls);
+    assertEquals(0, repository.updateCalls);
+    assertEquals(0, repository.deleteCalls);
+  }
+
+  @Test
+  void acceptsExactlyTwoHundredSupplementarySearchCodePoints() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    String searchText = "😀".repeat(200);
+    repository.tasks = List.of(new StudyTask(4, searchText, false));
+    StudyTaskService service = new StudyTaskService(repository);
+
+    List<StudyTask> tasks = service.listTasks(searchText);
+
+    assertEquals(List.of(new StudyTask(4, searchText, false)), tasks);
+    assertEquals(1, repository.findAllCalls);
+  }
+
+  @Test
+  void invalidSearchTextFailsBeforeReadingRepository() {
+    RecordingTaskRepository repository = new RecordingTaskRepository();
+    StudyTaskService service = new StudyTaskService(repository);
+
+    for (String searchText : List.of(" \t ", "😀".repeat(201))) {
+      InvalidSearchTextException exception =
+          assertThrows(
+              InvalidSearchTextException.class,
+              () -> service.listTasks(searchText));
+
+      assertEquals(InvalidSearchTextException.MESSAGE, exception.getMessage());
+    }
+    assertThrows(InvalidSearchTextException.class, () -> service.listTasks(null));
+    assertEquals(0, repository.findAllCalls);
+    assertEquals(0, repository.createCalls);
+    assertEquals(0, repository.updateCalls);
+    assertEquals(0, repository.deleteCalls);
+  }
+
+  @Test
   void summarizesMixedTaskStatesWithoutPersisting() {
     RecordingTaskRepository repository = new RecordingTaskRepository();
     repository.tasks =
