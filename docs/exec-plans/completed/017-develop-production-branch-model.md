@@ -1,11 +1,11 @@
 # 执行计划 017：迁移 develop 集成与 main 生产发布分支模型
 
-状态：远程迁移已到 S4，实施中
+状态：已完成并归档（S6 模型闭环）
 
 ## 目标与权限边界
 
 本计划执行
-[决策卡 020](../decisions/020-develop-production-branch-model.md)。目标是在始终保留一个
+[决策卡 020](../../decisions/020-develop-production-branch-model.md)。目标是在始终保留一个
 受保护默认分支的前提下，把日常集成迁移到 `develop`，把 `main` 保留为需要人工批准的
 生产发布基线，并建立普通、release 和 hotfix 三类机械分支流。
 
@@ -39,7 +39,7 @@ GitHub 默认分支、Branch Protection、Ruleset、远程权限或 CI。实施�
 任何状态验证失败都停留在最近一个已验证状态；不得跳过状态、交换 S2/S3/S4 的顺序，或
 让未保护 `develop` 成为默认分支。
 
-## 已发生的远程事实
+## 已发生的远程事实与完成结果
 
 2026-07-28，GitHub 权威记录已经确认：
 
@@ -49,8 +49,20 @@ GitHub 默认分支、Branch Protection、Ruleset、远程权限或 CI。实施�
   no bypass、禁止强推和禁止删除，approvals 未要求；
 - 远端 `HEAD` 指向 `refs/heads/develop`。
 
-因此远程迁移状态已达到 S4。尚未发生实施 PR、`develop → main` release PR、最终
-`main` 验证或部署，不得把后续计划步骤写成已完成。
+以上事实使远程迁移达到 S4。随后发生的 GitHub 权威事实完成了 S4 → S6：
+
+- [PR #33](https://github.com/weiran22222/study-track/pull/33) 实施分支流门禁，使检查进入
+  `develop`，完成 S5；
+- [PR #34](https://github.com/weiran22222/study-track/pull/34) 完成第一次
+  `develop → main` release；
+- `main` 合并提交 `280b74e5ca04f6e2a2b2e85c2a01882fe2d20e91` 的
+  [push verify run #119](https://github.com/weiran22222/study-track/actions/runs/30372083458)
+  成功；
+- GitHub 默认分支仍为 `develop`，`develop` 与 `main` 均保持受保护并要求 required
+  `verify`。
+
+因此迁移状态已达到 S6，实施计划完成。仓库没有发生部署；第一次 release、`main`
+合并提交与成功 CI 只证明发布基线和分支模型闭环，不是部署证据。
 
 ## 阶段 0：规划 PR 走当前 main 流程
 
@@ -327,8 +339,17 @@ GitHub 默认分支、Branch Protection、Ruleset、远程权限或 CI。实施�
 - 仓库内只记录实际发生的本地命令、SHA、偏差和未完成风险，不预测远程结果；
 - 实施 PR 可以更新本计划的实际进度并在完成后移入 `exec-plans/completed/`；
 - 只有发生部署/迁移外部状态偏差、必须记录合并后事实或仍有风险时，才创建独立收尾 PR；
-- 完成定义包括：默认 `develop`、双分支保护回读、实施 PR、首次 release 自举验证、最终
-  `main` push `verify`、hotfix 回流规则的机械测试，以及无永久迁移绕过。
+- 完成定义已经满足：
+  - GitHub 默认分支为 `develop`，且 `develop`、`main` 的保护回读均要求 required
+    `verify`；
+  - [PR #33](https://github.com/weiran22222/study-track/pull/33) 完成实施，分支流门禁及其
+    普通、release、hotfix 和 hotfix 回流机械测试进入 `develop`，没有永久迁移绕过；
+  - [PR #34](https://github.com/weiran22222/study-track/pull/34) 完成第一次 release
+    自举验证；
+  - 最终 `main` SHA `280b74e5ca04f6e2a2b2e85c2a01882fe2d20e91` 的
+    [push verify run #119](https://github.com/weiran22222/study-track/actions/runs/30372083458)
+    成功；
+  - 没有部署，完成状态只表示分支模型与发布基线闭环。
 
 ## 停止条件
 

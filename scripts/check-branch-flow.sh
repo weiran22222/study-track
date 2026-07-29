@@ -3,7 +3,7 @@
 set -u
 
 authority="docs/decisions/020-develop-production-branch-model.md and
-docs/exec-plans/017-develop-production-branch-model.md"
+docs/exec-plans/completed/017-develop-production-branch-model.md"
 
 fail_branch_flow() {
   location=$1
