@@ -1,16 +1,16 @@
 # 执行计划 020：实施本地 develop 安全纯快进策略
 
-状态：进行中（规划 PR 阶段，尚未实施）
+状态：已完成（仓库内实施，2026-07-29；功能 PR 远端阶段尚未发生）
 
 ## 目标与权威边界
 
-实施[决策卡 023](../decisions/023-local-develop-fast-forward-policy.md)：其他本地分支不得
+实施[决策卡 023](../../decisions/023-local-develop-fast-forward-policy.md)：其他本地分支不得
 直接 merge、rebase 或 cherry-pick 到本地 `develop`；变更只通过受保护 GitHub PR 进入
 远端 `develop`。GitHub 合并且最终远端 `develop` 精确 SHA 的 push `verify` 成功后，
 本地 `develop` 才能通过仓库自有入口从 `origin/develop` 纯快进。
 
-[决策卡 020](../decisions/020-develop-production-branch-model.md)继续定义远端分支拓扑，
-[决策卡 022](../decisions/022-simplify-agent-handoff.md)继续定义 generator/evaluator
+[决策卡 020](../../decisions/020-develop-production-branch-model.md)继续定义远端分支拓扑，
+[决策卡 022](../../decisions/022-simplify-agent-handoff.md)继续定义 generator/evaluator
 同 SHA 交接。本计划不改变 `SPEC.md`、`ARCHITECTURE.md`、产品行为、数据格式、依赖、
 CI Job 身份、GitHub 分支保护、远程权限或部署状态。
 
@@ -209,18 +209,29 @@ reset、强推、绕过 PR、合并本地 feature 或删除未知提交来满足
 
 ## 验收标准
 
-- [ ] 规划 PR 只包含决策 023、活跃计划 020 和索引，并通过独立 evaluator 与同 SHA
-  required `verify` 后在 GitHub 合入；
-- [ ] `AGENTS.md` 明确禁止把其他本地分支 merge/rebase/cherry-pick 到本地 `develop`，
+- [x] 规划 [PR #40](https://github.com/weiran22222/study-track/pull/40) 只包含决策 023、
+  活跃计划 020 和索引，并在独立 evaluator `PASS` 与同 head required `verify` 后由
+  GitHub 合入；
+- [x] `AGENTS.md` 明确禁止把其他本地分支 merge/rebase/cherry-pick 到本地 `develop`，
   并明确 GitHub PR → 最终远端 push `verify` → 本地安全更新顺序；
-- [ ] PowerShell 与 POSIX 入口只接受完整已验证 SHA，唯一 source 为
+- [x] PowerShell 与 POSIX 入口只接受完整已验证 SHA，唯一 source 为
   `origin/develop`，并执行 exact branch、clean/index、not-ahead/not-diverged 和
   fast-forward-only 前后检查；
-- [ ] 所有失败非零退出、无修复性 mutation，并包含六字段诊断；
-- [ ] 行为/静态测试覆盖成功、no-op、输入错误、错误分支、dirty/staged、本地领先、
+- [x] 所有失败非零退出、无修复性 mutation，并包含六字段诊断；
+- [x] 行为/静态测试覆盖成功、no-op、输入错误、错误分支、dirty/staged、本地领先、
   分叉、fetch/ref/SHA 错误和跨平台契约；
 - [ ] generator 自检、不同 evaluator `PASS` 与 required `verify` 覆盖同一功能 PR
   Subject SHA；
 - [ ] 功能 PR 只在 GitHub 合入，最终远端 `develop` 精确 SHA 的 push `verify` 成功后，
   本地 `develop` 才通过新入口从 `origin/develop` 纯快进到该 SHA；
 - [ ] 没有本地 feature 合并、直接 push、管理员绕过、CI/远程权限变化或部署声明。
+
+## 已发生的本地实施事实
+
+功能工作树已经形成 `AGENTS.md` 规则、两个仓库自有入口和
+`LocalDevelopUpdateTest`。Windows 原生测试使用临时仓库与 bare `origin` 覆盖纯快进、
+no-op 及所有计划内主要失败场景；静态契约同时检查 PowerShell/POSIX source parity。
+
+本节不声称 evaluator `PASS`、required CI、功能 PR、GitHub 合并、最终远端 push
+`verify`、本地 `develop` 更新或部署已经发生。generator 自检的精确命令与结果由本次交接
+报告；远端事实在实际发生后以 GitHub PR 与 Actions 为准。

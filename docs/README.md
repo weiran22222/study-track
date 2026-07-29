@@ -44,7 +44,7 @@
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
-- [020：实施本地 develop 安全纯快进策略](exec-plans/020-local-develop-fast-forward-policy.md)（进行中）
+- [020：实施本地 develop 安全纯快进策略](exec-plans/completed/020-local-develop-fast-forward-policy.md)（仓库内实施已完成）
 - [019：简化 generator/evaluator 交接](exec-plans/completed/019-simplify-agent-handoff.md)（实施计划已完成）
 - [018：实施 generator/evaluator 职责分离](exec-plans/completed/018-generator-evaluator-role-separation.md)（已完成）
 - [017：迁移 develop 集成与 main 生产发布分支模型](exec-plans/completed/017-develop-production-branch-model.md)（已完成）
