@@ -31,8 +31,8 @@ class VerificationSubjectGuardTest {
       List.of("Location:", "Invariant:", "Reason:", "Fix:", "Recheck:", "Authority:");
   private static final Pattern FORBIDDEN_GIT_COMMAND =
       Pattern.compile(
-          "(?i)\\bgit\\s+(?:add|branch|checkout|clean|commit|fetch|merge|pull|push|rebase|"
-              + "reset|restore|stash|switch|worktree)\\b");
+          "(?i)\\bgit\\s+(?:add|branch|checkout|clean|clone|commit|fetch|merge|pull|push|"
+              + "rebase|remote|reset|restore|stash|switch|tag|update-ref|worktree)\\b");
   private static final Pattern FORBIDDEN_POWERSHELL_WRITE =
       Pattern.compile(
           "(?i)\\b(?:Add-Content|Clear-Content|Copy-Item|Move-Item|New-Item|Out-File|"
@@ -66,7 +66,7 @@ class VerificationSubjectGuardTest {
                 failure(
                     AGENTS,
                     "AGENTS.md no longer navigates to both subject guard entry points.",
-                    "Reference both stable scripts paths in the serial handoff workflow.")));
+                    "Reference both stable scripts paths in the frozen-SHA handoff workflow.")));
   }
 
   @Test
@@ -78,16 +78,6 @@ class VerificationSubjectGuardTest {
     assertGuardContract(POSIX_GUARD, posix);
 
     assertAll(
-        () ->
-            assertTrue(
-                powershell.contains("git symbolic-ref --quiet --short HEAD")
-                    && powershell.contains("$currentBranch -cne $ExpectedBranch")
-                    && posix.contains("git symbolic-ref --quiet --short HEAD")
-                    && posix.contains("[ \"$current_branch\" != \"$expected_branch\" ]"),
-                failure(
-                    Path.of("scripts"),
-                    "The guards no longer perform the same case-sensitive branch check.",
-                    "Read the attached branch and compare exact case in both guards.")),
         () ->
             assertTrue(
                 powershell.contains("git rev-parse --verify HEAD")
@@ -111,7 +101,17 @@ class VerificationSubjectGuardTest {
                 failure(
                     Path.of("scripts"),
                     "The guards no longer perform the same empty-index check.",
-                    "Use git diff --cached --quiet --exit-code in both guards.")));
+                    "Use git diff --cached --quiet --exit-code in both guards.")),
+        () ->
+            assertFalse(
+                powershell.contains("symbolic-ref")
+                    || posix.contains("symbolic-ref")
+                    || powershell.contains("ExpectedBranch")
+                    || posix.contains("expected_branch"),
+                failure(
+                    Path.of("scripts"),
+                    "A guard still couples the Subject SHA to a branch.",
+                    "Keep the guard input and invariants limited to the full Subject SHA.")));
   }
 
   @Test
@@ -156,7 +156,7 @@ class VerificationSubjectGuardTest {
   }
 
   @Test
-  void agentsDefinesRoleStateHandoffAndSameShaCompletionContract() throws IOException {
+  void agentsDefinesRolesLightweightHandoffsAndSameShaCompletionContract() throws IOException {
     String agents = readRequiredFile(AGENTS);
 
     assertAll(
@@ -182,18 +182,39 @@ class VerificationSubjectGuardTest {
                     "Restore the frozen-SHA verification state transitions.")),
         () ->
             assertTrue(
-                agents.contains("Task:")
-                    && agents.contains("Expected base SHA:")
-                    && agents.contains("Subject SHA:")
-                    && agents.contains("Mutation allowed: no")
-                    && agents.contains("Commands executed:")
+                Pattern.compile(
+                        "协调者交给 generator 的最小任务交接只包含：\\R+```text\\R"
+                            + "Task:\\RAcceptance criteria:\\RAllowed scope:\\R"
+                            + "Prohibitions:\\R```")
+                    .matcher(agents)
+                    .find(),
+                failure(
+                    AGENTS,
+                    "The generator handoff is not the approved four-field minimum.",
+                    "Keep only Task, Acceptance criteria, Allowed scope, and Prohibitions.")),
+        () ->
+            assertTrue(
+                Pattern.compile(
+                        "协调者交给 evaluator 的最小交接只包含：\\R+```text\\R"
+                            + "Task:\\RAcceptance criteria:\\RSubject SHA:\\RGenerator:\\R"
+                            + "Evaluator:\\RMutation allowed: no\\R```")
+                    .matcher(agents)
+                    .find(),
+                failure(
+                    AGENTS,
+                    "The evaluator handoff is not the approved six-field minimum.",
+                    "Keep only the six evaluator handoff fields from decision 022.")),
+        () ->
+            assertTrue(
+                agents.contains("Commands executed:")
                     && agents.contains("Independent scenarios:")
+                    && agents.contains("Findings:")
                     && agents.contains("Residual gaps:")
                     && agents.contains("Verdict: PASS | FAIL | INCONCLUSIVE"),
                 failure(
                     AGENTS,
-                    "The minimum handoff or evaluator report fields are incomplete.",
-                    "Restore every minimum manifest and report field from decision 021.")),
+                    "The evaluator report no longer records the required evidence.",
+                    "Restore exact SHA, commands, scenarios, findings, gaps, and verdict.")),
         () ->
             assertTrue(
                 agents.contains("任何修复产生新 SHA 后，旧报告立即失效")
@@ -205,14 +226,26 @@ class VerificationSubjectGuardTest {
                     "Bind evaluator PASS and required verify to the same immutable SHA.")),
         () ->
             assertTrue(
-                agents.contains("不得通过新增名为 `independent-verification`")
-                    && agents.contains("git worktree add")
-                    && agents.contains("git worktree remove")
-                    && agents.contains("git worktree prune"),
+                agents.contains("`independent-verification` 的普通 CI Job")
+                    && agents.contains("只有收到人类明确指令后才能创建或切换分支")
+                    && agents.contains(
+                        "协调者可按任务需要自行决定是否使用额外子智能体以及是否并行")
+                    && agents.contains("仍必须依次进行"),
                 failure(
                     AGENTS,
-                    "The fake-check or manual-worktree prohibitions are incomplete.",
-                    "Restore both stable prohibitions without creating new CI identity.")));
+                    "The human branch authority, coordinator discretion, or serial SHA flow "
+                        + "is missing.",
+                    "Restore the lightweight coordination contract from decision 022.")),
+        () ->
+            assertFalse(
+                agents.contains("serial shared")
+                    || agents.contains("managed detached")
+                    || agents.contains("Codex-managed Worktree")
+                    || agents.contains("git worktree"),
+                failure(
+                    AGENTS,
+                    "Active navigation still mandates a worktree or branch verification mode.",
+                    "Keep runtime layout out of the active generator/evaluator contract.")));
   }
 
   @Test
@@ -256,7 +289,7 @@ class VerificationSubjectGuardTest {
     runSuccessfully(repository, "git", "commit", "-m", "new subject");
     String subjectSha = runSuccessfully(repository, "git", "rev-parse", "HEAD").output().trim();
 
-    CommandResult clean = runNativeGuard(repository, subjectSha, TEST_BRANCH);
+    CommandResult clean = runNativeGuard(repository, subjectSha);
     assertAll(
         () ->
             assertEquals(
@@ -265,36 +298,26 @@ class VerificationSubjectGuardTest {
                 failure(
                     repository,
                     "The native guard rejected the exact clean subject: " + clean.output(),
-                    "Restore acceptance of matching branch, HEAD, clean worktree, "
-                        + "and empty index.")),
+                    "Restore acceptance of matching HEAD, clean working tree, and empty index.")),
         () ->
             assertTrue(
-                clean.output().contains("Mode: serial shared")
-                    && clean.output().contains("Current branch: " + TEST_BRANCH)
+                clean.output().contains("Subject SHA: " + subjectSha)
                     && clean.output().contains("HEAD: " + subjectSha)
-                    && clean.output().contains("Worktree: clean")
+                    && clean.output().contains("Working tree: clean")
                     && clean.output().contains("Index: empty"),
                 failure(
                     repository,
                     "Successful guard output no longer precisely reports the checked state.",
-                    "Report mode, branch, HEAD, clean worktree, and empty index.")));
+                    "Report Subject SHA, HEAD, clean working tree, and empty index.")));
 
     assertGuardFailure(
-        runNativeGuard(repository, oldSha, TEST_BRANCH),
+        runNativeGuard(repository, oldSha),
         "HEAD",
         "A report for the old SHA remained valid after a new commit.");
-    assertGuardFailure(
-        runNativeGuard(repository, subjectSha, "codex/wrong-branch"),
-        "current branch",
-        "The guard accepted a branch different from the handoff manifest.");
-    assertGuardFailure(
-        runNativeGuard(repository, subjectSha, TEST_BRANCH.toUpperCase(Locale.ROOT)),
-        "current branch",
-        "The guard accepted a branch that differed only by letter case.");
 
     Files.writeString(trackedFile, "dirty\n", StandardCharsets.UTF_8);
     assertGuardFailure(
-        runNativeGuard(repository, subjectSha, TEST_BRANCH),
+        runNativeGuard(repository, subjectSha),
         "Git working tree status",
         "The guard accepted a dirty worktree.");
 
@@ -302,7 +325,7 @@ class VerificationSubjectGuardTest {
     Files.writeString(trackedFile, "staged\n", StandardCharsets.UTF_8);
     runSuccessfully(repository, "git", "add", "subject.txt");
     assertGuardFailure(
-        runNativeGuard(repository, subjectSha, TEST_BRANCH),
+        runNativeGuard(repository, subjectSha),
         "Git index",
         "The guard accepted a non-empty index.");
   }
@@ -317,10 +340,19 @@ class VerificationSubjectGuardTest {
         "arguments",
         "The guard silently accepted missing handoff arguments.");
     assertGuardFailure(
-        runNativeGuard(
-            nonRepository,
-            "0123456789012345678901234567890123456789",
-            TEST_BRANCH),
+        runNativeGuard(nonRepository, "0123456789012345678901234567890123456789", "extra"),
+        "arguments",
+        "The guard silently accepted more than one handoff argument.");
+    assertGuardFailure(
+        runNativeGuard(nonRepository, "abc"),
+        "Subject SHA",
+        "The guard silently accepted an abbreviated Subject SHA.");
+    assertGuardFailure(
+        runNativeGuard(nonRepository, ""),
+        "Subject SHA argument",
+        "The guard silently accepted an empty Subject SHA.");
+    assertGuardFailure(
+        runNativeGuard(nonRepository, "0123456789012345678901234567890123456789"),
         "current directory",
         "The guard silently accepted a non-Git directory.");
   }
@@ -328,12 +360,14 @@ class VerificationSubjectGuardTest {
   private static void assertGuardContract(Path path, String script) {
     assertAll(
         () ->
-            assertTrue(
-                script.contains("serial shared"),
+            assertFalse(
+                script.contains("serial shared")
+                    || script.contains("managed detached")
+                    || script.contains("Codex-managed Worktree"),
                 failure(
                     path,
-                    "The supported first-version working-tree mode is not explicit.",
-                    "State that this entry point supports serial shared verification.")),
+                    "The guard still declares a worktree verification mode.",
+                    "Limit the guard contract to one immutable Subject SHA.")),
         () -> {
           for (String field : SIX_FIELDS) {
             assertTrue(
@@ -346,13 +380,13 @@ class VerificationSubjectGuardTest {
         },
         () ->
             assertTrue(
-                script.contains("docs/decisions/021-generator-evaluator-role-separation.md")
+                script.contains("docs/decisions/022-simplify-agent-handoff.md")
                     && script.contains(
-                        "docs/exec-plans/completed/018-generator-evaluator-role-separation.md"),
+                        "docs/exec-plans/completed/019-simplify-agent-handoff.md"),
                 failure(
                     path,
                     "The guard no longer links its decision and execution-plan authorities.",
-                    "Restore links to decision 021 and plan 018.")));
+                    "Restore links to decision 022 and plan 019.")));
   }
 
   private static void assertGuardFailure(
@@ -446,12 +480,13 @@ class VerificationSubjectGuardTest {
         Verification subject guard invariant violated.
         Location: %s
         Invariant: generator/evaluator handoff must bind a read-only evaluator to one exact
-        branch and Subject SHA with a clean worktree, empty index, and unchanged verify identity.
+        Subject SHA with matching HEAD, a clean working tree, empty index, and unchanged verify
+        identity.
         Reason: %s
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=VerificationSubjectGuardTest test, then .\\mvnw.cmd verify.
-        Authority: docs/decisions/021-generator-evaluator-role-separation.md and
-        docs/exec-plans/completed/018-generator-evaluator-role-separation.md
+        Authority: docs/decisions/022-simplify-agent-handoff.md and
+        docs/exec-plans/completed/019-simplify-agent-handoff.md
         """
         .formatted(location, reason, fix);
   }
