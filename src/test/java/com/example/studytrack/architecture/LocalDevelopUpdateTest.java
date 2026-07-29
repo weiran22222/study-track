@@ -20,7 +20,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 class LocalDevelopUpdateTest {
 
-  private static final Path AGENTS = Path.of("AGENTS.md");
+  private static final Path WORKFLOW = Path.of("WORKFLOW.md");
   private static final Path POWERSHELL_UPDATER =
       Path.of("scripts", "update-local-develop.ps1");
   private static final Path POSIX_UPDATER = Path.of("scripts", "update-local-develop.sh");
@@ -39,29 +39,29 @@ class LocalDevelopUpdateTest {
   @TempDir Path temporaryDirectory;
 
   @Test
-  void stableNavigationAndBothScriptsDeclareTheApprovedContract() throws IOException {
-    String agents = readRequiredFile(AGENTS);
+  void stableWorkflowAndBothScriptsDeclareTheApprovedContract() throws IOException {
+    String workflow = readRequiredFile(WORKFLOW);
     String powershell = readRequiredFile(POWERSHELL_UPDATER);
     String posix = readRequiredFile(POSIX_UPDATER);
 
     assertAll(
         () ->
             assertTrue(
-                agents.contains("禁止在本地 `develop` 上 merge、rebase 或 cherry-pick")
-                    && agents.contains("受保护 GitHub PR")
-                    && agents.contains("required")
-                    && agents.contains("push `verify` 成功"),
+                workflow.contains("禁止在本地 `develop` 上 merge、rebase 或 cherry-pick")
+                    && workflow.contains("受保护 GitHub PR")
+                    && workflow.contains("required")
+                    && workflow.contains("push `verify` 成功"),
                 failure(
-                    AGENTS,
+                    WORKFLOW,
                     "The GitHub-only integration or final push verify rule is missing.",
                     "Restore the stable local develop update policy from decision 023.")),
         () ->
             assertTrue(
-                agents.contains("scripts\\update-local-develop.ps1")
-                    && agents.contains("scripts/update-local-develop.sh")
-                    && agents.contains("唯一更新源为 `origin/develop`"),
+                workflow.contains("scripts\\update-local-develop.ps1")
+                    && workflow.contains("scripts/update-local-develop.sh")
+                    && workflow.contains("唯一更新源为 `origin/develop`"),
                 failure(
-                    AGENTS,
+                    WORKFLOW,
                     "The cross-platform origin/develop-only entry points are missing.",
                     "Navigate to both stable updater paths and their only permitted source.")),
         () ->
@@ -571,7 +571,8 @@ class LocalDevelopUpdateTest {
         Reason: %s
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=LocalDevelopUpdateTest test, then .\\mvnw.cmd verify.
-        Authority: docs/decisions/023-local-develop-fast-forward-policy.md and
+        Authority: WORKFLOW.md, docs/decisions/023-local-develop-fast-forward-policy.md,
+        docs/decisions/026-slim-agent-navigation.md, and
         docs/exec-plans/completed/020-local-develop-fast-forward-policy.md
         """
         .formatted(location, reason, fix);

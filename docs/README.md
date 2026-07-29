@@ -7,7 +7,8 @@
 
 - [产品规格](../SPEC.md)描述当前有效的产品行为和验收标准；
 - [架构说明](../ARCHITECTURE.md)描述当前有效的技术选择、分层和依赖约束；
-- [智能体导航](../AGENTS.md)描述当前有效的工作约定和机械门禁入口；
+- [智能体导航](../AGENTS.md)描述项目目标、文档地图和根本原则；
+- [操作工作流](../WORKFLOW.md)描述修改仓库前必须读取的权限、角色、门禁和命令；
 - [Harness 目的与效果评估](../HARNESS.md)描述项目终极目的、实验载体和效果评估协议；
 - 决策记录解释现状形成的历史理由，可能被后续决策取代，不能凌驾于当前规格或架构之上。
 
@@ -42,6 +43,7 @@
 - [023：本地 develop 只从 origin/develop 安全纯快进](decisions/023-local-develop-fast-forward-policy.md)
 - [024：以 Harness 落地效果验证为项目终极目标](decisions/024-harness-effect-validation-goal.md)
 - [025：建立稳定的文档地图导航](decisions/025-documentation-map-navigation.md)
+- [026：精简智能体导航并分离操作工作流](decisions/026-slim-agent-navigation.md)
 
 ## 执行计划
 

@@ -18,7 +18,10 @@ class EnvironmentBootstrapTest {
   @Test
   void environmentEntryPointsAndDocumentationRemainDiscoverable() throws IOException {
     Path agentsPath = Path.of("AGENTS.md");
+    Path workflowPath = Path.of("WORKFLOW.md");
     String agents = readRequiredFile(agentsPath, "Restore AGENTS.md at the repository root.");
+    String workflow =
+        readRequiredFile(workflowPath, "Restore WORKFLOW.md at the repository root.");
 
     assertAll(
         () ->
@@ -45,12 +48,14 @@ class EnvironmentBootstrapTest {
         () ->
             assertTrue(
                 agents.contains("docs/environment.md")
-                    && agents.contains(".\\scripts\\check-environment.ps1")
-                    && agents.contains("sh ./scripts/check-environment.sh"),
+                    && agents.contains("WORKFLOW.md")
+                    && workflow.contains(".\\scripts\\check-environment.ps1")
+                    && workflow.contains("sh ./scripts/check-environment.sh"),
                 failure(
-                    agentsPath,
+                    workflowPath,
                     "A fresh contributor cannot discover every environment check.",
-                    "Link docs/environment.md and both platform commands from AGENTS.md.")));
+                    "Link AGENTS.md to WORKFLOW.md and docs/environment.md, then retain both "
+                        + "platform commands in WORKFLOW.md.")));
   }
 
   @Test
@@ -134,13 +139,15 @@ class EnvironmentBootstrapTest {
     return """
         Environment bootstrap invariant violated.
         Location: %s
-        Invariant: AGENTS.md, platform checks, environment documentation, and CI must preserve
-        one discoverable JDK 21 and repository Maven Wrapper feedback loop.
+        Invariant: AGENTS.md, WORKFLOW.md, platform checks, environment documentation, and CI
+        must preserve one discoverable JDK 21 and repository Maven Wrapper feedback loop.
         Reason: %s
         Fix: %s
         Recheck: .\\scripts\\check-environment.ps1 (Windows) or
         sh ./scripts/check-environment.sh (macOS/Linux), then run the canonical verify command.
-        Authority: docs/environment.md and docs/exec-plans/completed/006-environment-bootstrap.md
+        Authority: WORKFLOW.md, docs/environment.md,
+        docs/decisions/026-slim-agent-navigation.md, and
+        docs/exec-plans/completed/006-environment-bootstrap.md
         """
         .formatted(location, reason, fix);
   }

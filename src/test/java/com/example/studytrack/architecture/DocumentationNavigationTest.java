@@ -1,6 +1,7 @@
 package com.example.studytrack.architecture;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,8 +20,11 @@ import org.junit.jupiter.api.Test;
 class DocumentationNavigationTest {
 
   private static final Path AGENTS = Path.of("AGENTS.md");
+  private static final Path WORKFLOW = Path.of("WORKFLOW.md");
   private static final Path HARNESS = Path.of("HARNESS.md");
   private static final Path DOCUMENT_INDEX = Path.of("docs", "README.md");
+  private static final Path SLIM_NAVIGATION_DECISION =
+      Path.of("docs", "decisions", "026-slim-agent-navigation.md");
   private static final String UPSTREAM_SNAPSHOT =
       "github.com/deusyu/harness-engineering/blob/"
           + "90208d60687e47eb350606a584837e4cce7ab403/";
@@ -67,7 +72,7 @@ class DocumentationNavigationTest {
     String agents = readRequiredFile(AGENTS);
     String map =
         requiredSection(
-            agents, "## 开始工作前：文档地图", "## 权威事实与机械验收");
+            agents, "## 开始工作前：文档地图", "## 根本原则");
     Set<String> linkTargets = markdownLinkTargets(map);
 
     assertContainsAll(
@@ -93,6 +98,7 @@ class DocumentationNavigationTest {
     for (String stableEntry :
         Set.of(
             "AGENTS.md",
+            "WORKFLOW.md",
             "HARNESS.md",
             "SPEC.md",
             "ARCHITECTURE.md",
@@ -106,6 +112,13 @@ class DocumentationNavigationTest {
               "Restore the stable first-hop link and its reading guidance."));
     }
 
+    assertTrue(
+        map.contains("任何仓库修改前必须读取"),
+        failure(
+            AGENTS,
+            "The workflow is no longer mandatory before repository modifications.",
+            "Mark WORKFLOW.md as required reading before any repository modification."));
+
     assertFalse(
         linkTargets.stream()
             .anyMatch(
@@ -118,6 +131,108 @@ class DocumentationNavigationTest {
             AGENTS,
             "The first-hop map links individual historical artifacts.",
             "Keep historical categories descriptive and disclose files through docs/README.md."));
+  }
+
+  @Test
+  void slimAgentNavigationKeepsTheCompleteWorkflowDiscoverable() throws IOException {
+    String agents = readRequiredFile(AGENTS);
+    String workflow = readRequiredFile(WORKFLOW);
+    String index = readRequiredFile(DOCUMENT_INDEX);
+    List<String> secondLevelHeadings =
+        Pattern.compile("(?m)^## (.+)$")
+            .matcher(agents)
+            .results()
+            .map(result -> result.group(1))
+            .toList();
+
+    assertEquals(
+        List.of("项目目标", "开始工作前：文档地图", "根本原则"),
+        secondLevelHeadings,
+        failure(
+            AGENTS,
+            "AGENTS.md no longer contains exactly the three stable navigation sections.",
+            "Move operational sections to WORKFLOW.md and retain only the three approved "
+                + "headings."));
+    assertFalse(
+        Pattern.compile("(?m)^### ").matcher(agents).find(),
+        failure(
+            AGENTS,
+            "AGENTS.md contains a third-level operational section.",
+            "Keep operational detail in WORKFLOW.md."));
+
+    assertAll(
+        () ->
+            assertTrue(
+                markdownLinkTargets(agents).contains("WORKFLOW.md"),
+                failure(
+                    AGENTS,
+                    "The documentation map no longer links WORKFLOW.md.",
+                    "Restore WORKFLOW.md as the required modification workflow.")),
+        () ->
+            assertTrue(
+                markdownLinkTargets(index).contains("../WORKFLOW.md"),
+                failure(
+                    DOCUMENT_INDEX,
+                    "The current-fact index no longer links WORKFLOW.md.",
+                    "Restore ../WORKFLOW.md to the current-fact navigation.")),
+        () ->
+            assertTrue(
+                workflow.contains("任何仓库修改前必须先读取 [AGENTS.md](AGENTS.md)")
+                    && agents.contains("任何仓库修改前必须读取"),
+                failure(
+                    WORKFLOW,
+                    "The mandatory AGENTS.md-to-WORKFLOW.md reading sequence is incomplete.",
+                    "Restore reciprocal context and require WORKFLOW.md before modifications.")));
+
+    assertContainsAll(
+        WORKFLOW,
+        workflow,
+        Set.of(
+            "## 权威事实与机械验收",
+            "## 关键边界",
+            "## Harness 变更权限与风险分级",
+            "### 第一级：事实修正",
+            "### 第二级：小型 Harness 决策",
+            "### 第三级：重大或多步骤变更",
+            "### 工件单一职责",
+            "### 所有级别的不变边界",
+            "## 标准工作流",
+            "### 角色与冻结 SHA 交接",
+            "## 提交前暂存检查",
+            "## 验证范围",
+            "## 分支工作流",
+            "### 本地 develop 安全更新",
+            "## 验证命令",
+            "## 完成定义",
+            "## 失败反馈要求"),
+        "Restore every stable operational section migrated from AGENTS.md.");
+
+    assertContainsAll(
+        WORKFLOW,
+        workflow,
+        Set.of(
+            "不得实现 [SPEC.md](SPEC.md)“本版本不包含”中的功能",
+            "修改架构前必须先更新 [ARCHITECTURE.md](ARCHITECTURE.md)",
+            "修改产品行为前必须先更新 [SPEC.md](SPEC.md) 及验收标准",
+            "不得绕过受保护 `main`、必需 PR 或 `verify`",
+            "**generator**",
+            "**evaluator**",
+            "**协调者**",
+            "Mutation allowed: no",
+            "scripts/check-verification-subject.ps1",
+            "git diff --cached --check",
+            "`push` 和 `pull_request`",
+            "`develop → main` PR",
+            "`hotfix/* → main` PR",
+            "update-local-develop.ps1",
+            "update-local-develop.sh",
+            ".\\scripts\\check-environment.ps1",
+            ".\\mvnw.cmd verify",
+            "./mvnw verify",
+            "required `verify` 覆盖同一 SHA",
+            "错误位置",
+            "权威文档链接"),
+        "Restore migrated commands, role boundaries, branch rules, and completion diagnostics.");
   }
 
   @Test
@@ -157,6 +272,8 @@ class DocumentationNavigationTest {
   @Test
   void localMarkdownLinksAndEnvironmentEntryRemainValid() throws IOException {
     String agents = readRequiredFile(AGENTS);
+    String workflow = readRequiredFile(WORKFLOW);
+    final String slimNavigationDecision = readRequiredFile(SLIM_NAVIGATION_DECISION);
     String index = readRequiredFile(DOCUMENT_INDEX);
     Set<String> linkTargets = markdownLinkTargets(index);
 
@@ -168,6 +285,8 @@ class DocumentationNavigationTest {
             "Add a Markdown link to environment.md under the important documentation section."));
 
     assertLocalMarkdownLinksResolve(AGENTS, agents);
+    assertLocalMarkdownLinksResolve(WORKFLOW, workflow);
+    assertLocalMarkdownLinksResolve(SLIM_NAVIGATION_DECISION, slimNavigationDecision);
     assertLocalMarkdownLinksResolve(DOCUMENT_INDEX, index);
   }
 
@@ -355,7 +474,8 @@ class DocumentationNavigationTest {
         Recheck: .\\mvnw.cmd -Dtest=DocumentationNavigationTest test, then .\\mvnw.cmd verify.
         Authority: HARNESS.md, docs/decisions/009-documentation-entropy-control.md,
         docs/decisions/024-harness-effect-validation-goal.md,
-        docs/decisions/025-documentation-map-navigation.md, and docs/README.md
+        docs/decisions/025-documentation-map-navigation.md,
+        docs/decisions/026-slim-agent-navigation.md, WORKFLOW.md, and docs/README.md
         """
         .formatted(location, reason, fix);
   }
