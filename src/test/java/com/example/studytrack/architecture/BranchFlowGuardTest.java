@@ -135,7 +135,7 @@ class BranchFlowGuardTest {
             assertTrue(
                 script.contains("docs/decisions/020-develop-production-branch-model.md")
                     && script.contains(
-                        "docs/exec-plans/017-develop-production-branch-model.md"),
+                        "docs/exec-plans/completed/017-develop-production-branch-model.md"),
                 failure(
                     BRANCH_FLOW_GUARD,
                     "The guard no longer cites the approved decision and execution plan.",
@@ -166,7 +166,7 @@ class BranchFlowGuardTest {
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=BranchFlowGuardTest test, then .\\mvnw.cmd verify.
         Authority: docs/decisions/020-develop-production-branch-model.md and
-        docs/exec-plans/017-develop-production-branch-model.md
+        docs/exec-plans/completed/017-develop-production-branch-model.md
         """
         .formatted(location, reason, fix);
   }

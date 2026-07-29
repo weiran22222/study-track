@@ -45,7 +45,7 @@
 
 - [019：简化 generator/evaluator 交接](exec-plans/completed/019-simplify-agent-handoff.md)（实施计划已完成）
 - [018：实施 generator/evaluator 职责分离](exec-plans/completed/018-generator-evaluator-role-separation.md)（已完成）
-- [017：迁移 develop 集成与 main 生产发布分支模型](exec-plans/017-develop-production-branch-model.md)（实施中：远程迁移已到 S4）
+- [017：迁移 develop 集成与 main 生产发布分支模型](exec-plans/completed/017-develop-production-branch-model.md)（已完成）
 - [016：实施 CI PR 完整差异空白门禁](exec-plans/completed/016-ci-pr-diff-whitespace-gate.md)
 - [015：重新打开单个任务](exec-plans/completed/015-reopen-task.md)
 - [014：Unicode 安全的标题文件输入](exec-plans/completed/014-unicode-safe-title-file-input.md)

@@ -1,6 +1,6 @@
 # 决策卡 020：develop 集成与 main 生产发布分支模型
 
-状态：远程迁移至受保护 develop 默认分支，实施中
+状态：已实施，develop/main 分支模型已闭环
 
 日期：2026-07-28
 
@@ -52,7 +52,7 @@ StudyTrack 当前没有真实部署流程。即使 `main` 被定义为生产发�
 - 不允许直接推送两条长期分支，也不允许以管理员身份绕过门禁。
 
 分支流检查的精确事件契约、迁移顺序和首次自举验证以
-[执行计划 017](../exec-plans/017-develop-production-branch-model.md)为准。
+[执行计划 017](../exec-plans/completed/017-develop-production-branch-model.md)为准。
 
 ## 保护与远程事实
 
@@ -80,8 +80,16 @@ GitHub 的分支 ref、默认分支、Branch Protection、PR、检查和 Actions
 - 两条长期分支均未要求 approvals；
 - 远端 `HEAD` 已验证指向 `refs/heads/develop`。
 
-这些事实只证明远程分支入口和保护迁移已经到位。实现 PR、第一次 release PR、最终
-`main` 验证和任何部署均尚未发生；当前仍没有真实部署。
+随后，[PR #33](https://github.com/weiran22222/study-track/pull/33) 实施分支流门禁，
+[PR #34](https://github.com/weiran22222/study-track/pull/34) 完成第一次
+`develop → main` release。`main` 合并提交
+`280b74e5ca04f6e2a2b2e85c2a01882fe2d20e91` 的
+[push verify run #119](https://github.com/weiran22222/study-track/actions/runs/30372083458)
+成功。
+
+当前 GitHub 默认分支仍为 `develop`；`develop` 与 `main` 均保持受保护并要求 required
+`verify`。因此分支模型已经完成实施和首次 release 自举验证。仓库仍没有真实部署，
+上述 release、合并提交与成功 CI 只表示发布基线更新，不表示已经部署。
 
 ## 风险等级
 
