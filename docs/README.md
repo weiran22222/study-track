@@ -61,11 +61,13 @@
 - [028：精简 CI verify 触发](decisions/028-streamline-ci-triggers.md)
 - [029：建立 Harness 能力与信任边界图](decisions/029-harness-capability-trust-map.md)
 - [030：建立仓库 Markdown 本地链接一致性门禁](decisions/030-repository-markdown-link-consistency.md)
+- [031：机械保护 PR evaluator 报告与合并后安全回流](decisions/031-pr-evaluator-report-lifecycle.md)
 
 ## 执行计划
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
+- [025：实施 PR evaluator 报告生命周期](exec-plans/025-pr-evaluator-report-lifecycle.md)（待实施）
 - [024：采用原生 grill-with-docs](exec-plans/completed/024-adopt-native-grill-with-docs.md)（仓库内实施已完成）
 - [023：精简 CI verify 触发](exec-plans/completed/023-streamline-ci-triggers.md)（仓库内实施已完成）
 - [022：按标题字面子串筛选任务列表](exec-plans/completed/022-list-title-search.md)（已完成）
