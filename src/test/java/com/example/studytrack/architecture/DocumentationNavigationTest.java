@@ -22,6 +22,7 @@ class DocumentationNavigationTest {
   private static final Path AGENTS = Path.of("AGENTS.md");
   private static final Path WORKFLOW = Path.of("WORKFLOW.md");
   private static final Path HARNESS = Path.of("HARNESS.md");
+  private static final Path HARNESS_CAPABILITIES = Path.of("HARNESS-CAPABILITIES.md");
   private static final Path CONTEXT_MAP = Path.of("CONTEXT-MAP.md");
   private static final Path STUDY_TRACK_CONTEXT =
       Path.of("docs", "contexts", "study-track", "CONTEXT.md");
@@ -39,6 +40,8 @@ class DocumentationNavigationTest {
   private static final Path DOCUMENT_INDEX = Path.of("docs", "README.md");
   private static final Path SLIM_NAVIGATION_DECISION =
       Path.of("docs", "decisions", "026-slim-agent-navigation.md");
+  private static final Path HARNESS_CAPABILITY_DECISION =
+      Path.of("docs", "decisions", "029-harness-capability-trust-map.md");
   private static final String UPSTREAM_SNAPSHOT =
       "github.com/deusyu/harness-engineering/blob/"
           + "90208d60687e47eb350606a584837e4cce7ab403/";
@@ -117,6 +120,7 @@ class DocumentationNavigationTest {
             "AGENTS.md",
             "WORKFLOW.md",
             "HARNESS.md",
+            "HARNESS-CAPABILITIES.md",
             "SPEC.md",
             "ARCHITECTURE.md",
             "CONTEXT-MAP.md",
@@ -138,7 +142,7 @@ class DocumentationNavigationTest {
             "Mark WORKFLOW.md as required reading before any repository modification."));
 
     assertFalse(
-        linkTargets.stream()
+        markdownLinkTargets(agents).stream()
             .anyMatch(
                 target ->
                     target.startsWith("docs/decisions/")
@@ -295,9 +299,12 @@ class DocumentationNavigationTest {
     String agents = readRequiredFile(AGENTS);
     String workflow = readRequiredFile(WORKFLOW);
     final String harness = readRequiredFile(HARNESS);
+    final String harnessCapabilities = readRequiredFile(HARNESS_CAPABILITIES);
     final String contextMap = readRequiredFile(CONTEXT_MAP);
     final String harnessAdr = readRequiredFile(HARNESS_ADR);
     final String slimNavigationDecision = readRequiredFile(SLIM_NAVIGATION_DECISION);
+    final String harnessCapabilityDecision =
+        readRequiredFile(HARNESS_CAPABILITY_DECISION);
     String index = readRequiredFile(DOCUMENT_INDEX);
     Set<String> linkTargets = markdownLinkTargets(index);
 
@@ -311,9 +318,11 @@ class DocumentationNavigationTest {
     assertLocalMarkdownLinksResolve(AGENTS, agents);
     assertLocalMarkdownLinksResolve(WORKFLOW, workflow);
     assertLocalMarkdownLinksResolve(HARNESS, harness);
+    assertLocalMarkdownLinksResolve(HARNESS_CAPABILITIES, harnessCapabilities);
     assertLocalMarkdownLinksResolve(CONTEXT_MAP, contextMap);
     assertLocalMarkdownLinksResolve(HARNESS_ADR, harnessAdr);
     assertLocalMarkdownLinksResolve(SLIM_NAVIGATION_DECISION, slimNavigationDecision);
+    assertLocalMarkdownLinksResolve(HARNESS_CAPABILITY_DECISION, harnessCapabilityDecision);
     assertLocalMarkdownLinksResolve(DOCUMENT_INDEX, index);
   }
 
@@ -559,6 +568,106 @@ class DocumentationNavigationTest {
   }
 
   @Test
+  void harnessCapabilityMapKeepsItsDescriptiveTrustBoundary() throws IOException {
+    String agents = readRequiredFile(AGENTS);
+    String harness = readRequiredFile(HARNESS);
+    String capabilities = readRequiredFile(HARNESS_CAPABILITIES);
+    String index = readRequiredFile(DOCUMENT_INDEX);
+    Set<String> capabilityTargets = markdownLinkTargets(capabilities);
+
+    assertAll(
+        () ->
+            assertTrue(
+                markdownLinkTargets(agents).contains("HARNESS-CAPABILITIES.md"),
+                failure(
+                    AGENTS,
+                    "The stable first-hop map no longer links the Harness capability map.",
+                    "Restore HARNESS-CAPABILITIES.md as a concise Harness navigation entry.")),
+        () ->
+            assertTrue(
+                markdownLinkTargets(index).contains("../HARNESS-CAPABILITIES.md"),
+                failure(
+                    DOCUMENT_INDEX,
+                    "The current-fact index no longer links the Harness capability map.",
+                    "Restore ../HARNESS-CAPABILITIES.md under current facts.")),
+        () ->
+            assertTrue(
+                markdownLinkTargets(index)
+                    .contains("decisions/029-harness-capability-trust-map.md"),
+                failure(
+                    DOCUMENT_INDEX,
+                    "Decision 029 is no longer discoverable from the decision index.",
+                    "Restore the decision 029 link in docs/README.md.")),
+        () ->
+            assertTrue(
+                markdownLinkTargets(harness).contains("HARNESS-CAPABILITIES.md"),
+                failure(
+                    HARNESS,
+                    "HARNESS.md no longer declares the capability map's narrow responsibility.",
+                    "Restore the capability-map authority boundary in HARNESS.md.")));
+
+    assertContainsAll(
+        HARNESS_CAPABILITIES,
+        capabilities,
+        Set.of(
+            "只描述与导航",
+            "不授予权限",
+            "不能替代",
+            "## 权威来源与触发条件",
+            "## 当前能力表面",
+            "上下文与指导",
+            "机械反馈",
+            "编排与状态",
+            "工具与运行时",
+            "## 证据边界",
+            "## 效果观察边界",
+            "正向因果证明不是 Harness 交付的完成条件",
+            "不是尚待补齐的 Harness 能力缺口",
+            "## 已知部分覆盖与未覆盖",
+            "验证中状态与报告留存",
+            "当前仓库没有机械强制的持久存储通道",
+            "报告必须留在被验证提交之外",
+            "熵管理外循环",
+            "仓库不提供定时漂移扫描、质量评分或自动维护 PR 机制",
+            "不证明任何插件或技能在当前运行时可用",
+            "不证明智能体身份、沙箱状态、远程",
+            "状态或未来工作"),
+        "Restore the descriptive-only responsibility, core categories, and explicit "
+            + "trust boundaries.");
+
+    for (String boundarySource :
+        Set.of(
+            "WORKFLOW.md",
+            "HARNESS.md",
+            "docs/decisions/008-accept-atomic-replacement-test-gap.md",
+            "docs/decisions/021-generator-evaluator-role-separation.md",
+            "docs/decisions/009-documentation-entropy-control.md",
+            "docs/environment.md",
+            "docs/feedback/005-current-harness-effect-baseline.md")) {
+      assertTrue(
+          capabilityTargets.contains(boundarySource),
+          failure(
+              HARNESS_CAPABILITIES,
+              "A stable capability or trust-boundary source is no longer linked: "
+                  + boundarySource,
+              "Restore the focused boundary source without enumerating a volatile ledger."));
+    }
+
+    String decision = readRequiredFile(HARNESS_CAPABILITY_DECISION);
+    assertContainsAll(
+        HARNESS_CAPABILITY_DECISION,
+        decision,
+        Set.of(
+            "日期：2026-07-30",
+            "用户于 2026-07-30 明确批准",
+            "第二级小型 Harness 决策",
+            "## 候选方案与取舍",
+            "## 非目标与不变边界",
+            "不证明插件或技能可用、智能体身份、沙箱状态、远程状态或未来工作"),
+        "Restore decision 029's approval, alternatives, tradeoffs, and non-goals.");
+  }
+
+  @Test
   void documentationFailuresRemainActionable() {
     String diagnostic = failure(HARNESS, "example reason", "example fix");
 
@@ -613,15 +722,17 @@ class DocumentationNavigationTest {
         Documentation navigation invariant violated.
         Location: %s
         Invariant: AGENTS.md must remain a stable map, HARNESS.md must preserve the project
-        purpose, evaluation, and native grill-with-docs contracts, WORKFLOW.md must preserve
-        role permissions and gates, and managed documents must remain discoverable.
+        purpose, evaluation, and native grill-with-docs contracts, HARNESS-CAPABILITIES.md
+        must remain descriptive-only, WORKFLOW.md must preserve role permissions and gates,
+        and managed documents must remain discoverable.
         Reason: %s
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=DocumentationNavigationTest test, then .\\mvnw.cmd verify.
         Authority: HARNESS.md, docs/decisions/009-documentation-entropy-control.md,
         docs/decisions/024-harness-effect-validation-goal.md,
         docs/decisions/025-documentation-map-navigation.md,
-        docs/decisions/026-slim-agent-navigation.md, WORKFLOW.md, and docs/README.md
+        docs/decisions/026-slim-agent-navigation.md,
+        docs/decisions/029-harness-capability-trust-map.md, WORKFLOW.md, and docs/README.md
         """
         .formatted(location, reason, fix);
   }
