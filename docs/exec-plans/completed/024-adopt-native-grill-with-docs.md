@@ -1,18 +1,18 @@
 # 执行计划 024：采用原生 grill-with-docs
 
-状态：进行中（规划基线已形成；第二个迁移 PR 尚未实施，2026-07-30）
+状态：仓库内实施与 generator 自检已完成（2026-07-30）
 
 ## 目标与边界
 
-第二个迁移 PR 将实施
-[Harness ADR 0001](../contexts/harness/docs/adr/0001-adopt-native-grill-with-docs.md)：把
+第二个迁移 PR 已按
+[Harness ADR 0001](../../contexts/harness/docs/adr/0001-adopt-native-grill-with-docs.md)：把
 固定上游快照的原生 `grill-with-docs` 作为人类显式 opt-in 的复杂设计访谈，激活
 facilitator 的窄文档写权限、共享理解退出门禁，以及 coordinator 从已验证干净
 `develop` 准备干净 `codex/*` 分支的有限自主权。
 
-本计划不把 grilling 设为通用门禁，不 vendoring 技能或授权智能体安装、更新技能，不
+本次实施不把 grilling 设为通用门禁，不 vendoring 技能或授权智能体安装、更新技能，不
 改变 StudyTrack 产品行为、架构、构建、CI、脚本、required check 身份、分支保护、远程
-权限或发布语义。当前规划 PR 也不激活上述工作流权限。
+权限或发布语义。
 
 ## 迁移前置条件
 
@@ -29,7 +29,7 @@ facilitator 的窄文档写权限、共享理解退出门禁，以及 coordinato
 
 ## 精确文件与语义
 
-迁移 PR 只计划修改以下文件：
+迁移 PR 只修改以下文件：
 
 - `AGENTS.md`：在稳定第一跳地图中增加 `CONTEXT-MAP.md`，说明处理跨上下文术语或复杂
   设计时按需读取；不复制 glossary、ADR 或访谈协议；
@@ -54,8 +54,8 @@ facilitator 的窄文档写权限、共享理解退出门禁，以及 coordinato
   漂移，并继续给出六字段可行动诊断；
 - `docs/README.md`：保持 context map、两个 glossary 与 ADR 索引，迁移完成后把计划链接
   更新到 `exec-plans/completed/024-adopt-native-grill-with-docs.md`；
-- `docs/exec-plans/024-adopt-native-grill-with-docs.md`：只按真实本地实施与 generator
-  自检更新事实，完成后移入 `completed/`。
+- `docs/exec-plans/024-adopt-native-grill-with-docs.md`：按真实本地实施与 generator
+  自检更新事实，并移入 `completed/`。
 
 `CONTEXT-MAP.md`、两个 `CONTEXT.md` 与 Harness ADR 0001 是迁移输入，默认不在第二个 PR
 改写。若实施发现必须改变它们的已批准语义、扩大上述文件集合，或需要触碰
@@ -126,12 +126,12 @@ generator 在 JDK 21 中执行：
 
 ## 证据边界
 
-本文件当前只记录获批准的迁移意图、风险、命令与门禁。第二个 PR、分支准备、技能可用性、
-generator 实施、冻结 Subject SHA、evaluator 结论、required CI、PR 合并、最终
-`develop` 验证和前三次会话效果均尚未由本计划证明。发生后只记录实际事实，不预写
-成功；远程状态继续以 GitHub 权威记录为准。
+本文件记录获批准的迁移意图、实际仓库内实施和本地 generator 自检。它不证明分支准备的
+远程前置事实、技能可用性、冻结 Subject SHA、evaluator 结论、required CI、PR 合并、
+最终 `develop` 验证或前三次会话效果。发生后只记录实际事实，不预写成功；远程状态继续
+以 GitHub 权威记录为准。
 
-## 当前规划 PR 的 generator 自检事实
+## 规划 PR 的历史 generator 自检事实
 
 - 当前 shell 最初使用 Java 17，环境自检按预期失败；只为后续验证子进程选择本机
   `D:\work\jdk\jdk-21.0.11` 后，重新运行相同入口通过，报告 Java 21 与 Maven Wrapper
@@ -141,6 +141,26 @@ generator 实施、冻结 Subject SHA、evaluator 结论、required CI、PR 合�
 - 完整 `.\mvnw.cmd verify` 实际运行 142 项测试，0 失败、0 错误、0 跳过，Checkstyle
   0 违规，并成功完成可执行 JAR 打包。
 
-以上只证明当前规划文档的 generator 本地自检，不表示第二个迁移 PR 已实施，也不是
-evaluator `PASS`、required CI、PR、合并、最终 `develop` 验证、技能安装或 Harness
-效果证据。
+以上只证明规划文档当时的 generator 本地自检，不是 evaluator `PASS`、required CI、
+PR、合并、最终 `develop` 验证、技能安装或 Harness 效果证据。
+
+## 迁移 PR 的 generator 实施与自检事实
+
+- 实际只修改 `AGENTS.md`、`HARNESS.md`、`WORKFLOW.md`、`docs/environment.md`、
+  `docs/README.md`、`DocumentationNavigationTest.java`，并将本计划移入 `completed/`；
+  未修改迁移输入、产品代码、规格、架构、CI、脚本、构建或远程设置；
+- 在当前验证子进程中选择 `D:\work\jdk\jdk-21.0.11` 后，
+  `.\scripts\check-environment.ps1` 实际通过，报告 Java 21 与 Maven Wrapper 3.9.12；
+- 定向文档测试首次暴露一个测试锚点换行问题和本地链接 helper 未排除 HTTPS URL；修复后
+  又按六字段诊断逐项收紧稳定锚点，最终
+  `.\mvnw.cmd "-Dtest=DocumentationNavigationTest" test` 实际运行 9 项测试，
+  0 失败、0 错误、0 跳过，Checkstyle 0 违规；
+- 首次完整 `verify` 的 144 项测试中有 1 项失败：coordinator 新权限文案没有保留既有
+  人类分支权限字面锚点；在 `WORKFLOW.md` 明确保留原规则并把新增权限写成唯一窄例外后，
+  `DocumentationNavigationTest` 与 `VerificationSubjectGuardTest` 定向合计 16 项测试
+  全部通过；
+- 最终 `.\mvnw.cmd verify` 实际运行 144 项测试，0 失败、0 错误、0 跳过，
+  Checkstyle 0 违规，并成功完成可执行 JAR 打包。
+
+以上只证明本次迁移的 generator 本地自检，不是 evaluator `PASS`、required CI、PR、
+合并、最终 `develop` 验证、技能安装或 Harness 效果证据。

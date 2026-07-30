@@ -44,6 +44,31 @@
 - **反馈回路**：失败、审查和 evaluator 发现必须能定位根因并进入下一轮改进；
 - **熵管理**：新增规则也要检查重复、漂移、脆弱性、认知负担和持续维护成本。
 
+## 原生 grill-with-docs 学习输入
+
+复杂设计的澄清入口采用 `mattpocock/skills` 固定提交
+`2ab958093e83e0ec752e6c1c5932da465bf23e0c` 的原生 `grill-with-docs` 组合：
+
+- [`skills/engineering/grill-with-docs/SKILL.md`](https://github.com/mattpocock/skills/blob/2ab958093e83e0ec752e6c1c5932da465bf23e0c/skills/engineering/grill-with-docs/SKILL.md)；
+- [`skills/productivity/grilling/SKILL.md`](https://github.com/mattpocock/skills/blob/2ab958093e83e0ec752e6c1c5932da465bf23e0c/skills/productivity/grilling/SKILL.md)；
+- [`skills/engineering/domain-modeling/SKILL.md`](https://github.com/mattpocock/skills/blob/2ab958093e83e0ec752e6c1c5932da465bf23e0c/skills/engineering/domain-modeling/SKILL.md)。
+
+它原生组合 `grilling` 的逐问访谈与 `domain-modeling` 的即时词汇表/ADR 记录，只能由
+人类显式调用，是复杂设计的 opt-in 工具，不自动触发，也不是普通任务、简单任务或所有
+变更的通用门禁。固定快照是学习与运行语义输入，不自动成为本仓库权威；当前协议仍由
+本文与 [WORKFLOW.md](WORKFLOW.md) 决定。
+
+仓库不 vendoring、复制、包装或改写三个上游 skill 文件。用户显式管理运行环境中的技能
+安装与版本；智能体不得静默安装或更新。固定快照升级必须经过新的本地 Harness 决定和
+受保护 PR。
+
+落地后的前三次由人类显式调用的 grilling 会话是前瞻观察单元：至少一次 StudyTrack
+产品主题、至少一次 Harness 主题，第三次主题不限。观察人类澄清往返、术语冲突发现、
+后续 generator 是否仍需重新询问、ADR 是否真正被复用，以及文档熵。当前无可靠量化
+基线，不倒推历史耗时或节省比例；保留反例、维护成本与无法归因之处，结论只使用本文
+规定的五种值。落地、绿色 `verify`、evaluator `PASS` 或 PR 合并都不能单独证明正向
+效果。
+
 ## 落地与效果
 
 **落地**表示 Harness 变化已经通过适用门禁进入目标分支。**效果**表示它在预先说明的

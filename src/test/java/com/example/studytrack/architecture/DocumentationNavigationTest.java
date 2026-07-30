@@ -22,12 +22,29 @@ class DocumentationNavigationTest {
   private static final Path AGENTS = Path.of("AGENTS.md");
   private static final Path WORKFLOW = Path.of("WORKFLOW.md");
   private static final Path HARNESS = Path.of("HARNESS.md");
+  private static final Path CONTEXT_MAP = Path.of("CONTEXT-MAP.md");
+  private static final Path STUDY_TRACK_CONTEXT =
+      Path.of("docs", "contexts", "study-track", "CONTEXT.md");
+  private static final Path HARNESS_CONTEXT =
+      Path.of("docs", "contexts", "harness", "CONTEXT.md");
+  private static final Path HARNESS_ADR =
+      Path.of(
+          "docs",
+          "contexts",
+          "harness",
+          "docs",
+          "adr",
+          "0001-adopt-native-grill-with-docs.md");
+  private static final Path ENVIRONMENT = Path.of("docs", "environment.md");
   private static final Path DOCUMENT_INDEX = Path.of("docs", "README.md");
   private static final Path SLIM_NAVIGATION_DECISION =
       Path.of("docs", "decisions", "026-slim-agent-navigation.md");
   private static final String UPSTREAM_SNAPSHOT =
       "github.com/deusyu/harness-engineering/blob/"
           + "90208d60687e47eb350606a584837e4cce7ab403/";
+  private static final String GRILL_COMMIT = "2ab958093e83e0ec752e6c1c5932da465bf23e0c";
+  private static final String GRILL_UPSTREAM_PREFIX =
+      "github.com/mattpocock/skills/blob/" + GRILL_COMMIT + "/";
   private static final Set<Path> MANAGED_CATEGORIES =
       Set.of(
           Path.of("docs", "decisions"),
@@ -102,6 +119,7 @@ class DocumentationNavigationTest {
             "HARNESS.md",
             "SPEC.md",
             "ARCHITECTURE.md",
+            "CONTEXT-MAP.md",
             "docs/README.md",
             "docs/environment.md")) {
       assertTrue(
@@ -276,6 +294,9 @@ class DocumentationNavigationTest {
   void localMarkdownLinksAndEnvironmentEntryRemainValid() throws IOException {
     String agents = readRequiredFile(AGENTS);
     String workflow = readRequiredFile(WORKFLOW);
+    final String harness = readRequiredFile(HARNESS);
+    final String contextMap = readRequiredFile(CONTEXT_MAP);
+    final String harnessAdr = readRequiredFile(HARNESS_ADR);
     final String slimNavigationDecision = readRequiredFile(SLIM_NAVIGATION_DECISION);
     String index = readRequiredFile(DOCUMENT_INDEX);
     Set<String> linkTargets = markdownLinkTargets(index);
@@ -289,8 +310,129 @@ class DocumentationNavigationTest {
 
     assertLocalMarkdownLinksResolve(AGENTS, agents);
     assertLocalMarkdownLinksResolve(WORKFLOW, workflow);
+    assertLocalMarkdownLinksResolve(HARNESS, harness);
+    assertLocalMarkdownLinksResolve(CONTEXT_MAP, contextMap);
+    assertLocalMarkdownLinksResolve(HARNESS_ADR, harnessAdr);
     assertLocalMarkdownLinksResolve(SLIM_NAVIGATION_DECISION, slimNavigationDecision);
     assertLocalMarkdownLinksResolve(DOCUMENT_INDEX, index);
+  }
+
+  @Test
+  void contextLanguageAndNativeGrillDecisionRemainDiscoverable() throws IOException {
+    String agents = readRequiredFile(AGENTS);
+    String contextMap = readRequiredFile(CONTEXT_MAP);
+    String index = readRequiredFile(DOCUMENT_INDEX);
+    Set<String> mapTargets = markdownLinkTargets(contextMap);
+    Set<String> indexTargets = markdownLinkTargets(index);
+
+    assertAll(
+        () ->
+            assertTrue(
+                markdownLinkTargets(agents).contains("CONTEXT-MAP.md"),
+                failure(
+                    AGENTS,
+                    "The stable first-hop map no longer links CONTEXT-MAP.md.",
+                    "Restore CONTEXT-MAP.md for cross-context terminology and complex design.")),
+        () ->
+            assertTrue(
+                mapTargets.contains("docs/contexts/study-track/CONTEXT.md"),
+                failure(
+                    CONTEXT_MAP,
+                    "The StudyTrack glossary is no longer discoverable from the context map.",
+                    "Restore the StudyTrack CONTEXT.md link in CONTEXT-MAP.md.")),
+        () ->
+            assertTrue(
+                mapTargets.contains("docs/contexts/harness/CONTEXT.md"),
+                failure(
+                    CONTEXT_MAP,
+                    "The Harness glossary is no longer discoverable from the context map.",
+                    "Restore the Harness CONTEXT.md link in CONTEXT-MAP.md.")),
+        () ->
+            assertTrue(
+                indexTargets.contains("contexts/study-track/CONTEXT.md")
+                    && indexTargets.contains("contexts/harness/CONTEXT.md")
+                    && indexTargets.contains(
+                        "contexts/harness/docs/adr/0001-adopt-native-grill-with-docs.md"),
+                failure(
+                    DOCUMENT_INDEX,
+                    "A native grill-with-docs context input is missing from the index.",
+                    "Restore both glossary links and Harness ADR 0001 in docs/README.md.")),
+        () ->
+            assertTrue(
+                Files.isRegularFile(STUDY_TRACK_CONTEXT)
+                    && Files.isRegularFile(HARNESS_CONTEXT)
+                    && Files.isRegularFile(HARNESS_ADR),
+                failure(
+                    DOCUMENT_INDEX,
+                    "A linked context glossary or Harness ADR 0001 is missing.",
+                    "Restore the documented context artifact at its indexed path.")));
+  }
+
+  @Test
+  void nativeGrillWithDocsContractAndRuntimeBoundaryDoNotDrift() throws IOException {
+    String harness = readRequiredFile(HARNESS);
+    String workflow = readRequiredFile(WORKFLOW);
+    String environment = readRequiredFile(ENVIRONMENT);
+
+    assertContainsAll(
+        HARNESS,
+        harness,
+        Set.of(
+            GRILL_UPSTREAM_PREFIX + "skills/engineering/grill-with-docs/SKILL.md",
+            GRILL_UPSTREAM_PREFIX + "skills/productivity/grilling/SKILL.md",
+            GRILL_UPSTREAM_PREFIX + "skills/engineering/domain-modeling/SKILL.md",
+            "人类显式调用",
+            "opt-in",
+            "通用门禁",
+            "原生 `grill-with-docs` 组合",
+            "不 vendoring",
+            "前三次由人类显式调用的 grilling 会话",
+            "至少一次 StudyTrack",
+            "至少一次 Harness",
+            "第三次主题不限",
+            "当前无可靠量化",
+            "基线，不倒推历史",
+            "都不能单独证明正向"),
+        "Restore the pinned native composition, explicit opt-in, and prospective evidence "
+            + "boundary.");
+
+    assertContainsAll(
+        WORKFLOW,
+        workflow,
+        Set.of(
+            "一次只提出一个",
+            "附推荐答案",
+            "facilitator 先自行查明",
+            "`CONTEXT-MAP.md`",
+            "对应 context 的 `CONTEXT.md`",
+            "该 context 的 `docs/adr/*.md`",
+            "只记录人类已经解决的术语与决定",
+            "共享理解是人类显式确认的退出门禁",
+            "确认前不得开始实现、创建实现交接或宣称规划完成",
+            "完成上述远程验证和安全更新后",
+            "安全更新",
+            "干净且未分叉",
+            "新建、干净的 `codex/*`",
+            "不得用于其他基线",
+            "不扩大 stage、commit、push、PR、merge、rebase、cherry-pick、GitHub"),
+        "Restore the facilitator write scope, human exit gate, and coordinator branch limit.");
+
+    assertContainsAll(
+        ENVIRONMENT,
+        environment,
+        Set.of(
+            GRILL_COMMIT,
+            "skills/engineering/grill-with-docs/SKILL.md",
+            "skills/productivity/grilling/SKILL.md",
+            "skills/engineering/domain-modeling/SKILL.md",
+            "由用户",
+            "显式选择安装或启用固定快照",
+            "只做只读诊断",
+            "停止会话并请用户选择",
+            "不得静默安装、启用、更新或替换技能",
+            "不得把只读诊断",
+            "成功描述成“仓库已安装”"),
+        "Restore user-managed installation, read-only diagnosis, and no-silent-update rules.");
   }
 
   private static void assertLocalMarkdownLinksResolve(Path document, String markdown) {
@@ -298,7 +440,7 @@ class DocumentationNavigationTest {
     Path base = parent == null ? Path.of("") : parent;
 
     for (String linkTarget : markdownLinkTargets(markdown)) {
-      if (!linkTarget.endsWith(".md")) {
+      if (!linkTarget.endsWith(".md") || linkTarget.contains("://")) {
         continue;
       }
       Path linkedDocument = base.resolve(linkTarget).normalize();
@@ -471,7 +613,8 @@ class DocumentationNavigationTest {
         Documentation navigation invariant violated.
         Location: %s
         Invariant: AGENTS.md must remain a stable map, HARNESS.md must preserve the project
-        purpose and evaluation contract, and managed documents must remain discoverable.
+        purpose, evaluation, and native grill-with-docs contracts, WORKFLOW.md must preserve
+        role permissions and gates, and managed documents must remain discoverable.
         Reason: %s
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=DocumentationNavigationTest test, then .\\mvnw.cmd verify.

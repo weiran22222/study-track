@@ -102,6 +102,25 @@
    同一 Subject SHA，协调者才可进入正常 PR 合并判断；
 7. 如果检查失败，根据错误修复根因并重新验证，不绕过受保护 PR 或门禁。
 
+### 原生 grill-with-docs 显式会话
+
+`grill-with-docs` 是复杂设计的可选澄清入口，只能由人类显式调用；它不自动触发，也不
+是普通任务、简单任务或所有变更的通用门禁。运行环境使用
+[HARNESS.md](HARNESS.md#原生-grill-with-docs-学习输入)固定的原生组合，不在仓库中
+vendoring 或重新实现包装器。
+
+会话由 facilitator 一次只提出一个需要人类决定的问题，并附推荐答案。能从仓库或只读
+工具查明的事实由 facilitator 先自行查明，不把事实查询转交给人类，也不把推荐答案冒充
+为人类批准。facilitator 的写权限仅限于与本次主题相关的
+`CONTEXT-MAP.md`、对应 context 的 `CONTEXT.md` 和该 context 的 `docs/adr/*.md`，且
+只记录人类已经解决的术语与决定。不得修改产品代码、`SPEC.md`、`ARCHITECTURE.md`、
+`HARNESS.md`、本文、CI、脚本、构建或远程配置；需要越界时必须停止并取得新的明确授权。
+
+共享理解是人类显式确认的退出门禁，不是 facilitator 的主观判断。只有人类确认目标与
+非目标、关键术语、决定分支、取舍和待实施范围已足够清楚，才可退出会话并进入实施交接；
+确认前不得开始实现、创建实现交接或宣称规划完成。未解决的决定分支、词汇冲突或未记录
+的关键决定都会阻止退出。
+
 ### 角色与冻结 SHA 交接
 
 - **generator**：只实现批准的代码、测试和文档并运行自检；不得创建或切换分支，不得
@@ -109,7 +128,8 @@
 - **evaluator**：只依赖仓库、最小交接和精确 Subject SHA 进行只读独立验证；不得修改或
   修复文件，不得 stage、commit、push、切换分支或操作 GitHub；
 - **协调者**：审查和提交、冻结 SHA、检查交接状态、保存 evaluator 报告并协调失败回流；
-  只有收到人类明确指令后才能创建或切换分支，不得用自身判断替代独立 evaluator、复用
+  只有收到人类明确指令后才能创建或切换分支；唯一例外是完成“本地 develop 安全更新”
+  后按该节的窄权限准备新的 `codex/*` 分支；不得用自身判断替代独立 evaluator、复用
   失效报告或绕过门禁；
 - **人类**：决定产品目标、验收标准、重大 Harness 变更、是否创建或切换分支以及是否
   发布。
@@ -212,6 +232,12 @@ Verdict: PASS | FAIL | INCONCLUSIVE
   no-op 或 fast-forward-only 更新；
 - 任一前置、fetch、SHA、提交关系、更新或后置检查失败时必须停止；不得通过 reset、
   rebase、cherry-pick、切换分支、push、GitHub 操作或自动清理来修复。
+
+完成上述远程验证和安全更新后，若本地 `develop`、工作树与暂存区仍然干净且未分叉，
+coordinator 可自行从这个精确 `develop` 创建并切换到一个新建、干净的 `codex/*`
+分支。该有限权限不得用于其他基线、已有或非 `codex/*` 分支，也不得在脏工作树中创建或
+切换分支；它不扩大 stage、commit、push、PR、merge、rebase、cherry-pick、GitHub、
+远程权限或发布权限。任一条件无法证明时停止并请求人类明确指令。
 
 ## 验证命令
 
