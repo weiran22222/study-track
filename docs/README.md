@@ -14,6 +14,11 @@
   证据边界和已知覆盖缺口，不授予权限或替代权威协议；
 - 决策记录解释现状形成的历史理由，可能被后续决策取代，不能凌驾于当前规格或架构之上。
 
+历史工件中的状态、待办以及“尚未发生”等陈述，只绑定各工件记录时可用的证据截止点，
+不是实时状态。判断当前事实时回到相应根级权威文档；判断 PR、Actions、分支保护或远端
+SHA 等远程事实时回到 GitHub 权威记录。索引负责保留和渐进披露历史，不因后续状态变化
+而批量回填或改写历史工件正文。
+
 ## 重要说明
 
 - [构建环境](environment.md)：JDK 21、Maven Wrapper 和跨平台环境自检。
@@ -62,6 +67,7 @@
 - [029：建立 Harness 能力与信任边界图](decisions/029-harness-capability-trust-map.md)
 - [030：建立仓库 Markdown 本地链接一致性门禁](decisions/030-repository-markdown-link-consistency.md)
 - [031：机械保护 PR evaluator 报告与合并后安全回流](decisions/031-pr-evaluator-report-lifecycle.md)
+- [032：首次 Harness 文档与协议熵审计](decisions/032-harness-entropy-audit.md)
 
 ## 执行计划
 
