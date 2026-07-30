@@ -16,6 +16,17 @@
 
 - [构建环境](environment.md)：JDK 21、Maven Wrapper 和跨平台环境自检。
 
+## Context 与通用语言
+
+- [Context Map](../CONTEXT-MAP.md)：StudyTrack 与 Harness 上下文及其关系；
+- [StudyTrack glossary](contexts/study-track/CONTEXT.md)：学习任务、任务 ID、标题、状态与
+  任务库；
+- [Harness glossary](contexts/harness/CONTEXT.md)：Harness 协作、验证与效果观察术语。
+
+## Context ADR
+
+- [Harness ADR 0001：采用原生 grill-with-docs](contexts/harness/docs/adr/0001-adopt-native-grill-with-docs.md)
+
 ## 决策记录
 
 - [001：环境自举与冷启动检查](decisions/001-environment-bootstrap.md)
@@ -51,6 +62,8 @@
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
+- [024：采用原生 grill-with-docs](exec-plans/024-adopt-native-grill-with-docs.md)（进行中：
+  规划基线已形成，迁移 PR 尚未实施）
 - [023：精简 CI verify 触发](exec-plans/completed/023-streamline-ci-triggers.md)（仓库内实施已完成）
 - [022：按标题字面子串筛选任务列表](exec-plans/completed/022-list-title-search.md)（已完成）
 - [021：建立 Harness 目的与落地效果验证框架](exec-plans/completed/021-harness-effect-validation-goal.md)（仓库内实施已完成）
