@@ -239,6 +239,7 @@ class DocumentationNavigationTest {
             "不得绕过受保护 `develop` 或 `main`、必需 PR 或 `verify`",
             "普通集成的目标长期分支是 `develop`",
             "release/hotfix 的目标长期分支是 `main`",
+            "hotfix 回流 PR 的实际目标长期分支是 `develop`",
             "PR 合并后必须检查实际目标长期分支",
             "实际目标长期分支验证",
             "**generator**",
