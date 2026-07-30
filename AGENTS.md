@@ -17,6 +17,7 @@
 | 当前权威事实 | [HARNESS.md](HARNESS.md) | 项目目的与 Harness 效果评估协议；评估或调整 Harness 时读。 |
 | 当前权威事实 | [SPEC.md](SPEC.md) | 产品行为、输入输出和验收标准；涉及产品范围或行为时读。 |
 | 当前权威事实 | [ARCHITECTURE.md](ARCHITECTURE.md) | 技术选择、分层、依赖与验证流水线；改代码、依赖或架构时读。 |
+| 上下文导航 | [CONTEXT-MAP.md](CONTEXT-MAP.md) | 上下文关系与通用语言入口；处理跨上下文术语或复杂设计时按需读取。 |
 | 辅助说明 | [docs/environment.md](docs/environment.md) | JDK 21、Wrapper 和环境诊断；首次进入或构建环境变化时读。 |
 | 历史入口 | [docs/README.md](docs/README.md) | 历史工件的中央索引；需要理解现状形成原因时从这里渐进查阅。 |
 | 历史工件 | `docs/decisions/` | 为什么选择及取舍；从索引选择与当前问题相关的决策。 |
