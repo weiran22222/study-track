@@ -8,7 +8,11 @@
 
 - [SPEC.md](SPEC.md) 是当前完整产品行为与验收标准的唯一权威；
 - [ARCHITECTURE.md](ARCHITECTURE.md) 定义技术选择、分层和依赖；
-- [AGENTS.md](AGENTS.md) 是智能体使用的稳定导航地图与工作约定；
+- [AGENTS.md](AGENTS.md) 是智能体使用的稳定第一跳导航与根本原则；
+- [WORKFLOW.md](WORKFLOW.md) 定义修改仓库时适用的权限、角色、门禁和命令；
+- [HARNESS-CAPABILITIES.md](HARNESS-CAPABILITIES.md) 只导航当前 Harness 能力表面、
+  触发条件、信任与证据边界及已知覆盖缺口；它不授予权限，也不替代本协议或其他权威
+  文档；
 - 本文是项目 Harness 终极目的与效果评估协议的稳定仓库级权威；
 - [决策卡 024](docs/decisions/024-harness-effect-validation-goal.md)记录本协议的历史理由。
 

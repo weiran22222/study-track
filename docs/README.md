@@ -10,6 +10,8 @@
 - [智能体导航](../AGENTS.md)描述项目目标、文档地图和根本原则；
 - [操作工作流](../WORKFLOW.md)描述修改仓库前必须读取的权限、角色、门禁和命令；
 - [Harness 目的与效果评估](../HARNESS.md)描述项目终极目的、实验载体和效果评估协议；
+- [Harness 能力与信任边界图](../HARNESS-CAPABILITIES.md)只导航当前能力表面、触发条件、
+  证据边界和已知覆盖缺口，不授予权限或替代权威协议；
 - 决策记录解释现状形成的历史理由，可能被后续决策取代，不能凌驾于当前规格或架构之上。
 
 ## 重要说明
@@ -57,6 +59,7 @@
 - [026：精简智能体导航并分离操作工作流](decisions/026-slim-agent-navigation.md)
 - [027：按标题字面子串筛选任务列表](decisions/027-list-title-search.md)
 - [028：精简 CI verify 触发](decisions/028-streamline-ci-triggers.md)
+- [029：建立 Harness 能力与信任边界图](decisions/029-harness-capability-trust-map.md)
 
 ## 执行计划
 

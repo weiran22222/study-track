@@ -15,6 +15,7 @@
 | 导航与原则 | [AGENTS.md](AGENTS.md) | 项目目标、文档地图和根本原则；每项任务先读。 |
 | 工作约定 | [WORKFLOW.md](WORKFLOW.md) | 权限、角色、门禁和命令；任何仓库修改前必须读取。 |
 | 当前权威事实 | [HARNESS.md](HARNESS.md) | 项目目的与 Harness 效果评估协议；评估或调整 Harness 时读。 |
+| Harness 导航 | [HARNESS-CAPABILITIES.md](HARNESS-CAPABILITIES.md) | 当前能力表面、触发条件与信任边界；需要定位 Harness 机制或已知覆盖缺口时读。 |
 | 当前权威事实 | [SPEC.md](SPEC.md) | 产品行为、输入输出和验收标准；涉及产品范围或行为时读。 |
 | 当前权威事实 | [ARCHITECTURE.md](ARCHITECTURE.md) | 技术选择、分层、依赖与验证流水线；改代码、依赖或架构时读。 |
 | 上下文导航 | [CONTEXT-MAP.md](CONTEXT-MAP.md) | 上下文关系与通用语言入口；处理跨上下文术语或复杂设计时按需读取。 |
