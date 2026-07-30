@@ -112,6 +112,7 @@ SHA 等远程事实时回到 GitHub 权威记录。索引负责保留和渐进�
 
 ## 复盘反馈
 
+- [008：隔离 Maven 缓存的新克隆冷启动演练](feedback/008-isolated-cache-cold-start-drill.md)（已完成，证据不足）
 - [007：PR evaluator 报告生命周期远程负路径演练](feedback/007-evaluator-report-lifecycle-drill.md)（已完成）
 - [001：第一次 Harness 实战复盘](feedback/001-first-harness-retrospective.md)
 - [002：并行 worktree 实战复盘](feedback/002-parallel-worktree-retrospective.md)

@@ -642,6 +642,9 @@ class DocumentationNavigationTest {
             "首次人工 Harness 文档与协议熵审计",
             "只修正当前根级协议与导航断言",
             "仓库不提供定时漂移扫描、质量评分或自动维护 PR 机制",
+            "隔离 Maven 缓存的新 GitHub 克隆",
+            "仍非干净机器证明",
+            "隔离边界不包括 OS、JDK、网络、Git 凭据或宿主机状态",
             "不证明任何插件或技能在当前运行时可用",
             "不证明智能体身份、沙箱状态、远程",
             "状态或未来工作"),
@@ -658,7 +661,8 @@ class DocumentationNavigationTest {
             "docs/decisions/009-documentation-entropy-control.md",
             "docs/decisions/032-harness-entropy-audit.md",
             "docs/environment.md",
-            "docs/feedback/005-current-harness-effect-baseline.md")) {
+            "docs/feedback/005-current-harness-effect-baseline.md",
+            "docs/feedback/008-isolated-cache-cold-start-drill.md")) {
       assertTrue(
           capabilityTargets.contains(boundarySource),
           failure(
