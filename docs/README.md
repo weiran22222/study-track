@@ -106,7 +106,7 @@
 
 ## 复盘反馈
 
-- [007：PR evaluator 报告生命周期远程负路径演练](feedback/007-evaluator-report-lifecycle-drill.md)（进行中）
+- [007：PR evaluator 报告生命周期远程负路径演练](feedback/007-evaluator-report-lifecycle-drill.md)（已完成）
 - [001：第一次 Harness 实战复盘](feedback/001-first-harness-retrospective.md)
 - [002：并行 worktree 实战复盘](feedback/002-parallel-worktree-retrospective.md)
 - [003：rename 三级流程复盘](feedback/003-rename-task-retrospective.md)
