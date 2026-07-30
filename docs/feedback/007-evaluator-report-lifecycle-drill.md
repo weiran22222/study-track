@@ -1,6 +1,6 @@
 # PR evaluator 报告生命周期远程负路径演练
 
-状态：进行中（预注册；远程步骤尚未执行）
+状态：进行中（步骤 1～4 完成；步骤 5～6 待执行）
 
 日期：2026-07-30
 
@@ -8,7 +8,8 @@
 
 本演练的精确 `develop` 基线是
 `2d41e676d5fa78f2fa9588a21abcd13f4318e824`。该 SHA 只固定演练分支的仓库起点，不是
-效果对照组，也不表示下述 PR、Actions、body 编辑、关闭、重新打开或后续提交已经发生。
+效果对照组。步骤 1～4 的已发生事实见第 4 节；该基线本身不证明步骤结果，也不表示步骤
+5～6 或本次记录提交的远程动作已经发生。
 
 演练依据[决策 031](../decisions/031-pr-evaluator-report-lifecycle.md)和当前
 [WORKFLOW.md](../../WORKFLOW.md)验证 PR evaluator 报告门禁的 fail-closed 操作语义：
@@ -35,7 +36,8 @@
 
 ## 3. 预注册顺序与预期
 
-以下顺序是待执行协议，不是已发生事实：
+下表保留执行前注册的顺序、受控输入与预期；步骤 1～4 的实际结果另见第 4 节，步骤
+5～6 仍只是待执行协议：
 
 | 顺序 | 待执行动作 | 受控输入 | 预期结果 |
 |---|---|---|---|
@@ -51,9 +53,38 @@
 未经独立 `PASS` 的新 head。
 
 每一步最终将至少记录 event activity、PR head SHA、body 中的 Subject SHA、Actions run
-链接、`verify` conclusion 以及与预期是否一致。当前这些结果字段均为空，不能提前填写。
+链接、`verify` conclusion 以及与预期是否一致。步骤 5～6 的这些结果字段仍为空，不能
+提前填写。
 
-## 4. 停止条件与反误报规则
+## 4. 步骤 1～4 的实际结果
+
+承载演练的 PR 是
+[PR #57](https://github.com/weiran22222/study-track/pull/57)，步骤 1～4 期间 head 始终为
+`8f707dced5348ddcff9026eb33c2b08c56ea186b`：
+
+| 顺序 | 已发生 event 与输入 | 权威 run 与结果 | 与预期比较 |
+|---|---|---|---|
+| 1 | `opened`；body 为 head `8f707dced5348ddcff9026eb33c2b08c56ea186b` 的正确完整报告 | [`30535318232`](https://github.com/weiran22222/study-track/actions/runs/30535318232)：`success` | 符合预期 |
+| 2 | `edited`；body Subject SHA 仅改为 `0000000000000000000000000000000000000000` | [`30535404918`](https://github.com/weiran22222/study-track/actions/runs/30535404918)：`failure`；失败步骤为 `Check the current evaluator report` | 符合预期 |
+| 3 | `edited`；body 恢复为当前 head 的正确完整报告 | [`30535455060`](https://github.com/weiran22222/study-track/actions/runs/30535455060)：`success` | 符合预期 |
+| 4 | 关闭后重新打开，触发 `reopened`；head 与正确 body 均未改变 | [`30535503775`](https://github.com/weiran22222/study-track/actions/runs/30535503775)：`success` | 符合预期 |
+
+步骤 2 的失败诊断中，`Location` 为
+`Subject SHA in PR body: 0000000000000000000000000000000000000000`，`Reason` 明确为
+报告 Subject SHA 与 PR head `8f707dced5348ddcff9026eb33c2b08c56ea186b` 不匹配；输出
+包含 `Location`、`Invariant`、`Reason`、`Fix`、`Recheck` 与 `Authority` 六个字段。失败 run
+`30535404918` 保持为独立失败证据；步骤 3 是由恢复正确 body 后的新 `edited` event
+产生的 run `30535455060`，不是对步骤 2 失败 run 的重跑。
+
+截至本文此次更新，步骤 1～4 的实际操作结果均符合预注册预期：正确且与 head 绑定的报告
+在 `opened`、恢复后的 `edited` 和 `reopened` 中成功，全零 SHA 在独立 `edited` 中
+fail closed。这个窄结论只描述 PR #57 上四次 event/run 的操作事实，不证明 evaluator
+身份、报告真实性、验证完整性，也不构成 Harness 正向因果效果。
+
+本次更新本文的新提交尚未推送；它可能触发的 `synchronize`、步骤 5 使用陈旧 body 的
+失败，以及步骤 6 后续 `edited` 恢复均尚未发生，本文不预写其 head、run 或结论。
+
+## 5. 停止条件与反误报规则
 
 出现以下任一情况将立即停止后续演练并报告实际状态：
 
@@ -73,7 +104,7 @@ run 并分别记录。平台或瞬时故障可以按其真实原因记录，但�
 不得在远程动作发生前填写 run URL、conclusion、评论、PR 状态或“符合预期”结论。实际
 结果偏离预期时将原样保留，不通过删除评论、重写历史或增加未注册步骤展示成功。
 
-## 5. 最终记录与自引用边界
+## 6. 最终记录与自引用边界
 
 本文件所在 PR 将承载演练及其最终记录。演练步骤完成后，可以用一次后续提交把已经发生且
 可定位的步骤 1～6 结果写入本文；该提交本身会产生新的 PR head，并可能继续触发
