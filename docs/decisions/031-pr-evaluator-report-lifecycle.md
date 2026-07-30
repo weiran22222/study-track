@@ -1,6 +1,6 @@
 # 决策卡 031：机械保护 PR evaluator 报告与合并后安全回流
 
-状态：已批准，待规划 PR 人工合并后实施
+状态：已批准，仓库内实施与 generator 自检已完成
 
 日期：2026-07-30
 
@@ -114,7 +114,7 @@ SHA 不匹配和非 `PASS` 都将使 `verify` 失败。
 
 ## PR 生命周期与机械门禁
 
-功能 PR 将保持唯一 `jobs.verify`，并把 `pull_request` activity types 明确限制为
+仓库内实现保持唯一 `jobs.verify`，并把 `pull_request` activity types 明确限制为
 `opened`、`synchronize`、`reopened` 与 `edited`：
 
 1. evaluator 将在 PR 创建或新 head 推送前，对冻结 SHA 完成只读验证；
@@ -144,9 +144,8 @@ GitHub API 或 Git 状态，也不修改 PR、仓库或 runner 外部状态。
 
 ## 合并后安全回到 develop
 
-功能实现将把以下 coordinator 顺序写入当前工作流，但不会修改既有
-`scripts/update-local-develop.ps1` 或 `.sh`，除非实施证据证明现有入口无法满足决策
-023 的契约：
+当前 `WORKFLOW.md` 已把以下 coordinator 顺序写入当前工作流；既有
+`scripts/update-local-develop.ps1` 和 `.sh` 未修改：
 
 1. 只在 GitHub 权威记录确认 PR 已合入 `develop` 后开始；
 2. 回读精确 `origin/develop` SHA，并确认该同一 SHA 的 push `verify` 成功；
@@ -176,6 +175,31 @@ SHA 的机械结果。
 本决定不会改变产品行为、规格、Java 分层、数据格式、依赖、required Job 名称、分支保护
 规则、发布语义或部署状态；不会新增 comments-only 门禁、自定义 required status、外部
 身份服务、网络调用、定时自动化或历史批量回填。
+
+## 仓库内实施事实与未发生边界
+
+2026-07-30，本功能工作树已按“权威文档先行”更新 `WORKFLOW.md`、
+`ARCHITECTURE.md` 与 `HARNESS-CAPABILITIES.md`，随后完成：
+
+- 在同一 `jobs.verify` 中把 `pull_request` activity 明确为 `opened`、`synchronize`、
+  `reopened`、`edited`，并在 branch-flow、完整 diff 后增加 PR-only 当前报告检查；
+- 从 `$GITHUB_EVENT_PATH` 使用 runner 本地 `jq` 安全提取 body/head，把 body 写入
+  `$RUNNER_TEMP`，未直接把 PR body 插值进 shell；
+- 新增只读本地参数/文件的 `scripts/check-pr-evaluator-report.sh`，检查唯一 v1 marker、
+  八字段固定顺序与非空、完整 SHA 精确匹配和 `Verdict: PASS`，所有失败共用六字段诊断；
+- 更新 workflow 契约测试、文档导航测试，并增加缺少/重复 marker、缺少/空
+  scalar/section、字段乱序、SHA 不匹配、`FAIL`/`INCONCLUSIVE` 与有效报告行为场景；
+- 保持唯一 required Job、无条件 JDK/环境/Maven 验证和既有 develop 安全更新脚本/
+  测试不变；未修改产品、规格、依赖、分支保护或远程权限。
+
+generator 使用显式 Git for Windows `sh.exe` 运行 POSIX focused matrix。前两次真实运行
+分别发现 Git awk 不接受两处多行语法，修复为兼容写法后 25 项定向测试全部通过、无跳过。
+第一次完整 `verify` 的 157 项测试中有 1 项失败：`WORKFLOW.md` 改写丢失了既有 develop
+更新测试保护的稳定字面锚点；恢复该锚点后，相关 16 项定向测试与完整 157 项测试均通过。
+
+以上仅是仓库内实现与 generator 本地自检事实，不表示不同 evaluator 已给出 `PASS`、
+required CI 已成功、功能 PR 已创建或合并、远端 `develop` 已变化，或合并后安全回流已经
+发生。
 
 ## 风险等级与交付
 

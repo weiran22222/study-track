@@ -127,22 +127,36 @@ Repository 将存储异常转换为项目定义的持久化异常；CLI 只负�
 6. 可执行 JAR 打包。
 
 GitHub Actions 保留唯一且同名的 `jobs.verify`。`pull_request` 未按目标分支过滤，因此
-覆盖所有 PR 目标分支；activity types 采用 GitHub 对未配置 `types` 的默认集合，而不是
-显式启用全部类型。每次实际触发都运行完整 PR 门禁：先使用事件提供的 base/head ref
-检查分支流，再使用 base/head SHA 调用 `sh ./scripts/check-pr-diff.sh` 检查完整
-`base...head` 差异；checkout 必须获取完整历史，使两个端点及合并基点可达。随后 Job
-执行 JDK 21 环境自检和同一 Maven 命令。
+覆盖所有 PR 目标分支；activity types 明确为 `opened`、`synchronize`、`reopened` 与
+`edited`。每次实际触发都按固定顺序运行完整 PR 门禁：
+
+1. 使用事件提供的 base/head ref 检查分支流；
+2. 使用 base/head SHA 调用 `sh ./scripts/check-pr-diff.sh` 检查完整 `base...head`
+   差异；checkout 必须获取完整历史，使两个端点及合并基点可达；
+3. 从只读 `$GITHUB_EVENT_PATH` 提取 PR body 与 `pull_request.head.sha`，把 body 安全
+   写入 runner 临时文件，再调用
+   `sh ./scripts/check-pr-evaluator-report.sh <body-file> <expected-head-sha>`；
+4. 无条件执行 JDK 21 环境自检和同一 Maven 命令。
+
+第三步只解析决策 031 定义的窄 v1 逐行协议：唯一 marker、八个固定顺序非空字段、完整
+40 位 Subject SHA 与 event head 精确相等、`Verdict: PASS`。workflow 不把 PR body
+直接插值进 shell；脚本只读取本地参数与文件，不访问网络、GitHub API 或 Git，也不修改
+状态。
 
 `push` 事件只匹配 `develop` 与 `main`，用于长期分支更新后的最终非 PR 验证；普通
 `codex/*`、`hotfix/*` 等工作分支 push 不触发 CI。`develop` 与 `main` 的 push 没有 PR
-语义，不运行分支流或差异门禁，但仍执行同一 JDK 21 环境自检和 Maven `verify`。因此
-PR 门禁、长期分支最终验证和本地 Maven 验收共用产品与架构验证入口，又不会为工作分支
-push 重复运行一次完整构建。
+语义，不运行分支流、差异或 evaluator 报告门禁，但仍无条件执行同一 JDK 21 环境自检和
+Maven `verify`。因此 PR 门禁、长期分支最终验证和本地 Maven 验收共用产品与架构验证
+入口，又不会为工作分支 push 重复运行一次完整构建。
 
-PR 差异门禁是 CI 合并验收，不绑定 Maven 生命周期。本地 Windows `.\mvnw.cmd verify`
-不执行 POSIX 脚本，也不依赖系统 `sh`。提交前的 `git diff --cached --check`、本地
-Maven `verify` 和 PR-only 完整差异门禁分别保护暂存内容、产品/架构构建和最终 PR 差异，
-不能互相替代。
+PR 差异与 evaluator 报告门禁是 CI 合并验收，不绑定 Maven 生命周期。本地 Windows
+`.\mvnw.cmd verify` 不执行 POSIX 脚本，也不依赖系统 `sh`。提交前的
+`git diff --cached --check`、本地 Maven `verify`、PR-only 完整差异门禁和报告门禁分别
+保护暂存内容、产品/架构构建、最终 PR 差异及当前报告 envelope，不能互相替代。
+
+报告门禁只证明 PR body 存在唯一、结构符合 v1、Subject SHA 等于 event head 且自述
+`Verdict: PASS` 的报告。它不证明 generator/evaluator 身份或独立性、报告真实性、
+验证完整性、完整 CommonMark 语义或 Harness 正向因果效果。
 
 ### 构建幂等性
 

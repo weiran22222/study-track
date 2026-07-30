@@ -67,7 +67,7 @@
 
 进行中的计划直接保存在 `exec-plans/`，已完成计划保存在 `exec-plans/completed/`：
 
-- [025：实施 PR evaluator 报告生命周期](exec-plans/025-pr-evaluator-report-lifecycle.md)（待实施）
+- [025：实施 PR evaluator 报告生命周期](exec-plans/completed/025-pr-evaluator-report-lifecycle.md)（仓库内实施已完成）
 - [024：采用原生 grill-with-docs](exec-plans/completed/024-adopt-native-grill-with-docs.md)（仓库内实施已完成）
 - [023：精简 CI verify 触发](exec-plans/completed/023-streamline-ci-triggers.md)（仓库内实施已完成）
 - [022：按标题字面子串筛选任务列表](exec-plans/completed/022-list-title-search.md)（已完成）
