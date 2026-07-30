@@ -24,7 +24,7 @@
 | 类别 | 仓库当前提供的表面 | 使用触发 | 信任边界 |
 |---|---|---|---|
 | 上下文与指导 | `AGENTS.md` 提供第一跳；`CONTEXT-MAP.md` 导航上下文与通用语言；`docs/README.md` 渐进披露历史 | 任务冷启动；出现术语或历史理由问题时继续下钻 | 导航帮助定位规则，本身不创造权限或产品语义 |
-| 机械反馈 | JDK 21 环境自检、Maven Wrapper `verify`、自动测试、架构/风格检查、验证对象 guard 与适用 CI 门禁 | 首次进入或环境变化；修改后；冻结 SHA 独立验证；PR 与长期分支更新 | 每次结果只覆盖实际命令、对象、环境和时间；检查通过不证明验收范围外没有缺陷 |
+| 机械反馈 | JDK 21 环境自检、Maven Wrapper `verify`、自动测试、架构/风格检查、仓库 Markdown 本地链接一致性门禁、验证对象 guard 与适用 CI 门禁 | 首次进入或环境变化；修改后；冻结 SHA 独立验证；PR 与长期分支更新 | 每次结果只覆盖实际命令、对象、环境和时间；链接门禁只证明已覆盖相对本地目标存在；检查通过不证明验收范围外没有缺陷 |
 | 编排与状态 | 风险分级、人类/generator/evaluator/协调者职责、`FROZEN(<Subject SHA>)` 状态与失败回流、分支流 | 仓库变更分级；实现交接；独立验证；合并或发布判断 | 协议和审计记录约束协作；Git guard 不认证参与者身份，也不替代 required `verify` |
 | 工具与运行时 | 仓库内 Wrapper 与诊断脚本；原生 `grill-with-docs` 的固定学习输入和只读运行前诊断 | 构建环境检查；人类显式调用复杂设计会话 | 仓库只规定入口和诊断边界，不安装、启用或认证外部工具、插件或技能 |
 
@@ -66,7 +66,7 @@
 | 最终原子替换失败 | 已直接覆盖临时写入失败、原文件保护与清理；最终 `Files.move` 失败没有确定性故障注入 | [决策 008](docs/decisions/008-accept-atomic-replacement-test-gap.md) |
 | generator/evaluator 身份 | guard 和记录绑定精确 SHA 与工作树状态；仓库与 CI 没有密码学或平台级身份认证 | [决策 021](docs/decisions/021-generator-evaluator-role-separation.md#机械边界与身份边界) |
 | 验证中状态与报告留存 | 工作流定义交接/报告字段和协调者保存职责，且报告必须留在被验证提交之外；当前仓库没有机械强制的持久存储通道，guard 也不验证报告已持久保存 | [WORKFLOW 的角色与交接](WORKFLOW.md#角色与冻结-sha-交接)、[决策 021 的报告边界](docs/decisions/021-generator-evaluator-role-separation.md#handoff-与验证报告) |
-| 熵管理外循环 | 导航测试、人工反馈和计划归档提供反应式控制；仓库不提供定时漂移扫描、质量评分或自动维护 PR 机制 | [决策 009](docs/decisions/009-documentation-entropy-control.md)、[状态漂移复盘](docs/feedback/004-unicode-boundary-harness-retrospective.md#4-状态漂移的两级处理)、[历史索引](docs/README.md) |
+| 熵管理外循环 | 导航测试、覆盖根级 `*.md` 与 `docs/**/*.md` 的相对本地链接一致性门禁、人工反馈和计划归档提供反应式控制；仓库不提供定时漂移扫描、质量评分或自动维护 PR 机制 | [决策 009](docs/decisions/009-documentation-entropy-control.md)、[决策 030](docs/decisions/030-repository-markdown-link-consistency.md)、[状态漂移复盘](docs/feedback/004-unicode-boundary-harness-retrospective.md#4-状态漂移的两级处理)、[历史索引](docs/README.md) |
 | 干净机器冷启动 | 环境自检与 `verify` 可证明实际运行；使用本地或 CI 缓存时不构成无缓存冷启动证明 | [环境说明的证据边界](docs/environment.md#证据边界) |
 | 原生技能运行时 | 固定学习输入和只读诊断已定义；仓库不保证技能已安装、启用或在后续会话可见 | [环境说明的运行前提](docs/environment.md#原生-grill-with-docs-运行前提) |
 | Windows Unicode 手工链路 | JVM 自动测试覆盖 200/201 码点语义；原生命令行未可靠传递 200 个补充平面内联字符 | [`list --contains` 前瞻观察](docs/feedback/006-list-title-search-observation.md#6-反例与残余缺口) |
