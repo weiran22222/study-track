@@ -33,6 +33,11 @@ class VerifyWorkflowTriggerTest {
               - develop
               - main
           pull_request:
+            types:
+              - opened
+              - synchronize
+              - reopened
+              - edited
         """
             .strip();
 
@@ -41,10 +46,10 @@ class VerifyWorkflowTriggerTest {
         normalizedTriggers,
         failure(
             "on:",
-            "The event matrix no longer keeps every pull request while limiting push to exactly "
-                + "develop and main.",
-            "Restore an unfiltered pull_request trigger and a push.branches list containing only "
-                + "develop and main."));
+            "The event matrix no longer keeps the four report lifecycle activities while "
+                + "limiting push to exactly develop and main.",
+            "Restore opened, synchronize, reopened, and edited for pull_request and keep "
+                + "push.branches limited to develop and main."));
   }
 
   @Test
@@ -55,6 +60,7 @@ class VerifyWorkflowTriggerTest {
         JOB_ID.matcher(jobs).results().map(result -> result.group(1)).toList();
     int branchFlow = workflow.indexOf("- name: Check pull request branch flow");
     int pullRequestDiff = workflow.indexOf("- name: Check the complete pull request diff");
+    int evaluatorReport = workflow.indexOf("- name: Check the current evaluator report");
     int setupJava = workflow.indexOf("- name: Set up JDK 21");
     int environmentCheck = workflow.indexOf("sh ./scripts/check-environment.sh");
     int mavenVerify = workflow.indexOf("./mvnw --batch-mode --no-transfer-progress verify");
@@ -72,32 +78,36 @@ class VerifyWorkflowTriggerTest {
             assertTrue(
                 branchFlow >= 0
                     && pullRequestDiff > branchFlow
-                    && setupJava > pullRequestDiff
+                    && evaluatorReport > pullRequestDiff
+                    && setupJava > evaluatorReport
                     && environmentCheck > setupJava
                     && mavenVerify > environmentCheck,
                 failure(
                     "jobs.verify.steps",
                     "The PR gates, JDK setup, environment check, and Maven verify order changed.",
-                    "Run branch-flow first, complete PR diff second, then JDK 21 setup, "
-                        + "environment self-check, and Maven verify.")),
+                    "Run branch-flow, complete PR diff, evaluator report, JDK 21 setup, "
+                        + "environment self-check, and Maven verify in that order.")),
         () ->
             assertEquals(
-                2,
+                3,
                 countOccurrences(workflow, PULL_REQUEST_ONLY),
                 failure(
                     "jobs.verify.steps",
-                    "The two PR gates are not the only pull_request-conditional steps.",
-                    "Keep pull_request conditions on branch-flow and complete diff only.")),
+                    "The three PR gates are not the only pull_request-conditional steps.",
+                    "Keep pull_request conditions on branch-flow, complete diff, and evaluator "
+                        + "report only.")),
         () -> {
           String branchSection = workflow.substring(branchFlow, pullRequestDiff);
-          String diffSection = workflow.substring(pullRequestDiff, setupJava);
+          String diffSection = workflow.substring(pullRequestDiff, evaluatorReport);
+          String reportSection = workflow.substring(evaluatorReport, setupJava);
           assertTrue(
               branchSection.contains(PULL_REQUEST_ONLY)
-                  && diffSection.contains(PULL_REQUEST_ONLY),
+                  && diffSection.contains(PULL_REQUEST_ONLY)
+                  && reportSection.contains(PULL_REQUEST_ONLY),
               failure(
                   "jobs.verify.steps",
                   "A PR-only gate lost its pull_request condition.",
-                  "Restore the condition on both branch-flow and complete diff steps."));
+                  "Restore the condition on branch-flow, complete diff, and evaluator report."));
         },
         () ->
             assertFalse(
@@ -163,7 +173,8 @@ class VerifyWorkflowTriggerTest {
         Fix: %s
         Recheck: .\\mvnw.cmd -Dtest=VerifyWorkflowTriggerTest test, then .\\mvnw.cmd verify.
         Authority: ARCHITECTURE.md section 7, WORKFLOW.md,
-        and docs/decisions/028-streamline-ci-triggers.md.
+        docs/decisions/028-streamline-ci-triggers.md,
+        and docs/decisions/031-pr-evaluator-report-lifecycle.md.
         """
         .formatted(location, reason, fix);
   }

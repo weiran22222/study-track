@@ -100,7 +100,9 @@
 5. `FAIL` 由协调者交回 generator；任何修复产生新 SHA 后，旧报告立即失效并重新交接；
 6. `INCONCLUSIVE` 不得视为通过；只有 evaluator `PASS` 与 required `verify` 同时覆盖
    同一 Subject SHA，协调者才可进入正常 PR 合并判断；
-7. 如果检查失败，根据错误修复根因并重新验证，不绕过受保护 PR 或门禁。
+7. evaluator 必须在 PR 创建或把新 head 推入既有 PR 前完成；当前完整 `PASS` 报告进入
+   PR body 的 v1 marker 区，旧 `FAIL`/`INCONCLUSIVE` 在 PR 存在后追加为评论；
+8. 如果检查失败，根据错误修复根因并重新验证，不绕过受保护 PR 或门禁。
 
 ### 原生 grill-with-docs 显式会话
 
@@ -172,7 +174,9 @@ Residual gaps:
 Verdict: PASS | FAIL | INCONCLUSIVE
 ```
 
-报告不得写入被验证提交。协调者在 evaluator 前后分别运行
+报告不得写入被验证提交。只有覆盖当前 Subject SHA 的完整 `PASS` 可以放入 PR body；
+协调者不得把 generator 自检改写成 evaluator 报告，也不得用简短 envelope 代替上述
+完整字段。协调者在 evaluator 前后分别运行
 `scripts/check-verification-subject.ps1`（Windows）或
 `scripts/check-verification-subject.sh`（macOS/Linux），只传一个完整 Subject SHA，
 检查该 SHA 解析为提交、`HEAD` 精确相等、工作树干净且暂存区为空。完整协议与实施步骤
@@ -181,6 +185,28 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 
 不同智能体身份仍由协调记录、最小交接与 evaluator 报告审计；不得通过新增名为
 `independent-verification` 的普通 CI Job 或 required check 伪造身份保证。
+
+### PR evaluator 报告生命周期
+
+当前 PR head 的完整 evaluator `PASS` 必须位于 PR body 中唯一的
+`studytrack-evaluator-report:v1` marker 区，按固定顺序包含 `Subject SHA`、
+`Generator`、`Evaluator`、`Commands executed`、`Independent scenarios`、`Findings`、
+`Residual gaps` 与 `Verdict` 八个非空字段。`Subject SHA` 必须精确等于 PR head SHA，
+`Verdict` 必须精确为 `PASS`。完整格式与历史理由见
+[决策卡 031](docs/decisions/031-pr-evaluator-report-lifecycle.md)。
+
+- 新 PR 创建时，body 必须已经包含该 head 的完整当前 `PASS`；
+- 既有 PR 的 head SHA 改变后，旧 body 报告立即失效，`synchronize` 门禁必须因 SHA
+  不匹配而失败；
+- 新 SHA 重新取得不同 evaluator `PASS` 后，协调者更新 body；`edited` 事件重新运行同一
+  required `verify`；
+- `reopened` 重新检查 body 与当前 head；历史真实 `FAIL`/`INCONCLUSIVE` 在 PR 存在后
+  按原报告追加评论，不覆盖 body 中的当前 `PASS`；
+- 不得捏造、摘要替代或批量回填历史报告；评论不作为当前 head 的机械门禁输入。
+
+PR-only 检查只证明 body 中存在唯一、结构符合 v1、SHA 与当前 head 相同且自述
+`Verdict: PASS` 的报告。它不证明 generator/evaluator 的真实身份或独立性、报告内容
+真实性、命令实际执行、场景完整、结论正确或 Harness 正向因果效果。
 
 ## 提交前暂存检查
 
@@ -196,9 +222,10 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 - 本地 `.\mvnw.cmd verify`（Windows）或 `./mvnw verify`（macOS/Linux）是产品代码、
   架构和构建产物的完整机械验收入口；
 - GitHub Actions 保留同名 `jobs.verify`：`pull_request` 未按目标分支过滤，覆盖所有
-  PR 目标分支；activity types 采用 GitHub 对未配置 `types` 的默认集合。每次实际触发
-  先使用事件提供的 base/head ref 检查分支流，再使用 base/head SHA 检查完整
-  `base...head` 差异，随后运行 JDK 21 环境自检和 Maven `verify`；
+  PR 目标分支；activity types 明确为 `opened`、`synchronize`、`reopened` 与 `edited`。
+  每次实际触发先使用事件提供的 base/head ref 检查分支流，再使用 base/head SHA 检查
+  完整 `base...head` 差异，随后从 event file 安全落盘 body 并检查当前 evaluator
+  `PASS` 报告，最后运行 JDK 21 环境自检和 Maven `verify`；
 - `push` 只匹配 `develop` 与 `main`，作为长期分支更新后的最终非 PR 验证，继续运行
   JDK 21 环境自检和 Maven `verify`，但不运行没有 PR 语义的分支流或差异门禁；
 - 普通 `codex/*`、`hotfix/*` 等工作分支 push 不触发 CI。generator 仍须在 JDK 21 下
@@ -222,8 +249,13 @@ Verdict: PASS | FAIL | INCONCLUSIVE
 
 - 禁止在本地 `develop` 上 merge、rebase 或 cherry-pick feature 或其他本地分支；任何
   进入远端 `develop` 的变更都必须通过受保护 GitHub PR 合并；
-- GitHub 合并后，先回读最终 `origin/develop` 的精确 SHA，并确认该 SHA 的 required
-  push `verify` 成功；只有完成这项远端验证后，才可更新本地 `develop`；
+- 每次经人类批准的 PR 在 GitHub 合入 `develop` 后，协调者无需再次询问是否安全回到
+  本地 `develop`；这项长期授权不替代人类的 PR 合并决定，也不扩大其他 Git/GitHub
+  权限；
+- GitHub 合并后，先回读最终 `origin/develop` 的精确 SHA，并确认该 SHA 的 required push `verify` 成功；
+  只有完成这项远端验证后，才可在当前工作树和暂存区干净时运行 `git switch develop`。
+  若远端事实、SHA、push `verify`、干净状态或分支占用无法确认，或切换失败，必须停止且
+  不得修复；
 - Windows 使用 `.\scripts\update-local-develop.ps1 "<verified-develop-sha>"`，
   macOS/Linux 使用
   `sh ./scripts/update-local-develop.sh "<verified-develop-sha>"`；
@@ -231,7 +263,7 @@ Verdict: PASS | FAIL | INCONCLUSIVE
   当前分支精确为 `develop`、工作树和暂存区干净、本地 `HEAD` 不领先且不分叉，并只执行
   no-op 或 fast-forward-only 更新；
 - 任一前置、fetch、SHA、提交关系、更新或后置检查失败时必须停止；不得通过 reset、
-  rebase、cherry-pick、切换分支、push、GitHub 操作或自动清理来修复。
+  clean、merge、rebase、cherry-pick、stash、push、GitHub 操作或自动清理来修复。
 
 完成上述远程验证和安全更新后，若本地 `develop`、工作树与暂存区仍然干净且未分叉，
 coordinator 可自行从这个精确 `develop` 创建并切换到一个新建、干净的 `codex/*`
@@ -280,6 +312,7 @@ sh ./scripts/check-environment.sh
 - 新增或修改的行为有自动测试；
 - `verify` 全部通过；
 - 不同 evaluator 对冻结的 Subject SHA 给出 `PASS`，且 required `verify` 覆盖同一 SHA；
+- PR body 中的当前 v1 `PASS` 报告与同一 PR head SHA 绑定；
 - evaluator 前后 guard 均确认 Subject SHA、HEAD、工作树和暂存区没有改变；
 - 文档与实际命令、目录和行为保持一致；
 - 没有未经规格授权的顺手功能。

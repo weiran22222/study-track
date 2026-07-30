@@ -1,11 +1,11 @@
 # 执行计划 025：实施 PR evaluator 报告生命周期
 
-状态：待实施（规划 PR）
+状态：仓库内实施与 generator 自检已完成（2026-07-30）
 
 ## 目标与权威边界
 
-本计划将实施
-[决策卡 031](../decisions/031-pr-evaluator-report-lifecycle.md)：把完整当前 evaluator
+本计划实施
+[决策卡 031](../../decisions/031-pr-evaluator-report-lifecycle.md)：把完整当前 evaluator
 `PASS` 放入 PR body 的 v1 marker 区，由现有唯一 required `verify` 在 PR event 中检查
 结构、head SHA 绑定和 `PASS`；旧 `FAIL`/`INCONCLUSIVE` 将保留为评论。每次 PR 合入
 `develop` 后，coordinator 将依据用户长期授权，在确认精确远端 SHA 及其 push
@@ -13,9 +13,9 @@
 
 本计划属于第三级 Harness 变更，将严格使用“规划 PR → 功能 PR”。规划 PR 不会激活新
 协议；功能 PR 将先更新当前权威文档，再实现 workflow、POSIX 脚本和测试。现有
-[WORKFLOW.md](../../WORKFLOW.md)、[ARCHITECTURE.md](../../ARCHITECTURE.md)、
-[决策卡 022](../decisions/022-simplify-agent-handoff.md)和
-[决策卡 023](../decisions/023-local-develop-fast-forward-policy.md)在功能 PR 合并前
+[WORKFLOW.md](../../../WORKFLOW.md)、[ARCHITECTURE.md](../../../ARCHITECTURE.md)、
+[决策卡 022](../../decisions/022-simplify-agent-handoff.md)和
+[决策卡 023](../../decisions/023-local-develop-fast-forward-policy.md)在功能 PR 合并前
 继续定义当前有效行为。
 
 ## 全程不变量
@@ -190,6 +190,42 @@ git diff --check
 POSIX 原生行为将由可用的明确 `sh` 入口或 Linux required `verify` 执行。Windows 若没有
 系统 `sh`，generator 将明确报告本地未执行的 POSIX 边界，不会冒充双平台通过。
 
+## 已发生的仓库内实施与 generator 自检
+
+2026-07-30，generator 在获准功能工作树中先更新 `WORKFLOW.md`、`ARCHITECTURE.md` 与
+`HARNESS-CAPABILITIES.md`，再实现 workflow、POSIX guard 与测试。实际范围为计划内
+文件；`DocumentationNavigationTest` 因旧能力边界锚点和计划归档路径变化做了最小更新。
+没有修改 `SPEC.md`、产品代码、`pom.xml`、依赖、develop 更新脚本/
+`LocalDevelopUpdateTest`、分支保护或远程权限。
+
+实际实现结果：
+
+- `pull_request` 已明确使用 `opened`、`synchronize`、`reopened`、`edited`；同一个
+  `jobs.verify` 按 branch-flow、完整 diff、evaluator report 顺序运行三个 PR-only
+  步骤，随后无条件运行 JDK setup、环境自检和 Maven `verify`；
+- workflow 从 `$GITHUB_EVENT_PATH` 使用 runner 本地 `jq` 提取 body/head，body 只落入
+  `$RUNNER_TEMP`；新脚本不访问网络、GitHub API 或 Git，也不修改状态；
+- 新脚本实现唯一 marker、八字段固定顺序/非空、40 位 SHA 精确匹配、`Verdict: PASS`
+  和统一六字段失败诊断；
+- `PullRequestEvaluatorReportTest` 覆盖 missing/duplicate marker、missing/empty
+  scalar/section、字段乱序、SHA mismatch、`FAIL`/`INCONCLUSIVE` 和 valid；
+  `VerifyWorkflowTriggerTest` 覆盖四种
+  activity、三个 PR-only 条件、顺序与无条件 canonical verification。
+
+generator 的实际验证反馈形成了两轮收敛：
+
+1. Windows 默认定向 Maven 首次运行 25 项通过、1 项按既有边界跳过；随后显式设置
+   `STUDYTRACK_POSIX_SHELL=C:\Program Files\Git\bin\sh.exe` 运行真实 POSIX 场景；
+2. 显式 POSIX 场景前两次均在合法报告处失败，分别定位到 Git awk 不接受两处多行语法；
+   改成兼容语法后，同一 25 项定向测试全部通过，0 失败、0 错误、0 跳过；
+3. 第一次完整 JDK 21 `verify` 运行 157 项测试，其中 1 项
+   `LocalDevelopUpdateTest` 失败，原因是 `WORKFLOW.md` 改写破坏既有
+   `push `verify` 成功` 稳定锚点；恢复原锚点而不修改测试后，相关 16 项定向测试通过；
+4. 随后完整 JDK 21 `verify` 运行 157 项测试，0 失败、0 错误、0 跳过，并成功打包。
+
+这些结果只属于 generator 本地自检。不同 evaluator、required CI、功能 PR、合并、最终
+远端 push `verify` 与合并后安全回流尚未发生，不能由本节推断。
+
 ## 阶段 3：冻结、新 SHA 生命周期与功能 PR 试点
 
 1. coordinator 将审查功能 diff、脚本输入边界、workflow 权限和测试，只暂存精确预期
@@ -223,25 +259,22 @@ POSIX 原生行为将由可用的明确 `sh` 入口或 Linux required `verify` �
 8. 只有必须记录合并后新出现的偏差、外部状态或残余风险时，才会另建收尾 PR；不会为了
    复制 GitHub 已保存的成功记录而创建收尾工件。
 
-## 验收标准
+## 验收状态
 
-- [ ] 规划 PR 只包含决策 031、活跃计划 025 与索引，generator 自检、不同 evaluator
-  `PASS` 和 required `verify` 将覆盖同一规划 SHA；
-- [ ] 人类将实际批准并合并规划 PR，合并后的精确 `develop` push `verify` 将成功，
-  本地 `develop` 将按既有入口安全更新后才开始功能 PR；
-- [ ] 当前权威文档将先于脚本和 workflow 更新，且将准确区分报告机械存在性与身份/
-  内容真实性边界；
-- [ ] v1 脚本 focused cases 将覆盖 missing/duplicate marker、missing field、SHA
-  mismatch、non-`PASS` 和 valid report，并提供六字段诊断；
-- [ ] `VerifyWorkflowTriggerTest` 与新增静态测试将覆盖四种 PR activity、安全 body
+- [x] 当前权威文档先于脚本和 workflow 更新，并准确区分报告机械存在性与身份/内容
+  真实性边界；
+- [x] v1 脚本 focused cases 覆盖 missing/duplicate marker、missing/empty
+  scalar/section、字段乱序、SHA mismatch、`FAIL`/`INCONCLUSIVE` 和 valid report，
+  并提供六字段诊断；
+- [x] `VerifyWorkflowTriggerTest` 与新增静态测试覆盖四种 PR activity、安全 body
   落盘、PR head SHA、三个 PR-only 步骤的数量与顺序、无条件 canonical verification、
   唯一 `jobs.verify` 与无网络边界；
+- [x] 功能实现保持前瞻试点边界，没有捏造或批量回填历史 PR，PR #54 保持不变；
+- [x] focused tests、文档导航、Markdown 本地链接与完整 JDK 21 `verify` 已通过；
 - [ ] 新 SHA 将使旧 body 门禁失败；重新 evaluator `PASS` 并更新 body 后，
   `edited` 将重跑同一 required `verify`；
-- [ ] 功能 PR 将作为前瞻试点，不捏造或批量回填历史 PR，PR #54 将保持不变；
-- [ ] focused tests、文档导航、Markdown 本地链接、完整 JDK 21 `verify`、提交 diff
-  检查、不同 evaluator 与同 SHA required `verify` 将全部通过；
-- [ ] 人类将继续批准功能 PR 合并；合并后将确认精确 `origin/develop` SHA 的 push
+- [ ] 不同 evaluator、同 SHA required `verify` 与功能 PR body 试点尚待实际发生；
+- [ ] 人类仍将决定功能 PR 是否合并；合并后将确认精确 `origin/develop` SHA 的 push
   `verify` 成功，并按长期授权自动切回和安全更新本地 `develop`；
 - [ ] dirty、占用、分叉、SHA 不确定或 verify 失败路径将停止，且不会发生 reset、
   clean、merge、rebase、cherry-pick 或其他恢复性 mutation；
@@ -278,9 +311,9 @@ POSIX 原生行为将由可用的明确 `sh` 入口或 Linux required `verify` �
 
 ## 证据边界
 
-规划 PR 将只记录获批意图和未来实施方法。功能 PR 可按实际发生更新本地实现、自检与试点
-事实，但不会预写 evaluator、required CI、合并、最终 push `verify` 或安全回流成功。
-GitHub PR、评论、Check Run、Actions 与远端 refs 将继续是对应远端事实的权威来源。
+本计划记录获批意图、实际仓库内实施与 generator 自检，但不预写 evaluator、required
+CI、功能 PR、合并、最终 push `verify` 或安全回流成功。GitHub PR、评论、Check Run、
+Actions 与远端 refs 将继续是对应远端事实的权威来源。
 
 即使 v1 门禁与完整 `verify` 都成功，也只会证明当前 event/body/head 的机械条件和实际
 构建结果；不会证明 evaluator 身份独立性、报告真实性、验证完整性、完整 CommonMark、
