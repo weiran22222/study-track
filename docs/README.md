@@ -60,6 +60,7 @@
 - [027：按标题字面子串筛选任务列表](decisions/027-list-title-search.md)
 - [028：精简 CI verify 触发](decisions/028-streamline-ci-triggers.md)
 - [029：建立 Harness 能力与信任边界图](decisions/029-harness-capability-trust-map.md)
+- [030：建立仓库 Markdown 本地链接一致性门禁](decisions/030-repository-markdown-link-consistency.md)
 
 ## 执行计划
 
